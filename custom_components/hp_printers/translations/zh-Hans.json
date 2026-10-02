@@ -195,70 +195,92 @@
         }
       },
       "printer_total_pages": {
-        "name": "已打印页数"
+        "name": "已打印页数",
+        "unit_of_measurement": "页"
       },
       "printer_mono_pages": {
-        "name": "黑白页数"
+        "name": "黑白页数",
+        "unit_of_measurement": "页"
       },
       "printer_color_pages": {
-        "name": "彩色页数"
+        "name": "彩色页数",
+        "unit_of_measurement": "页"
       },
       "printer_simplex_sheets": {
-        "name": "单面打印张数"
+        "name": "单面打印张数",
+        "unit_of_measurement": "页"
       },
       "printer_duplex_sheets": {
-        "name": "双面打印张数"
+        "name": "双面打印张数",
+        "unit_of_measurement": "页"
       },
       "printer_jams": {
-        "name": "卡纸次数"
+        "name": "卡纸次数",
+        "unit_of_measurement": "页"
       },
       "printer_mispicks": {
-        "name": "错误进纸次数"
+        "name": "错误进纸次数",
+        "unit_of_measurement": "页"
       },
       "scanner_images": {
-        "name": "已扫描页数"
+        "name": "已扫描页数",
+        "unit_of_measurement": "页"
       },
       "scanner_adf_images": {
-        "name": "自动进稿器扫描页数"
+        "name": "自动进稿器扫描页数",
+        "unit_of_measurement": "页"
       },
       "scanner_flatbed_images": {
-        "name": "平板扫描页数"
+        "name": "平板扫描页数",
+        "unit_of_measurement": "页"
       },
       "scanner_duplex_sheets": {
-        "name": "双面扫描张数"
+        "name": "双面扫描张数",
+        "unit_of_measurement": "页"
       },
       "scan_job_pages": {
-        "name": "扫描任务页数"
+        "name": "扫描任务页数",
+        "unit_of_measurement": "页"
       },
       "scan_job_adf_pages": {
-        "name": "自动进稿器扫描任务页数"
+        "name": "自动进稿器扫描任务页数",
+        "unit_of_measurement": "页"
       },
       "scan_job_flatbed_pages": {
-        "name": "平板扫描任务页数"
+        "name": "平板扫描任务页数",
+        "unit_of_measurement": "页"
       },
       "scan_job_duplex_sheets": {
-        "name": "双面扫描任务张数"
+        "name": "双面扫描任务张数",
+        "unit_of_measurement": "页"
       },
       "scanner_jams": {
-        "name": "扫描仪卡纸次数"
+        "name": "扫描仪卡纸次数",
+        "unit_of_measurement": "页"
       },
       "scanner_mispicks": {
-        "name": "扫描仪错误进纸次数"
+        "name": "扫描仪错误进纸次数",
+        "unit_of_measurement": "页"
       },
       "copy_total_pages": {
-        "name": "已复印页数"
+        "name": "已复印页数",
+        "unit_of_measurement": "页"
       },
       "copy_mono_pages": {
-        "name": "黑白复印页数"
+        "name": "黑白复印页数",
+        "unit_of_measurement": "页"
       },
       "copy_color_pages": {
-        "name": "彩色复印页数"
+        "name": "彩色复印页数",
+        "unit_of_measurement": "页"
       },
       "copy_adf_pages": {
-        "name": "自动进稿器复印页数"
+        "name": "自动进稿器复印页数",
+        "unit_of_measurement": "页"
       },
       "copy_flatbed_pages": {
-        "name": "平板复印页数"
+        "name": "平板复印页数",
+        "unit_of_measurement": "页"
       },
       "firmware_date": {
         "name": "固件日期"
@@ -273,7 +295,8 @@
         "name": "最近事件代码"
       },
       "last_event_page": {
-        "name": "最近事件所在页"
+        "name": "最近事件所在页",
+        "unit_of_measurement": "页"
       },
       "network_errors": {
         "name": "网络错误数"
@@ -282,37 +305,47 @@
         "name": "链路模式"
       },
       "network_bad_packets": {
-        "name": "收到的错误包数"
+        "name": "收到的错误包数",
+        "unit_of_measurement": "包"
       },
       "network_framing_errors": {
-        "name": "帧错误数"
+        "name": "帧错误数",
+        "unit_of_measurement": "包"
       },
       "network_transmit_collisions": {
-        "name": "发送冲突数"
+        "name": "发送冲突数",
+        "unit_of_measurement": "包"
       },
       "network_late_collisions": {
-        "name": "延迟冲突数"
+        "name": "延迟冲突数",
+        "unit_of_measurement": "包"
       },
       "network_unsendable_packets": {
-        "name": "无法发送的包数"
+        "name": "无法发送的包数",
+        "unit_of_measurement": "包"
       },
       "network_packets_received": {
-        "name": "收到的包数"
+        "name": "收到的包数",
+        "unit_of_measurement": "包"
       },
       "network_packets_transmitted": {
-        "name": "发出的包数"
+        "name": "发出的包数",
+        "unit_of_measurement": "包"
       },
       "last_job_source": {
         "name": "最近作业来源"
       },
       "cartridge_level": {
-        "name": "余量"
+        "name": "余量",
+        "unit_of_measurement": "%"
       },
       "cartridge_pages_remaining": {
-        "name": "剩余页数"
+        "name": "剩余页数",
+        "unit_of_measurement": "页"
       },
       "cartridge_pages_printed": {
-        "name": "已打印页数"
+        "name": "已打印页数",
+        "unit_of_measurement": "页"
       },
       "cartridge_brand": {
         "name": "品牌"
@@ -330,10 +363,12 @@
         "name": "保修到期"
       },
       "cartridge_raw_level": {
-        "name": "余量（原始值）"
+        "name": "余量（原始值）",
+        "unit_of_measurement": "%"
       },
       "cartridge_low_threshold": {
-        "name": "低余量阈值"
+        "name": "低余量阈值",
+        "unit_of_measurement": "%"
       },
       "cartridge_counterfeit_refills": {
         "name": "未认证补充次数"
@@ -342,10 +377,12 @@
         "name": "已认证补充次数"
       },
       "genuine_color_pages": {
-        "name": "正版耗材彩色页数"
+        "name": "正版耗材彩色页数",
+        "unit_of_measurement": "页"
       },
       "genuine_mono_pages": {
-        "name": "正版耗材黑白页数"
+        "name": "正版耗材黑白页数",
+        "unit_of_measurement": "页"
       },
       "power_save_timeout": {
         "name": "休眠超时时间"

@@ -33,6 +33,7 @@ COMPONENT = Path(__file__).resolve().parent.parent / "custom_components" / "hp_p
 STRINGS = COMPONENT / "strings.json"
 TRANSLATIONS = COMPONENT / "translations"
 CONST = COMPONENT / "const.py"
+SENSOR = COMPONENT / "sensor.py"
 
 # Every other language is discovered from the directory rather than listed, so
 # a translation added later is checked without this file being edited.
@@ -141,12 +142,16 @@ def test_translation_keeps_every_placeholder(path: Path) -> None:
 def _is_prose(value: str) -> bool:
     """True when a value has words of its own, not just placeholders.
 
-    The fallback device name for a colour this integration has never seen is
-    "{device_name} {label}" -- identical in every language, because there is
-    nothing in it to translate. Treating "no prose" as "nothing to check" is
-    a rule rather than a hand-maintained list of exceptions, so it cannot rot.
+    Two kinds of value are deliberately skipped. One made entirely of
+    placeholders -- "{device_name} {label}" is identical in every language
+    because there is nothing in it to translate. The other contains no
+    letters at all: a unit of "%" is a symbol, and demanding Chinese
+    characters of it would be demanding a translation that cannot exist.
+    Treating "no prose" as "nothing to check" is a rule rather than a
+    hand-maintained list of exceptions, so it cannot rot.
     """
-    return bool(PLACEHOLDER.sub("", value).strip())
+    stripped = PLACEHOLDER.sub("", value).strip()
+    return any(char.isalpha() for char in stripped)
 
 
 @pytest.mark.parametrize("path", TRANSLATED, ids=lambda p: p.stem)
@@ -182,4 +187,64 @@ def test_device_names_cover_every_combination_the_code_can_ask_for() -> None:
 
     assert declared == expected, (
         f"missing: {sorted(expected - declared)}; stale: {sorted(declared - expected)}"
+    )
+
+
+def test_no_unit_is_defined_in_code() -> None:
+    """sensor.py must not set native_unit_of_measurement on any description.
+
+    A translated unit is ignored while the description still defines one, so
+    leaving it behind is what produced Chinese entity names rendering
+    "13,141 pages". The unit and the translation are two halves of one
+    change: this test holds the code half, test_translation_declares_a_unit
+    holds the JSON half.
+    """
+    source = SENSOR.read_text(encoding="utf-8")
+    offenders = [
+        f"line {no}: {line.strip()}"
+        for no, line in enumerate(source.splitlines(), 1)
+        if "native_unit_of_measurement" in line
+    ]
+
+    assert not offenders, f"units belong in the translations, not in code: {offenders}"
+
+
+def test_translation_declares_a_unit_for_every_counter() -> None:
+    """Every entity that used to carry a unit in code still carries one.
+
+    The counterpart to the test above, and the exact set rather than a
+    naming heuristic -- ``network_errors`` is a bare count, ``network_link_mode``
+    is a string and ``printer_manufactured_at`` is a date, so a prefix rule
+    would demand units of all three. A new counter added to sensor.py has to
+    be added here too, which is the point: it forces a decision about the
+    unit instead of rendering a bare number in every language.
+    """
+    page_counters = {
+        "printer_total_pages", "printer_mono_pages", "printer_color_pages",
+        "printer_simplex_sheets", "printer_duplex_sheets", "printer_jams",
+        "printer_mispicks", "scanner_images", "scanner_adf_images",
+        "scanner_flatbed_images", "scanner_duplex_sheets", "scan_job_pages",
+        "scan_job_adf_pages", "scan_job_flatbed_pages", "scan_job_duplex_sheets",
+        "scanner_jams", "scanner_mispicks", "copy_total_pages", "copy_mono_pages",
+        "copy_color_pages", "copy_adf_pages", "copy_flatbed_pages",
+        "genuine_color_pages", "genuine_mono_pages", "last_event_page",
+        "cartridge_pages_remaining", "cartridge_pages_printed",
+    }
+    packet_counters = {
+        "network_bad_packets", "network_framing_errors",
+        "network_transmit_collisions", "network_late_collisions",
+        "network_unsendable_packets", "network_packets_received",
+        "network_packets_transmitted",
+    }
+    percent_sensors = {
+        "cartridge_level", "cartridge_raw_level", "cartridge_low_threshold",
+    }
+    expected = page_counters | packet_counters | percent_sensors
+
+    entity = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]["sensor"]
+    with_unit = {key for key, entry in entity.items() if "unit_of_measurement" in entry}
+
+    assert with_unit == expected, (
+        f"missing a unit: {sorted(expected - with_unit)}; "
+        f"unit that should not be there: {sorted(with_unit - expected)}"
     )
