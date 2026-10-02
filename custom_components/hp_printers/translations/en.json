@@ -64,6 +64,92 @@
       "reconfigure_to_resolve": "This integration reads the printer without credentials. Update the host address from the integration's settings to continue."
     }
   },
+  "device": {
+    "consumable_cartridge_black": {
+      "name": "{device_name} Cartridge Black"
+    },
+    "consumable_cartridge_cyan": {
+      "name": "{device_name} Cartridge Cyan"
+    },
+    "consumable_cartridge_magenta": {
+      "name": "{device_name} Cartridge Magenta"
+    },
+    "consumable_cartridge_tricolor": {
+      "name": "{device_name} Cartridge Tricolor"
+    },
+    "consumable_cartridge_yellow": {
+      "name": "{device_name} Cartridge Yellow"
+    },
+    "consumable_drum_black": {
+      "name": "{device_name} Drum Black"
+    },
+    "consumable_drum_cyan": {
+      "name": "{device_name} Drum Cyan"
+    },
+    "consumable_drum_magenta": {
+      "name": "{device_name} Drum Magenta"
+    },
+    "consumable_drum_tricolor": {
+      "name": "{device_name} Drum Tricolor"
+    },
+    "consumable_drum_yellow": {
+      "name": "{device_name} Drum Yellow"
+    },
+    "consumable_ink_tank_black": {
+      "name": "{device_name} Ink Tank Black"
+    },
+    "consumable_ink_tank_cyan": {
+      "name": "{device_name} Ink Tank Cyan"
+    },
+    "consumable_ink_tank_magenta": {
+      "name": "{device_name} Ink Tank Magenta"
+    },
+    "consumable_ink_tank_tricolor": {
+      "name": "{device_name} Ink Tank Tricolor"
+    },
+    "consumable_ink_tank_yellow": {
+      "name": "{device_name} Ink Tank Yellow"
+    },
+    "consumable_maintenance_kit_black": {
+      "name": "{device_name} Maintenance Kit Black"
+    },
+    "consumable_maintenance_kit_cyan": {
+      "name": "{device_name} Maintenance Kit Cyan"
+    },
+    "consumable_maintenance_kit_magenta": {
+      "name": "{device_name} Maintenance Kit Magenta"
+    },
+    "consumable_maintenance_kit_tricolor": {
+      "name": "{device_name} Maintenance Kit Tricolor"
+    },
+    "consumable_maintenance_kit_yellow": {
+      "name": "{device_name} Maintenance Kit Yellow"
+    },
+    "consumable_other": {
+      "name": "{device_name} {label}"
+    },
+    "consumable_printhead_black": {
+      "name": "{device_name} Printhead Black"
+    },
+    "consumable_printhead_cyan": {
+      "name": "{device_name} Printhead Cyan"
+    },
+    "consumable_printhead_magenta": {
+      "name": "{device_name} Printhead Magenta"
+    },
+    "consumable_printhead_tricolor": {
+      "name": "{device_name} Printhead Tricolor"
+    },
+    "consumable_printhead_yellow": {
+      "name": "{device_name} Printhead Yellow"
+    },
+    "subunit_copier": {
+      "name": "{device_name} Copier"
+    },
+    "subunit_scanner": {
+      "name": "{device_name} Scanner"
+    }
+  },
   "options": {
     "step": {
       "init": {

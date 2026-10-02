@@ -84,9 +84,6 @@ def _network_counter(
     )
 
 
-SUBUNIT_LABELS = {"scanner": "Scanner", "copy": "Copier"}
-
-
 PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
     HPPrinterSensorDescription(
         key="status",
@@ -508,7 +505,6 @@ async def async_setup_entry(
             coordinator,
             description,
             description.subunit,
-            SUBUNIT_LABELS[description.subunit],
         )
         if description.subunit
         else HPPrinterSensor(coordinator, description)
