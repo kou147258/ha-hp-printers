@@ -148,7 +148,7 @@ def test_status_is_folded_onto_the_integration_option_list() -> None:
         return
 
     assert _status(document["printerState"]) is not None
-    assert _status("Idle") == "idle"
+    assert _status("Idle") == "ready"  # folded, not passed through
     assert _status("ready") == "ready"
     assert _status(None) is None
 

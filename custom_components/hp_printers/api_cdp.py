@@ -50,11 +50,16 @@ _LOGGER = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT = ClientTimeout(total=20)
 
-# The CDP print engine reports its own name for "idle" while the EWS pages it
-# as "ready", and reports "Idle" capitalised on the scan service. Entity
-# options are drawn from STATUS_OPTIONS, so values are folded to lower case.
+# The CDP print engine says "idle" where the EWS page says "ready", and
+# capitalises "Idle" on the scan service. Both fold onto the single "ready"
+# option the status sensor declares, so the two protocols present the same
+# physical state under the same name.
+#
+# Anything unrecognised folds to "unknown" rather than passing through: a
+# value outside the declared options does not read as "unknown" to the
+# entity, it makes the entity refuse to be created at all.
 _STATUS_ALIASES = {
-    "idle": "idle",
+    "idle": "ready",
     "ready": "ready",
     "inpowersave": "inpowersave",
     "printing": "processing",
@@ -64,7 +69,36 @@ _STATUS_ALIASES = {
     "off": "off",
     "initializing": "initializing",
     "cancelling": "cancelling",
+    "shuttingdown": "shuttingdown",
+    "trayempty": "trayempty",
+    "outofpaper": "outofpaper",
+    "papermisfeed": "papermisfeed",
+    "nomediainstalled": "nomediainstalled",
+    "closedoorcover": "closedoorcover",
+    "unknown": "unknown",
 }
+
+# Mirrors const.STATUS_OPTIONS rather than importing it: this module already
+# imports from const, and a test asserts the two stay in step.
+_VALID_STATUS = frozenset(
+    {
+        "cancelling",
+        "closedoorcover",
+        "copying",
+        "inpowersave",
+        "initializing",
+        "nomediainstalled",
+        "off",
+        "outofpaper",
+        "papermisfeed",
+        "processing",
+        "ready",
+        "scanning",
+        "shuttingdown",
+        "trayempty",
+        "unknown",
+    }
+)
 
 
 def _text(document: dict[str, Any], key: str) -> str | None:
@@ -128,7 +162,8 @@ def _status(value: str | None) -> str | None:
     """Fold a CDP status word onto the integration's option list."""
     if value is None:
         return None
-    return _STATUS_ALIASES.get(value.strip().lower(), value.strip().lower())
+    mapped = _STATUS_ALIASES.get(value.strip().lower(), "unknown")
+    return mapped if mapped in _VALID_STATUS else "unknown"
 
 
 class CDPClient:

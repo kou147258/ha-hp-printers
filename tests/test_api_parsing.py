@@ -24,12 +24,14 @@ from custom_components.hp_printers.api import (
     LEDMClient,
     _strip_namespaces,
 )
+from custom_components.hp_printers.api_cdp import _status
 from custom_components.hp_printers.const import (
     ENDPOINT_CONSUMABLE_CONFIG,
     ENDPOINT_PRODUCT_CONFIG,
     ENDPOINT_PRODUCT_LOGS,
     ENDPOINT_PRODUCT_STATUS,
     ENDPOINT_PRODUCT_USAGE,
+    STATUS_OPTIONS,
 )
 
 
@@ -498,3 +500,46 @@ def test_endpoints_are_distinct() -> None:
         ENDPOINT_PRODUCT_LOGS,
     }
     assert len(endpoints) == 5
+
+
+async def test_status_ignores_supply_categories() -> None:
+    """The device state is found even when a supply alert comes first.
+
+    ProductStatusDyn lists one <Status> per condition and does not order
+    them. The captured Smart Tank leads with a genuineHP supply alert, so
+    taking the first element reported a consumable category as the printer's
+    status -- and because that value is not one the status sensor can render,
+    the entity was silently never created.
+    """
+    doc = _xml(
+        """
+        <ProductStatusDyn>
+          <Status>
+            <StatusCategory>genuineHP</StatusCategory>
+            <LocString>Ink tank filled.</LocString>
+          </Status>
+          <Status>
+            <StatusCategory>inPowerSave</StatusCategory>
+          </Status>
+        </ProductStatusDyn>
+        """
+    )
+
+    assert LEDMClient._parse_status(doc) == ("inpowersave", None)  # noqa: SLF001
+
+
+def test_cdp_status_never_leaves_the_declared_options() -> None:
+    """Every CDP status word folds onto an option the sensor declares.
+
+    `idle` is what the CDP print engine says where LEDM says `ready`,
+    and `idle` is not in STATUS_OPTIONS -- so passing it through made the
+    status entity refuse to be created on every idle CDP printer.
+    """
+
+    assert _status("idle") == "ready"
+    assert _status("Idle") == "ready"
+    assert _status("inPowerSave") == "inpowersave"
+    assert _status("something-new") == "unknown"
+    for word in ("idle", "inPowerSave", "Printing", "weird-future-state"):
+        assert _status(word) in STATUS_OPTIONS
+    assert _status(None) is None

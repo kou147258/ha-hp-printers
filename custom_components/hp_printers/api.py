@@ -26,6 +26,7 @@ from .const import (
     ENDPOINT_PRODUCT_LOGS,
     ENDPOINT_PRODUCT_STATUS,
     ENDPOINT_PRODUCT_USAGE,
+    STATUS_OPTIONS,
 )
 from .models import (
     Consumable,
@@ -305,17 +306,17 @@ class LEDMClient:
             self._fetch_optional(ENDPOINT_MEDIA_HANDLING),
         )
 
-        status_node = _find(status_doc, "Status")
-        loc = status_node.find("LocString") if status_node is not None else None
+        # ProductStatusDyn carries one <Status> per condition, and the
+        # document does not order them; _parse_status picks the device state
+        # out of them rather than assuming the first one is it.
+        status, status_message = self._parse_status(status_doc)
 
         consumables = self._parse_consumables(consumable_doc, usage_doc)
         events, jobs, assert_text = self._parse_logs(logs_doc)
 
-        raw_status = _text(status_node, "StatusCategory")
-
         return PrinterData(
-            status=raw_status.lower() if raw_status else None,
-            status_message=loc.text.strip() if loc is not None and loc.text else None,
+            status=status,
+            status_message=status_message,
             consumables=consumables,
             printer=self._parse_subunit(usage_doc, "PrinterSubunit"),
             scanner=self._parse_subunit(usage_doc, "ScannerEngineSubunit"),
@@ -370,6 +371,42 @@ class LEDMClient:
             transmit_late_collisions=_int(stats, "TransmitLateCollisions"),
             unsendable_packets=_int(stats, "UnsendablePackets"),
         )
+
+    @staticmethod
+    def _parse_status(status_doc: Element) -> tuple[str | None, str | None]:
+        """Return ``(status, message)`` from a ``ProductStatusDyn`` document.
+
+        The document carries one ``<Status>`` per condition and does not
+        order them. On the captured Smart Tank the first entry is a supply
+        alert -- ``genuineHP``, "ink tank filled" -- and the device state
+        (``inPowerSave``) comes later, so taking the first element reported a
+        consumable category as the printer's status. That value is not one the
+        status sensor can render, so the entity was then never created at all,
+        which presents as "this printer is unsupported" rather than as a bug.
+
+        The device state is therefore the entry whose category the status
+        sensor can display; a supply or alert category never can. Falling back
+        to the first entry keeps a device that reports something entirely new
+        reporting something, rather than reporting nothing.
+        """
+        if status_doc is None:
+            return None, None
+        nodes = list(status_doc.iter("Status"))
+        if not nodes:
+            return None, None
+        known = set(STATUS_OPTIONS) | {"idle"}
+        node = next(
+            (
+                candidate
+                for candidate in nodes
+                if (_text(candidate, "StatusCategory") or "").lower() in known
+            ),
+            nodes[0],
+        )
+        loc = node.find("LocString")
+        message = loc.text.strip() if loc is not None and loc.text else None
+        category = _text(node, "StatusCategory")
+        return (category.lower() if category else None), message
 
     def _parse_subunit(self, usage_doc: Element, subunit: str) -> SubunitUsage:
         """Parse one usage subunit.
