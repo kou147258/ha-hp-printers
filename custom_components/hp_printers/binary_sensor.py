@@ -72,6 +72,36 @@ PRINTER_BINARY_SENSORS: tuple[HPPrinterBinarySensorDescription, ...] = (
         value_fn=lambda data, _info: _paper_low(data),
     ),
     HPPrinterBinarySensorDescription(
+        key="accepting_jobs",
+        translation_key="accepting_jobs",
+        # "Will it take a job right now" is a readiness question, not a
+        # problem, so it is RUNNING rather than PROBLEM. It is also the only
+        # such signal on a CDP model -- its status word is a state name, not
+        # a decision.
+        device_class=BinarySensorDeviceClass.RUNNING,
+        value_fn=lambda data, _info: data.accepting_jobs,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="quiet_mode",
+        translation_key="quiet_mode",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # Reported by both protocols under different names and in different
+        # places: LEDM puts it in the static product configuration, CDP in
+        # the per-poll print configuration. Either copy answers the question,
+        # so the second is a fallback rather than a second entity.
+        value_fn=lambda data, info: (
+            data.quiet_mode if data.quiet_mode is not None else info.quiet_mode
+        ),
+    ),
+    HPPrinterBinarySensorDescription(
+        key="auto_jam_recovery",
+        translation_key="auto_jam_recovery",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # Off means the device will not try to clear a jam by itself, so a
+        # jam needs someone at the machine. A setting, not a fault.
+        value_fn=lambda data, _info: data.auto_jam_recovery,
+    ),
+    HPPrinterBinarySensorDescription(
         key="paper_present",
         translation_key="paper_present",
         device_class=BinarySensorDeviceClass.RUNNING,

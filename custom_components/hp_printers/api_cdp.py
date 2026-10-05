@@ -38,6 +38,7 @@ from .const import (
     CDP_DEVICE_USAGE,
     CDP_EVENTS,
     CDP_IDENTITY,
+    CDP_PRINT_CONFIG,
     CDP_PRINT_STATUS,
     CDP_SCAN_STATUS,
     CDP_SECURITY_CONFIG,
@@ -158,6 +159,20 @@ def _date(document: dict[str, Any], key: str) -> datetime | None:
             return None
         return parsed
     return None
+
+
+def _auto_jam(print_config: dict[str, Any]) -> bool | None:
+    """Return whether automatic jam recovery is enabled.
+
+    The document phrases it as a mode ("off" / "on" / "auto") rather than as
+    a flag, so "off" has to map to False. Read as a plain boolean the value
+    would report jam recovery as *enabled* on a printer that has turned it
+    off, which is the opposite of what the setting means.
+    """
+    value = _text(print_config, "autoJamRecovery")
+    if value is None:
+        return None
+    return value.strip().lower() not in ("off", "disabled", "no", "false")
 
 
 def _status(value: str | None) -> str | None:
@@ -315,10 +330,11 @@ class CDPClient:
             self._fetch(CDP_DEVICE_SERVICE_COUNTERS),
             self._fetch(CDP_SUPPLIES),
         )
-        status_doc, scan_doc, supply_config = await asyncio.gather(
+        status_doc, scan_doc, supply_config, print_config = await asyncio.gather(
             self._fetch(CDP_PRINT_STATUS),
             self._fetch_optional(CDP_SCAN_STATUS),
             self._fetch_optional(CDP_SUPPLY_CONFIG),
+            self._fetch_optional(CDP_PRINT_CONFIG),
         )
         events_doc = await self._fetch_optional(CDP_EVENTS)
 
@@ -334,6 +350,13 @@ class CDPClient:
             scanner_error=_text(scan_doc or {}, "scannerError"),
             power_cycles=_int(statistics or {}, "powerCycleCount"),
             low_ink_messaging=_bool(supply_config or {}, "lowMessagingEnabled"),
+            # The only "ready for work" signal on this interface: the
+            # status word is a state name, this is a decision.
+            accepting_jobs=_bool(status_doc, "printerIsAcceptingJobs"),
+            quiet_mode=_bool(print_config or {}, "quietModeEnabled"),
+            # "off" here means the device will not try to clear a jam on
+            # its own -- a reading worth having, and not a fault.
+            auto_jam_recovery=_auto_jam(print_config or {}),
             # Genuine-supplies enforcement. LEDM spells it
             # GenuineHPSuppliesOnly; CDP calls the same thing the anti-theft
             # mode and states it in the supply service. Both answer "would the

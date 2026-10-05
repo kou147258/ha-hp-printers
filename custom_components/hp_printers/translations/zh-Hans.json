@@ -174,6 +174,12 @@
   },
   "entity": {
     "sensor": {
+      "auto_off_time": {
+        "name": "自动关机延时"
+      },
+      "better_quality_pages": {
+        "name": "较高质量页数（全纸材合计）"
+      },
       "cartridge_brand": {
         "name": "品牌"
       },
@@ -250,6 +256,9 @@
         "name": "已复印页数",
         "unit_of_measurement": "页"
       },
+      "draft_quality_pages": {
+        "name": "草稿质量页数（全纸材合计）"
+      },
       "firmware_date": {
         "name": "固件日期"
       },
@@ -312,11 +321,23 @@
         "name": "无法发送的包数",
         "unit_of_measurement": "包"
       },
+      "non_hp_flag_count": {
+        "name": "未认证墨盒出现次数"
+      },
+      "normal_quality_pages": {
+        "name": "普通质量页数（全纸材合计）"
+      },
+      "panel_button_presses": {
+        "name": "面板按键次数"
+      },
       "panel_cancel_presses": {
         "name": "面板取消次数"
       },
       "paper_level": {
         "name": "纸张"
+      },
+      "photo_quality_pages": {
+        "name": "照片页数"
       },
       "power_cycles": {
         "name": "电源循环次数"
@@ -374,6 +395,9 @@
         "name": "扫描任务页数",
         "unit_of_measurement": "页"
       },
+      "scan_to_host_images": {
+        "name": "扫描到主机图像数"
+      },
       "scanner_adf_images": {
         "name": "自动进稿器扫描页数",
         "unit_of_measurement": "页"
@@ -423,8 +447,14 @@
       }
     },
     "binary_sensor": {
+      "accepting_jobs": {
+        "name": "可接收任务"
+      },
       "admin_password_set": {
         "name": "已设置管理员密码"
+      },
+      "auto_jam_recovery": {
+        "name": "自动卡纸恢复"
       },
       "cartridge_genuine": {
         "name": "原装"
@@ -452,6 +482,9 @@
       },
       "paper_present": {
         "name": "纸仓有纸"
+      },
+      "quiet_mode": {
+        "name": "静音模式"
       }
     }
   }

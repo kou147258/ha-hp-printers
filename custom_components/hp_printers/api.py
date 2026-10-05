@@ -281,11 +281,16 @@ class LEDMClient:
             password_set=_enabled(_text(info, "PasswordStatus")),
             duplex_unit=_text(info, "DuplexUnit"),
             # These live under ProductSettings rather than ProductInformation,
-            # so they are read from the document root.
+            # so they are read from the document root. AutoOffTime and
+            # QuietPrintMode are siblings of PowerSaveTimeout, not children of
+            # it, and looking for them inside the wrong element returns None
+            # silently rather than raising.
             friendly_name=_text(root, "FriendlyName"),
             power_save=_text(info, "PowerSave"),
             power_save_timeout=_text(root, "PowerSaveTimeout"),
             shutdown_delay=_text(root, "ShutDownDelay"),
+            auto_off_time=_text(root, "AutoOffTime"),
+            quiet_mode=_enabled(_text(root, "QuietPrintMode")),
         )
 
     async def async_get_data(self) -> PrinterData:
@@ -332,6 +337,8 @@ class LEDMClient:
             genuine_mono_impressions=_int(usage_doc, "OriginalHPMonochromeImpressions"),
             network=self._parse_network(io_doc),
             **_parse_marking_agent(usage_doc),
+            **_parse_extra_counters(usage_doc),
+            **_parse_quality_by_media(usage_doc),
             **_parse_media_handling(media_doc),
         )
 
@@ -563,6 +570,81 @@ class LEDMClient:
         if not info.serial_number:
             raise HPPrinterParseError("Device did not report a serial number")
         return info
+
+
+def _parse_extra_counters(usage_doc: Element) -> dict[str, Any]:
+    """Return the usage counters that appear exactly once in the document.
+
+    Returned as a ``**kwargs`` fragment so ``async_get_data`` stays one
+    readable call. Every value here is a single occurrence in the document;
+    the per-media-type counters are handled by
+    :func:`_parse_quality_by_media` instead, because reading the first
+    occurrence of those would report one medium's share as if it were a
+    total.
+    """
+    return {
+        "panel_button_presses": _int(
+            usage_doc, "UIButtonPressCounters", "ButtonPressCount"
+        ),
+        "scan_to_host_images": _int(usage_doc, "ScanToHostImages"),
+        "photo_quality_pages": _int(usage_doc, "PhotoImpressions"),
+        # The cartridge's own tamper flag. A device reports it once per
+        # consumable slot; a non-zero value anywhere is the signal, so the
+        # highest is what survives.
+        "non_hp_flag_count": _max_int(usage_doc, "NonHPFlagCounter"),
+    }
+
+
+def _max_int(usage_doc: Element, name: str) -> int | None:
+    """Return the largest value a repeated counter reports, or None.
+
+    Several of these counters are emitted once per consumable slot. Taking
+    the first, or the last, would depend on document order; taking the
+    maximum answers the question the entity actually asks -- has this
+    happened at all.
+    """
+    values = [
+        int(node.text.strip())
+        for node in usage_doc.iter(name)
+        if node.text and node.text.strip().lstrip("-").isdigit()
+    ]
+    return max(values) if values else None
+
+
+def _parse_quality_by_media(usage_doc: Element) -> dict[str, Any]:
+    """Sum the per-media-type quality counters.
+
+    ``UsageByQuality`` repeats Normal/Draft/Better once per media type, so a
+    single occurrence is only that medium's share. Reading the first one
+    produces a "normal quality pages" figure that is really just "pages
+    printed on plain paper" -- which is why this sums instead.
+
+    A sum of zero is returned as 0 rather than None: the document listed the
+    block, so the device did report the counters and they are genuinely zero.
+    """
+    totals = {"normal": 0, "better": 0, "draft": 0}
+    seen = False
+    for block in usage_doc.iter("UsageByQuality"):
+        seen = True
+        for key, tag in (
+            ("normal", "NormalImpressions"),
+            ("better", "BetterImpressions"),
+            ("draft", "DraftImpressions"),
+        ):
+            value = _int(block, tag)
+            if value is not None:
+                totals[key] += value
+    if not seen:
+        return {
+            "normal_quality_pages": None,
+            "better_quality_pages": None,
+            "draft_quality_pages": None,
+        }
+    return {
+        "normal_quality_pages": totals["normal"],
+        "better_quality_pages": totals["better"],
+        "draft_quality_pages": totals["draft"],
+    }
 
 
 def _parse_marking_agent(usage_doc: Element) -> dict[str, Any]:

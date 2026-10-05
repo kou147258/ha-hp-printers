@@ -37,6 +37,12 @@ class ProductInfo:
     power_save: str | None = None
     power_save_timeout: str | None = None
     shutdown_delay: str | None = None
+    # How long the printer waits before powering itself down, as free text the
+    # firmware chooses ("never", "2minutes"). Kept as text: the accepted
+    # spellings are not an enumeration, and mapping them to minutes would
+    # invent precision the device does not offer.
+    auto_off_time: str | None = None
+    quiet_mode: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -298,6 +304,32 @@ class PrinterData:
     # level, so this is the only paper signal available without IPP.
     paper_present: bool | None = None
     input_trays: tuple[str, ...] = ()
+
+    # --- selected facts the devices report but this integration had not read ---
+    # Whether the printer will take a job right now. More directly useful
+    # than the status word for a dashboard, and on a CDP model it is the only
+    # "ready for work" signal available.
+    accepting_jobs: bool | None = None
+    # Panel button presses. A jump between polls means someone was standing
+    # at the machine cancelling jobs -- usually a paper problem the jam and
+    # mispick counters do not show.
+    panel_button_presses: int | None = None
+    # Pages by the quality the job asked for. ``UsageByQuality`` repeats
+    # these once per media type, so these are **sums across media types**,
+    # not the single number the device reports for any one of them.
+    normal_quality_pages: int | None = None
+    better_quality_pages: int | None = None
+    draft_quality_pages: int | None = None
+    # Photo impressions appear once, in the print application's own block.
+    photo_quality_pages: int | None = None
+    # Images the scan application sent to a host. Sits between the scanner
+    # engine's total (which includes copies) and the scan job's own count.
+    scan_to_host_images: int | None = None
+    # Times the device has seen a cartridge it could not authenticate. A
+    # record that this happened, not a verdict on any particular cartridge.
+    non_hp_flag_count: int | None = None
+    quiet_mode: bool | None = None
+    auto_jam_recovery: bool | None = None
 
     @property
     def main_paper_tray(self) -> PaperTray | None:

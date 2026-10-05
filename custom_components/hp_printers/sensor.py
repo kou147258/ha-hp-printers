@@ -299,6 +299,42 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         value_fn=lambda data, _info: data.scanner_status,
         attrs_fn=lambda data: {"scanner_error": data.scanner_error},
     ),
+    # --- the settings and counters a device reports but used to be ignored ---
+    HPPrinterSensorDescription(
+        key="auto_off_time",
+        translation_key="auto_off_time",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        # Free text the firmware chooses ("never", "2minutes"). Not converted
+        # to minutes: the accepted spellings are not an enumeration, and a
+        # converted value would claim precision the device never offered.
+        value_fn=lambda _data, info: info.auto_off_time,
+    ),
+    _counter(
+        "panel_button_presses",
+        "panel_button_presses",
+        lambda d: d.panel_button_presses,
+    ),
+    _counter(
+        "scan_to_host_images", "scan_to_host_images", lambda d: d.scan_to_host_images
+    ),
+    _counter("non_hp_flag_count", "non_hp_flag_count", lambda d: d.non_hp_flag_count),
+    # The three below are sums across the per-media-type blocks the device
+    # repeats, not the single value it reports for any one of them. The
+    # translations say so, because "normal quality pages" otherwise reads as
+    # a total the device never stated.
+    _counter(
+        "normal_quality_pages", "normal_quality_pages", lambda d: d.normal_quality_pages
+    ),
+    _counter(
+        "better_quality_pages", "better_quality_pages", lambda d: d.better_quality_pages
+    ),
+    _counter(
+        "draft_quality_pages", "draft_quality_pages", lambda d: d.draft_quality_pages
+    ),
+    _counter(
+        "photo_quality_pages", "photo_quality_pages", lambda d: d.photo_quality_pages
+    ),
     # --- diagnostics: firmware and the device event log ---
     HPPrinterSensorDescription(
         key="firmware_date",
