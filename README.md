@@ -1,8 +1,12 @@
 # HP Printers for Home Assistant
 
-Local integration for HP printers that expose the **LEDM** XML interface from
-their embedded web server. Reads the printer over HTTP/HTTPS — no cloud, no
-account, no credentials, no writes.
+Local integration for HP printers. Reads the printer over HTTP/HTTPS — no
+cloud, no account, no credentials, no writes.
+
+Newer HP models no longer serve **LEDM**, the XML interface this integration
+originally targeted; they serve a JSON API instead (**CDP**), and report paper
+level over **IPP**. All three are supported, and which one a given printer
+speaks is worked out at setup — there is no protocol setting to fill in.
 
 ## What you get
 
@@ -10,8 +14,9 @@ The printer itself is one device; each cartridge is a sub-device because
 cartridges are independently replaceable and have their own serial numbers.
 Depending on what the model reports, the integration exposes:
 
-- **Printer**: status, page counters, jams, mispicks, firmware build date,
-  event log, network link health, and diagnostic state.
+- **Printer**: status, page counters, jams, mispicks, paper level, ink
+  consumed, printhead alignment result, firmware build date, event log, network
+  link health, and diagnostic state.
 - **Scanner and copier**: their own counters, when those capabilities exist.
 - **Cartridges**: level, pages remaining, pages printed, part and serial
   information, dates, genuine/clone status, and problem state.
@@ -65,8 +70,14 @@ Then *Settings → Devices & Services → Add Integration → HP Printers*.
 
 ## Requirements
 
-- An HP printer with an Embedded Web Server (EWS) that exposes the LEDM XML API.
+- An HP printer with an Embedded Web Server (EWS) that exposes **LEDM** (XML)
+  or **CDP** (JSON). Both are detected automatically; see
+  [How it talks to your printer](#how-it-talks-to-your-printer).
 - Home Assistant **2026.8.2** or newer.
+
+The printer's web server must stay reachable from Home Assistant. Paper level
+additionally needs port 631 open; it is the only feature that uses it, and
+everything else works without it.
 
 ## Configuration
 
@@ -82,6 +93,51 @@ When the printer stops answering — asleep, powered off, or off the network —
 the interval doubles per consecutive failure up to ten minutes, and snaps back
 to the configured value on the first successful read. Backing off never polls
 faster than you asked for: a 30-minute interval stays 30 minutes.
+
+## How it talks to your printer
+
+Three interfaces are in play, and which ones a printer uses varies by model and
+firmware. None of this is configurable, because a wrong setting is the kind of
+thing you cannot discover until something silently reports nothing.
+
+| Interface | What it is | Used for |
+|---|---|---|
+| **LEDM** | XML under `/DevMgmt/` on the embedded web server. The oldest and best-documented-by-observation of the three — every value is paired with a capability document that names its type and legal range. | Most printers |
+| **CDP** | JSON under `/cdm/`. The modern replacement; newer consumer models serve *only* this and answer 404 to every LEDM path. | Newer models |
+| **IPP** | The standard print protocol, on port 631. Every printer already speaks it. | Paper level only |
+
+At setup the integration asks for LEDM first, because a model that serves it
+answers on the first request and the capability documents make the XML far
+easier to read. A model that does not answers **404**, at which point it falls
+back to CDP. It re-checks on every restart, so replacing a printer with a
+different model under the same address needs no reconfiguration.
+
+That 404 matters more than it looks. A model without LEDM returns 404 for
+*every* endpoint, so treating "not found" as "cannot connect" would report a
+printer that is online and printing as offline. The two are separate conditions
+here, and only the second one puts the device on `unavailable`.
+
+IPP is used for one thing: `MarkMediaLevel`/`MarkMediaMax` is the only place
+either protocol reports how much paper is left, as opposed to merely whether
+the tray holds any. A model that does not describe its tray gets no paper-level
+entity rather than a permanently-100% one.
+
+### A note on "pages printed"
+
+Two different numbers both look like "how much has this printer printed", and
+they are not the same:
+
+- The **engine total** is every page the engine has ever turned. It includes
+  jams, retries, copies, scans and calibration passes, and HP's own EWS states
+  it never resets. On one of the test machines it reads 44,492 where the
+  user-facing figure is 44,376.
+- **Black and white + color pages** is what was actually printed.
+
+Use the split, not the total, for anything you intend to chart. The
+`Pages printed` sensor is the engine total on LEDM printers; on CDP printers
+the protocol's equivalent counter *is* the split, so the integration reports it
+directly. `Black and white pages` and `Color pages` mean the same thing on
+both, and are the ones to add together.
 
 ## Devices
 
@@ -103,16 +159,34 @@ device page.
 | Entity | Type | Notes |
 |---|---|---|
 | Status | sensor (enum) | Current state from the printer's `StatusCategory`. Localised in the integration. |
-| Pages printed | sensor (total_increasing) | Lifetime page count. |
-| Black and white pages | sensor (total_increasing) | Monochrome impressions. |
+| Accepting jobs | binary_sensor | `on` when the printer is ready for a new job. On a CDP model this is the only "ready for work" signal there is. |
+| Scanner status | sensor (diagnostic) | Scanner subunit state, separate from the printer's own status. |
+| Printhead alignment | sensor (diagnostic) | How the last alignment went. A **failed** alignment is a real fault — the printer is online and prints, but output can be skewed or banded — and no counter here would otherwise reveal it. The failure reason is attached as an attribute. Needs a human at the machine; this integration never triggers one. |
+| Paper level | sensor | Remaining paper in the main input tray, as a percentage, read over IPP. Only the main sheet-feed tray is watched: a document feeder is excluded, because "low" on it means nothing. Absent on models that do not describe their tray. |
+| Paper low | binary_sensor | `on` when the tray is below the level the manufacturer defines as low. |
+| Paper present | binary_sensor | `on` when the main input tray holds media. |
+| Auto jam recovery | binary_sensor | Whether the printer retries a jam automatically. |
+| Quiet mode | binary_sensor | Whether the printer is in its quieter mode. |
+| Low-ink messaging | binary_sensor | Whether the firmware's low-ink warning is switched on. Recorded because a model with no ink level sensor has the feature but cannot act on it — that pair is the answer to "why is my printer not warning me". |
+| Pages printed | sensor (total_increasing) | Lifetime page count. See [A note on "pages printed"](#a-note-on-pages-printed) — this is the engine total on LEDM printers. |
+| Black and white pages | sensor (total_increasing) | Monochrome impressions. Add to **Color pages** for what was actually printed. |
 | Color pages | sensor (total_increasing) | Color impressions. |
 | Single-sided sheets | sensor (total_increasing) | Simplex sheets. |
 | Double-sided sheets | sensor (total_increasing) | Duplex sheets. |
+| Normal / Better / Draft quality pages | sensor (total_increasing) | Pages by the quality the job asked for. These are **sums across media types**, not the number the device reports for any one of them — `UsageByQuality` repeats each entry once per media type, and taking the first gives you only the plain-paper figure. |
+| Photo pages | sensor (total_increasing) | Photo impressions. |
+| Ink used | sensor (total_increasing) | Millilitres of ink the engine has drawn. The clearest available evidence that pages came from bottled refills. LEDM only. |
+| Non-HP part count | sensor (diagnostic) | Times the device has seen a cartridge it could not authenticate. A record that this happened, not a verdict on any particular cartridge. |
+| Panel button presses | sensor (total_increasing) | Presses on the front panel. A jump between polls usually means someone was at the machine cancelling jobs — usually a paper problem the jam and mispick counters do not show. |
+| Panel cancel presses | sensor (total_increasing) | Presses specifically on cancel. |
 | Paper jams | sensor (total_increasing) | Cumulative jam events. |
 | Mispicks | sensor (total_increasing) | Cumulative mispick events. Watch for an upward trend — a pickup roller is glazing over long before paper starts jamming. |
+| Power cycles | sensor (diagnostic) | Times the device has been power-cycled — a proxy for how often it loses power or is hard-reset, which nothing else reports. CDP only. |
 | Color pages on genuine supplies | sensor (total_increasing) | Color impressions printed with HP-marked cartridges. |
 | Black and white pages on genuine supplies | sensor (total_increasing) | Same, monochrome. |
+| Installed | sensor (diagnostic, date) | When the printer was installed. Only the CDP identity document carries this, so it is absent on LEDM models rather than showing a placeholder date. |
 | Firmware date | sensor (diagnostic) | Build date of the installed firmware — the only version marker LEDM exposes. |
+| Auto-off time | sensor (diagnostic, disabled by default) | How long the printer waits before powering itself down, as free text the firmware chooses (`never`, `2minutes`). Kept as text on purpose: the accepted spellings are not an enumeration, and converting to minutes would invent precision the device does not offer. |
 | Last event code | sensor (diagnostic) | Most recent fault code (`13.x` paper jams, `49.x` firmware faults, `10.x` supply-memory errors). Full history and any firmware assert text are attached as attributes. |
 | Last event at page | sensor (diagnostic) | Page count at which the most recent event occurred. |
 | Manufactured | sensor (diagnostic, disabled by default, date) | When the printer was built, from `ProductInformation/Manufacturer`. Many models — including the M182nw — do not report it, and then no entity is created. |
@@ -164,7 +238,9 @@ type the printer reports.
 
 | Entity | Type | Notes |
 |---|---|---|
-| Level | sensor | Manufacturer-rounded remaining percentage. The cartridge's slot (`station`) and type (`consumable_type`) are attached as attributes — both are fixed for the life of the cartridge, so they are not sensors of their own. |
+| Level | sensor | Manufacturer-rounded remaining percentage. The cartridge's slot (`station`) and type (`consumable_type`) are attached as attributes — both are fixed for the life of the cartridge, so they are not sensors of their own. **Read `consumable_type` before you alert on this:** a refillable ink tank (`inkTank`) has no level sensor and reports a fixed 100, while a real cartridge (`inkCartridge`) does not. An Smart Tank's printhead is also reported as an `inkCartridge`, so a low reading there means printhead life, not ink. |
+| State reason | sensor (diagnostic, disabled by default) | Why the cartridge is in its current state, when the device says. |
+| Supplier manufacture date | sensor (diagnostic, disabled by default) | The date as the supplier recorded it, kept as text — the precision varies by firmware, and truncating it would lose information rather than add clarity. |
 | Pages remaining | sensor | `EstimatedPagesRemaining` for the installed cartridge. |
 | Pages printed | sensor (total_increasing) | Lifetime impressions on the installed cartridge. |
 | Brand | sensor (diagnostic) | "genuinehp" or "clone". HP labels third-party cartridges "clone" even when enforcement is off. |
@@ -181,6 +257,30 @@ type the printer reports.
 | Previous cartridge part number | sensor (diagnostic, disabled by default) | Part number of the removed cartridge. |
 | Problem | binary_sensor | `on` when the cartridge state is anything other than the healthy set (`ok`, `newgenuinehp`, `new`, `good`). |
 | Genuine | binary_sensor (diagnostic) | Whether the brand is HP or a clone.
+| Previously used | binary_sensor (diagnostic) | `on` when the cartridge was already used in another printer. This is HP's **anti-transfer** flag, *not* a claim that the part is not genuine — the same document reports them separately. |
+| Refilled | binary_sensor (diagnostic) | `on` when the cartridge has been refilled. |
+
+## Dashboard
+
+`examples/dashboards/printers.yaml` is a ready-made view. It builds itself
+from `auto-entities` filtered by device and translation key rather than from a
+list of entity IDs, so it survives you renaming a printer in Home Assistant —
+which, since entity IDs are derived from the name, is the thing most likely to
+happen.
+
+It needs [card-mods](https://github.com/thomasloven/lovelace-card-mod) for the
+`auto-entities` card. The two `picture-entity` cards at the top are the only
+part that needs editing, and only once: they show the printer itself, using the
+512×512 render every HP printer already serves from its own web server.
+
+```yaml
+image: http://192.168.9.20/images/printer-large.png
+```
+
+Point that at your printer. There is nothing to host and nothing to update when
+the firmware changes — the picture always comes from the machine it depicts. It
+does mean Home Assistant has to be able to reach the printer's HTTP port, which
+is the same requirement as setup itself.
 
 ## Troubleshooting
 
@@ -188,6 +288,22 @@ If setup cannot connect, confirm that the printer's EWS is reachable from the
 Home Assistant host. Open the printer's host and port in a browser first; most
 printers use HTTP on port 80. Enable **HTTPS** only when the printer's EWS is
 configured for it.
+
+**The device is online but shows no entities.** That is a different problem
+from an unreachable printer, and the integration treats it as one: a model that
+speaks neither LEDM nor CDP produces a device with a serial and nothing else.
+Compare the host against the printer's own Network Summary page — the common
+cause is a printer that was replaced by a different model under the same
+address, or a captive portal on the network intercepting the request.
+
+**Paper level never appears.** Only the main sheet-feed tray is watched, and
+only over IPP on port 631. A model that does not describe its tray gets no
+entity rather than a permanently-100% one. Check that 631 is reachable from
+the Home Assistant host; if it is not, everything else still works.
+
+**A cartridge level looks stuck at 100%.** Read the `consumable_type`
+attribute. `inkTank` means a refillable reservoir with no sensor, and 100 is
+the device's placeholder — there is nothing behind that number.
 
 For logs, enable debug logging from the integration device page:
 
@@ -199,24 +315,44 @@ For logs, enable debug logging from the integration device page:
 
 When reporting a problem, also download diagnostics from the same menu. The
 diagnostic file redacts the printer host and serial identifiers while retaining
-the LEDM data needed to investigate unsupported models and missing entities.
+the parsed device data needed to investigate unsupported models and missing
+entities.
 
 ## Compatibility
 
-Developed against an **HP Color LaserJet MFP M182nw**. LEDM is widely
-implemented across HP's consumer and small-office range, so other models are
-likely to work; the integration reads only endpoints it finds and skips what a
-device does not report. Reports of other models working (or not) are welcome.
+Developed and tested against real hardware, not just fixtures:
 
-## A note on LEDM
+| Model | Interface | Notable |
+|---|---|---|
+| HP Color LaserJet MFP M182nw | LEDM | The original target. No install date, no refill counters, no ADF or duplex counters, and a `1976-01-01` manufacture date because it has no real-time clock. |
+| HP Smart Tank 750 series | LEDM | Ink-tank AIO. Reports an engine total above its own printed page count, meters ink in millilitres, and serves paper level over IPP. |
+| HP Smart Tank 580-590 series | CDP | Answers 404 to every LEDM path. This model is the reason the CDP client exists: it reports its install date, its power cycles and its last printhead alignment result, none of which LEDM carries — and none of which the other two report. |
 
-HP publishes no specification for it. The endpoint map here was derived by
-reading a live device: `/DevMgmt/DiscoveryTree.xml` enumerates the available
-resources, and each is exposed as a paired `<Resource>Cap.xml` — describing
-types, access modes and legal values — and `<Resource>Dyn.xml` carrying current
-values. The device is, in effect, its own documentation.
+Both consumer models have a refillable ink tank with no level sensor, so
+**neither reports usable ink level**; the tank sensors read a fixed 100. This
+is a hardware fact, not a parsing gap, and no amount of querying will change
+it. Their printheads *are* reported as `inkCartridge` and do carry a real
+percentage — which is life, not ink.
+
+Reports of other models working (or not) are welcome.
+
+## A note on LEDM and CDP
+
+HP publishes no specification for either. The endpoint map here was derived by
+reading live devices: for LEDM, `/DevMgmt/DiscoveryTree.xml` enumerates the
+available resources, and each is exposed as a paired `<Resource>Cap.xml` —
+describing types, access modes and legal values — and `<Resource>Dyn.xml`
+carrying current values. The device is, in effect, its own documentation.
+
+CDP has no equivalent discovery document, so its endpoint list was established
+by exhaustively enumerating the `supply` and `ink` namespaces and keeping only
+those that return data on real hardware. That is why the CDP client reads 24
+fixed documents rather than walking a tree: there is nothing to walk.
 
 All access is read-only (`GET`). This integration never writes to your printer.
+That is a deliberate constraint rather than a limitation of the interfaces —
+it means the integration cannot start a print, clear a queue, or run a
+printhead cleaning cycle, and that is the trade it makes.
 
 ## Contributing
 
@@ -236,7 +372,7 @@ include:
   diagnostics).
 
 Diagnostics intentionally redact the printer host, serial, UUID, and user
-identifiers, but keep the LEDM payloads — that is what makes it possible to
+identifiers, but keep the parsed payloads — that is what makes it possible to
 investigate unsupported models and missing entities without seeing your
 network.
 
@@ -249,9 +385,10 @@ it. A feature without the source data usually has to wait for someone with
 the same printer to confirm the field.
 
 > [!IMPORTANT]
-> **Raw LEDM XML identifies your device and your network** — serial number,
-> UUID, hostname, MAC address, IP addresses, and your cartridges' serial
-> numbers. Do not paste a raw `curl` response into a public issue.
+> **Raw LEDM XML and CDP JSON both identify your device and your network** —
+> serial number, UUID, hostname, MAC address, IP addresses, and your
+> cartridges' serial numbers. Do not paste a raw `curl` response into a
+> public issue.
 
 Two ways to share it safely:
 
@@ -264,6 +401,10 @@ Two ways to share it safely:
   ./.venv/bin/python scripts/capture_ledm.py --host <your-printer>
   ./.venv/bin/python scripts/anonymize_ledm.py scripts/captures/<dir>/
   ```
+
+  For a CDP printer, use `scripts/capture_cdp.py` and
+  `scripts/anonymize_cdp.py` instead — the JSON documents need a different
+  scrubber, and the anonymizer skips non-JSON files rather than mangling them.
 
   The first is read-only — every request is a `GET`. The second replaces
   identifiers with stable dummies and prints every replacement it makes.

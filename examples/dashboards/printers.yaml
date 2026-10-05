@@ -3,17 +3,38 @@
 # Copy into a Lovelace view (YAML mode), or save as a dashboard under
 # Settings -> Dashboards.
 #
-# Built from auto-entities filtered by device rather than from explicit
-# entity ids on purpose: entity ids embed the config entry's title, so a list
-# of them breaks the moment someone renames a printer in Home Assistant.
-# Filtering by device keeps the card working through a rename.
+# ---------------------------------------------------------------------------
+# 需要改的地方只有两处，都在下面的 picture-entity 卡片里：
+#   1. image: 打印机自己的 IP（或主机名）
+#   2. entity: 那台打印机的状态实体
+# 其余全部按 device / translation_key 过滤，改名不会失效。
+# ---------------------------------------------------------------------------
 #
-# The supply rows are a separate card because each cartridge is its own
-# sub-device -- that is what groups the four colours together instead of
-# scattering them among the printer's own entities.
+# 为什么要用打印机自带的图
+# ----------------------------
+# 每台 HP 都自带一张 512x512 的整机渲染图，直接取它自己的 web 服务即可：
 #
-# Requires card-mods (Mushroom cards). The `type: entities` fallbacks at the
-# bottom of each section work without it.
+#     http://<打印机地址>/images/printer-large.png
+#
+# 好处是不用托管任何图片、改固件也不会失效，图片永远和机器对得上。
+# 代价是 Home Assistant 必须能直连打印机的 http 端口（631 之外的 80）。
+#
+# 如果 HA 跑在 Docker 里并且用了 host 网络，直接可用；用 bridge 网络时，
+# 把 `network_mode: host` 加上，否则 HA 解析不到打印机 IP。
+#
+# ---------------------------------------------------------------------------
+# 口径提醒（这一条最容易踩）
+# ----------------------------
+# `printer_total_pages` 在两种协议下含义不同：
+#   * LEDM（大多数机型）= 引擎页面总数，设备一辈子转过的页，
+#     含卡纸 / 重试 / 复印 / 扫描 / 校准，EWS 明示「从不重置」。
+#   * CDP（少数新机型）= 黑白 + 彩色，也就是用户实际打印量。
+# 要做长期统计，用 `printer_mono_pages` + `printer_color_pages`，
+# 那两个在两种协议下口径一致，可以相加。
+#
+# 另外 `cartridge_level` 对墨槽（inkTank）返回 100 是设备的**占位值**，
+# 不是测量值——墨槽没有液位传感器。做低墨告警前先看 `consumable_type`
+# 是不是 inkCartridge。
 
 title: HP 打印机
 views:
@@ -22,7 +43,22 @@ views:
     icon: mdi:printer
     type: masonry
     cards:
-      # ---------------------------------------------------------- 状态
+      # ============================================================== 外观
+      # picture-entity 的 entity 是写死的，改名打印机后只有这一处要跟着改。
+      # 换成「状态」那个实体即可（名字里带打印机名 + Status）。
+      - type: picture-entity
+        entity: sensor.192_168_9_20_status
+        image: http://192.168.9.20/images/printer-large.png
+        name: 客厅 HP Smart Tank 750
+        show_entity_picture: false
+
+      - type: picture-entity
+        entity: sensor.192_168_9_12_status
+        image: http://192.168.9.12/images/printer-large.png
+        name: 卧室 HP Smart Tank 580
+        show_entity_picture: false
+
+      # ============================================================== 状态
       - type: entities
         title: 状态
         show_header_toggle: false
@@ -30,9 +66,15 @@ views:
           - type: custom:auto-entities
             filter:
               - integration: hp_printers
-                domain: sensor
-                device_class: enum
-            show_header_toggle: false
+                domain: binary_sensor
+                entity:
+                  translation_key:
+                    - accepting_jobs
+                    - quiet_mode
+                    - auto_jam_recovery
+                    - admin_password_set
+            sort:
+              method: label
 
       - type: custom:auto-entities
         title: 状态
@@ -40,10 +82,15 @@ views:
         filter:
           - integration: hp_printers
             domain: sensor
-            device_class: enum
-        show_header_toggle: false
+            entity:
+              translation_key:
+                - status
+                - scanner_status
+                - calibration_result
+        sort:
+          method: label
 
-      # ---------------------------------------------------------- 纸
+      # ============================================================== 纸
       - type: entities
         title: 纸张
         show_header_toggle: false
@@ -57,13 +104,13 @@ views:
               - integration: hp_printers
                 domain: binary_sensor
                 entity:
-                  translation_key: paper_low
-              - integration: hp_printers
-                domain: binary_sensor
-                entity:
-                  translation_key: paper_present
+                  translation_key:
+                    - paper_low
+                    - paper_present
 
-      # ---------------------------------------------------------- 墨
+      # ============================================================== 墨
+      # 耗材是独立子设备（每支墨盒一个），所以单独一张卡，
+      # 这样四个颜色会自己归到一起，而不是散在打印机自己的实体里。
       - type: entities
         title: 耗材
         show_header_toggle: false
@@ -73,13 +120,24 @@ views:
               - integration: hp_printers
                 domain: sensor
                 entity:
-                  translation_key: cartridge_level
+                  translation_key:
+                    - cartridge_level
+                    - cartridge_raw_level
+                    - cartridge_pages_remaining
+                    - cartridge_low_threshold
+                    - cartridge_part_number
               - integration: hp_printers
                 domain: binary_sensor
                 entity:
-                  translation_key: cartridge_genuine
+                  translation_key:
+                    - cartridge_problem
+                    - cartridge_genuine
+                    - cartridge_previously_used
+                    - cartridge_refilled
+            sort:
+              method: label
 
-      # ---------------------------------------------------------- 用量
+      # ============================================================== 用量
       - type: entities
         title: 用量
         show_header_toggle: false
@@ -90,21 +148,52 @@ views:
                 domain: sensor
                 entity:
                   translation_key:
-                    - printer_total_pages
                     - printer_mono_pages
                     - printer_color_pages
                     - printer_simplex_sheets
                     - printer_duplex_sheets
                     - printer_jams
                     - printer_mispicks
+                    - scanner_images
+                    - scanner_flatbed_images
+                    - scanner_adf_images
+                    - scanner_jams
+                    - scanner_mispicks
+                    - copy_total_pages
+                    - panel_button_presses
                     - panel_cancel_presses
                     - marking_agent_used
             sort:
               method: label
 
-      # ---------------------------------------------------------- 健康
+      # ============================================================== 健康
       - type: entities
         title: 健康
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key:
+                    - firmware_fault
+                    - low_ink_messaging
+                    - genuine_supplies_only
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - last_event_code
+                    - last_event_page
+                    - power_cycles
+                    - non_hp_flag_count
+            sort:
+              method: label
+
+      # ============================================================== 身份
+      - type: entities
+        title: 设备
         show_header_toggle: false
         entities:
           - type: custom:auto-entities
@@ -113,17 +202,16 @@ views:
                 domain: sensor
                 entity:
                   translation_key:
-                    - last_event_code
-                    - last_event_page
-                    - power_cycles
-                    - scanner_status
                     - printer_installed_at
-                    - firmware_date
                     - printer_manufactured_at
+                    - firmware_date
+                    - auto_off_time
+                    - power_save_timeout
+                    - language_pack_version
             sort:
               method: label
 
-      # ---------------------------------------------------------- 排障
+      # ============================================================== 排障
       - type: entities
         title: 诊断
         collapsed: true
