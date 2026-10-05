@@ -277,10 +277,16 @@ class CDPClient:
         model = document.get("makeAndModel")
         model_name = model.get("name") if isinstance(model, dict) else None
         model_family = model.get("family") if isinstance(model, dict) else None
-        if not isinstance(model_name, str):
-            model_name = _text(model, "base") if isinstance(model, dict) else None
-        if not isinstance(model_family, str):
-            model_family = None
+        if isinstance(model, str):
+            # A bare string rather than the nested object. Not seen on either
+            # measured model, but handling it costs three lines and a crash
+            # here would take the whole update down.
+            model_name, model_family = model.strip() or None, None
+        else:
+            if not isinstance(model_name, str):
+                model_name = _text(model, "base") if isinstance(model, dict) else None
+            if not isinstance(model_family, str):
+                model_family = None
 
         return ProductInfo(
             make_and_model=model_name,

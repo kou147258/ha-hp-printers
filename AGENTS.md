@@ -32,10 +32,16 @@
   alongside it.
 - Do not delete a test to make a change pass. If a test is wrong, fix the
   test and explain why in the commit message.
-- Coverage is currently 99%, with every module at or above 97%, and
-  `quality_scale.yaml` claims `test-coverage` and
-  `config-flow-test-coverage` on that basis. Keep it there: if a change
-  drops a module below 95%, either add the tests or downgrade the claim.
+- Coverage was 99% before the CDP and IPP clients landed. It is **96%**
+  now, and `quality_scale.yaml` records that next to its `test-coverage`
+  claim so the number is checkable rather than remembered. Measure with
+  `./.venv/bin/python -m pytest -q --cov=custom_components/hp_printers
+  --cov-report=term-missing`. Re-measure and update the claim in the same
+  commit that moves the number: a stale `done` reads as a current
+  guarantee, which is the failure mode to avoid.
+  `api_cdp.py` is the module to watch -- it sat at 62% until the parsing
+  helpers and the transport error paths were covered directly, and the
+  gap was invisible until a coverage run rather than a review found it.
   Measure with
   `./.venv/bin/python -m pytest -q --cov=custom_components/hp_printers --cov-report=term-missing`.
 
