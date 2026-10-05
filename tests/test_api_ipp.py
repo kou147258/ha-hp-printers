@@ -19,11 +19,17 @@ from custom_components.hp_printers.api import (
 )
 from custom_components.hp_printers.api_ipp import (
     OP_GET_PRINTER_ATTRIBUTES,
+    TAG_BOOLEAN,
+    TAG_INTEGER,
+    TAG_RANGE_OF_INTEGER,
+    TAG_RESOLUTION,
     IPPClient,
+    _add_attribute,
     _as_int,
     _decode_value,
     _parse_attributes,
     _parse_tray,
+    async_probe_paper,
     build_get_printer_attributes,
 )
 from custom_components.hp_printers.client import async_build_client
@@ -79,6 +85,37 @@ def test_request_starts_with_the_operation_group_tag() -> None:
     body = build_get_printer_attributes("ipp://h:631/ipp/print")
     # 8 bytes of header, then 0x01 = operation-attributes-group-tag
     assert body[8] == 0x01
+
+
+def test_attribute_values_are_encoded_by_type_not_coerced() -> None:
+    """A bool is one byte and an int is four, whatever ``str()`` would do.
+
+    Both are reachable only if a caller adds an integer or boolean attribute,
+    which the tray request does not -- but encoding them as text is the kind
+    of mistake that stays invisible until a device starts sending one back.
+    """
+    buf = bytearray()
+    _add_attribute(buf, TAG_BOOLEAN, "flag-true", True)
+    _add_attribute(buf, TAG_BOOLEAN, "flag-false", False)
+    _add_attribute(buf, TAG_INTEGER, "count", 300)
+
+    assert bytes(buf) == (
+        bytes([TAG_BOOLEAN])
+        + struct.pack(">H", 9)
+        + b"flag-true"
+        + struct.pack(">H", 1)
+        + b"\x01"
+        + bytes([TAG_BOOLEAN])
+        + struct.pack(">H", 10)
+        + b"flag-false"
+        + struct.pack(">H", 1)
+        + b"\x00"
+        + bytes([TAG_INTEGER])
+        + struct.pack(">H", 5)
+        + b"count"
+        + struct.pack(">H", 4)
+        + struct.pack(">i", 300)
+    )
 
 
 # -------------------------------------------------------------- decoding
@@ -137,6 +174,80 @@ def test_non_success_status_is_rejected() -> None:
 def test_unknown_tag_degrades_instead_of_raising() -> None:
     """An invented tag should cost one attribute, not the whole update."""
     assert _decode_value(0x7E, b"\x01\x02") is not None
+
+
+def test_structured_value_tags_decode_to_their_shape() -> None:
+    """Resolution and range-of-integer carry structure, not a scalar.
+
+    Neither is used by the paper sensor, but a client that hands back the raw
+    bytes for a value it *does* understand the shape of is the kind of thing
+    that gets mistaken for a level later.
+    """
+    # resolution is 9 octets: x, y, and a trailing units octet
+    assert _decode_value(
+        TAG_RESOLUTION, (600).to_bytes(4, "big") + (600).to_bytes(4, "big") + b"\x03"
+    ) == {"x": 600, "y": 600}
+    assert _decode_value(
+        TAG_RANGE_OF_INTEGER, (1).to_bytes(4, "big") + (99).to_bytes(4, "big")
+    ) == [1, 99]
+
+
+def test_malformed_structured_values_decode_to_none() -> None:
+    """A short or empty value is unknown, not a zero.
+
+    Returning 0 here would be the dangerous outcome: a paper level of zero is
+    the one reading a user would act on, so anything we cannot parse has to
+    stay distinguishable from a genuine measurement.
+    """
+    assert _decode_value(TAG_INTEGER, b"\x00\x00") is None
+    assert _decode_value(TAG_BOOLEAN, b"") is None
+
+
+def test_unexpected_version_is_rejected() -> None:
+    """A response that is not IPP 1.x or 2.x is not parsed as if it were."""
+    header = struct.pack(">BBHI", 9, 0, 0, 1)
+    with pytest.raises(HPPrinterParseError):
+        _parse_attributes(header + b"\x04\x03")
+
+
+def test_truncated_attribute_bodies_stop_the_scan_without_raising() -> None:
+    """A response cut mid-attribute yields what parsed, not an exception.
+
+    Each case below truncates at a different point in the attribute grammar.
+    A printer that drops the connection mid-response should cost the tail of
+    the list, not the whole update.
+    """
+    # name-length field present but no name/value bytes behind it
+    assert _parse_attributes(_response(b"\x41\x00\x64")) == {}
+    # a repeated value whose value-length field is cut off
+    continuation = _attr(0x41, "marker-names", b"K") + b"\x41" + b"\x00\x00"
+    assert _parse_attributes(_response(continuation)) == {"marker-names": ["K"]}
+    # a named attribute whose value-length field is cut off
+    partial = b"\x41" + struct.pack(">H", 3) + b"abc"
+    assert _parse_attributes(_response(partial)) == {}
+
+
+def test_extension_tag_supplies_the_value_tag() -> None:
+    r"""0x7F is followed by a four-octet value tag, and it is the real one.
+
+    Reading those four bytes as a name length would desynchronise the rest of
+    the group. Ignoring them as a value tag is the subtler half of that bug:
+    the attribute still parses, but every value behind the extension decodes
+    as an unknown type and arrives as raw bytes -- which for this client means
+    a paper level of four raw octets rather than a number.
+    """
+    # After the four-octet tag comes the name directly -- no second value tag.
+    name = b"printer-state"
+    extension = (
+        b"\x7f"
+        + struct.pack(">I", TAG_INTEGER)
+        + struct.pack(">H", len(name))
+        + name
+        + struct.pack(">H", 4)
+        + (3).to_bytes(4, "big")
+    )
+    attributes = _parse_attributes(_response(extension))
+    assert attributes["printer-state"] == [3]
 
 
 def test_negative_level_is_dropped() -> None:
@@ -214,6 +325,52 @@ async def test_post_failure_becomes_a_connection_error() -> None:
     client = IPPClient(_stub_session(status=500), "printer.local", 631)
     with pytest.raises(HPPrinterConnectionError):
         await client.async_get_paper_level()
+
+
+async def test_timeout_becomes_a_connection_error() -> None:
+    """A printer that accepts the connection and then stalls is unreachable.
+
+    ``raise_for_status`` never runs in this case, so the timeout handler is
+    the only thing standing between a silent hang and a hung coordinator.
+    """
+    session = MagicMock()
+    context = MagicMock()
+    context.__aenter__ = AsyncMock(side_effect=TimeoutError)
+    context.__aexit__ = AsyncMock(return_value=False)
+    session.post = MagicMock(return_value=context)
+
+    client = IPPClient(session, "printer.local", 631)
+    with pytest.raises(HPPrinterConnectionError):
+        await client.async_get_paper_level()
+
+
+async def test_unusable_tray_values_are_skipped_not_guessed() -> None:
+    """A non-text tray value, or a bag with no fields, yields no tray.
+
+    Both cases have to *drop* the entry. Inventing a tray here would produce
+    a paper-level entity reading a level nobody measured, and a permanently
+    normal-looking sensor is worse than a missing one.
+    """
+    integer_tray = _attr(TAG_INTEGER, "printer-input-tray", (5).to_bytes(4, "big"))
+    empty_bag = _attr(0x35, "printer-input-tray", b";;;")
+
+    client = IPPClient(_stub_session(body=_response(integer_tray)), "h", 631)
+    assert await client.async_get_paper_level() == []
+
+    client = IPPClient(_stub_session(body=_response(empty_bag)), "h", 631)
+    assert await client.async_get_paper_level() == []
+
+
+async def test_probe_wrapper_returns_the_same_records() -> None:
+    """The convenience wrapper is the client, not a second implementation."""
+    payload = _response(_attr(0x35, "printer-input-tray", TRAY_BAG.encode()))
+    trays = await async_probe_paper(_stub_session(body=payload), "printer.local", 631)
+    assert trays[0]["level"] == 72
+
+
+def test_client_reports_its_own_host() -> None:
+    """The host is available for diagnostics without reaching into _host."""
+    assert IPPClient(MagicMock(), "printer.local", 631).host == "printer.local"
 
 
 # -------------------------------------------------------- protocol probe

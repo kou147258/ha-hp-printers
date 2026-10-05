@@ -170,7 +170,13 @@ def _parse_attributes(data: bytes) -> dict[str, list[object]]:
         if tag < 0x10:
             group_tag = tag
             continue
-        if tag == 0x7F:  # extension tag, followed by a 4-byte tag number
+        if tag == 0x7F:  # extension tag, followed by a 4-byte value tag
+            # RFC 8010 puts a four-octet value tag after 0x7F. Skipping those
+            # bytes without reading them leaves `tag` as 0x7F, and every
+            # attribute behind the extension then decodes as an unknown type
+            # and comes back as raw bytes -- a paper level of b"\x00\x00\x00<"
+            # instead of a number.
+            tag = struct.unpack(">I", data[index : index + 4])[0]
             index += 4
         if index + 2 > total:
             break

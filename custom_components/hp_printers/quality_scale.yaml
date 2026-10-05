@@ -1,6 +1,6 @@
 rules:
   config_flow: done
-  config-flow-test-coverage: done  # 96%
+  config-flow-test-coverage: done  # 97%
   docs-high-level-description: done
   docs-installation-instructions: done
   docs-removal-instructions: done

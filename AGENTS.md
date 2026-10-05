@@ -32,7 +32,7 @@
   alongside it.
 - Do not delete a test to make a change pass. If a test is wrong, fix the
   test and explain why in the commit message.
-- Coverage was 99% before the CDP and IPP clients landed. It is **96%**
+- Coverage was 99% before the CDP and IPP clients landed. It is **97%**
   now, and `quality_scale.yaml` records that next to its `test-coverage`
   claim so the number is checkable rather than remembered. Measure with
   `./.venv/bin/python -m pytest -q --cov=custom_components/hp_printers
@@ -42,8 +42,11 @@
   `api_cdp.py` is the module to watch -- it sat at 62% until the parsing
   helpers and the transport error paths were covered directly, and the
   gap was invisible until a coverage run rather than a review found it.
-  Measure with
-  `./.venv/bin/python -m pytest -q --cov=custom_components/hp_printers --cov-report=term-missing`.
+  `api_ipp.py` was the second one, at 90%, and covering it found a real
+  bug: the parser skipped the four-octet value tag after an IPP extension
+  tag instead of reading it, so every attribute behind one decoded as an
+  unknown type and came back as raw bytes. The uncovered line was
+  `index += 4` -- a line that looked obviously correct in isolation.
 
 ## Architecture
 
