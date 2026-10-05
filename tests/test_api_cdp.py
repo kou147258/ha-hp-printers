@@ -14,10 +14,11 @@ To add one:
     cp -r scripts/captures/<dir>-anon tests/fixtures/<short-name>/
 """
 
+from dataclasses import replace
 import json
 from pathlib import Path
 
-from custom_components.hp_printers.api_cdp import CDPClient, _status
+from custom_components.hp_printers.api_cdp import CDPClient, _bool, _status
 from custom_components.hp_printers.const import (
     CDP_DEVICE_SERVICE_COUNTERS,
     CDP_DEVICE_USAGE,
@@ -28,6 +29,7 @@ from custom_components.hp_printers.const import (
     CDP_SUPPLIES,
     CDP_SYSTEM_STATISTICS,
 )
+from custom_components.hp_printers.models import ProductInfo
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 CDP_MODEL_DIR = FIXTURES_DIR / "st580_590"
@@ -221,3 +223,36 @@ def test_endpoint_constants_match_the_capture() -> None:
     ):
         name = endpoint.lstrip("/").replace("/", "_") + ".json"
         assert (CDP_MODEL_DIR / name).exists(), f"{endpoint} missing from capture"
+
+
+def test_security_document_sets_the_admin_password_flag() -> None:
+    """The CDP security document answers the same question LEDM's does.
+
+    ``passwordSet`` is the one fact that matters about a printer's admin
+    password, and without it the admin_password_set entity never existed on a
+    CDP model -- so a printer still on its factory default looked identical
+    to one whose password had been changed.
+    """
+    base = ProductInfo(serial_number="SN-1", make_and_model="Smart Tank 580-590")
+    security = {"passwordSet": "true", "configuredByUser": "false"}
+    assert _with_password(base, security).password_set is True
+    assert _with_password(base, {"passwordSet": "false"}).password_set is False
+    # A document the model does not serve must leave the field alone rather
+    # than report "no password".
+    assert _with_password(base, None).password_set is None
+
+
+def test_anti_theft_is_the_cdp_spelling_of_genuine_supplies_only() -> None:
+    """Both protocols answer "would it refuse a non-HP cartridge"."""
+
+    assert _bool({"antiTheftEnabled": "true"}, "antiTheftEnabled") is True
+    assert _bool({"antiTheftEnabled": "false"}, "antiTheftEnabled") is False
+    assert _bool({}, "antiTheftEnabled") is None
+
+
+def _with_password(base, security):
+    """Apply the security document the way async_get_product_info does."""
+
+    if security is None:
+        return base
+    return replace(base, password_set=_bool(security, "passwordSet"))

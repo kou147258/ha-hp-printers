@@ -17,6 +17,7 @@ entities, config flow -- has to know which protocol a printer speaks.
 """
 
 import asyncio
+from dataclasses import replace
 from datetime import datetime
 import json
 import logging
@@ -39,6 +40,7 @@ from .const import (
     CDP_IDENTITY,
     CDP_PRINT_STATUS,
     CDP_SCAN_STATUS,
+    CDP_SECURITY_CONFIG,
     CDP_SUPPLIES,
     CDP_SUPPLY_CONFIG,
     CDP_SYSTEM_STATISTICS,
@@ -241,9 +243,27 @@ class CDPClient:
             return None
 
     async def async_get_product_info(self) -> ProductInfo:
-        """Read static device information."""
-        document = await self._fetch(CDP_IDENTITY)
-        return self._parse_product_info(document)
+        """Read static device information.
+
+        The security document is folded in here rather than in
+        ``async_get_data`` because it is static: the admin password is set
+        once and never changes on its own, and a config entry keeps this
+        object for the whole life of the printer.
+        """
+        document, security = await asyncio.gather(
+            self._fetch(CDP_IDENTITY),
+            self._fetch_optional(CDP_SECURITY_CONFIG),
+        )
+        info = self._parse_product_info(document)
+        if security is None:
+            return info
+        return replace(
+            info,
+            # As on LEDM this gates writes only; every read this client makes
+            # stays open either way, which is why the integration needs no
+            # credentials.
+            password_set=_bool(security, "passwordSet"),
+        )
 
     @staticmethod
     def _parse_product_info(document: dict[str, Any]) -> ProductInfo:
@@ -308,6 +328,12 @@ class CDPClient:
             scanner_error=_text(scan_doc or {}, "scannerError"),
             power_cycles=_int(statistics or {}, "powerCycleCount"),
             low_ink_messaging=_bool(supply_config or {}, "lowMessagingEnabled"),
+            # Genuine-supplies enforcement. LEDM spells it
+            # GenuineHPSuppliesOnly; CDP calls the same thing the anti-theft
+            # mode and states it in the supply service. Both answer "would the
+            # printer refuse a non-HP cartridge", so they land on one field
+            # rather than two half-populated ones.
+            genuine_supplies_only=_bool(supply_config or {}, "antiTheftEnabled"),
         )
 
     @staticmethod
