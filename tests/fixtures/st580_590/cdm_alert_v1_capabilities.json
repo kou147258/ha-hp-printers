@@ -1,0 +1,212 @@
+{
+  "version": "1.0.0",
+  "validators": [
+    {
+      "resourceGun": "com.hp.cdm.service.alert.version.1.resource.alert",
+      "propertyPointer": "/category",
+      "options": [
+        {
+          "seValue": "antiTheftEnabledSupplyError"
+        },
+        {
+          "seValue": "calibrationInProgress"
+        },
+        {
+          "seValue": "carriageJam"
+        },
+        {
+          "seValue": "cartridgeError"
+        },
+        {
+          "seValue": "cartridgeLow"
+        },
+        {
+          "seValue": "cartridgeMissing"
+        },
+        {
+          "seValue": "cartridgeVeryLow"
+        },
+        {
+          "seValue": "doorOpen"
+        },
+        {
+          "seValue": "genuineHPsupply"
+        },
+        {
+          "seValue": "printerImproperShutdown"
+        },
+        {
+          "seValue": "incompatibleCartridge"
+        },
+        {
+          "seValue": "jamInPrinter"
+        },
+        {
+          "seValue": "cartridgeNonHp"
+        },
+        {
+          "seValue": "printerError"
+        },
+        {
+          "seValue": "outOfInk"
+        },
+        {
+          "seValue": "shaidElectricalError"
+        },
+        {
+          "seValue": "cartridgeForwardIncompatible"
+        },
+        {
+          "seValue": "cartridgeSupportMessage"
+        },
+        {
+          "seValue": "trayOpen"
+        },
+        {
+          "seValue": "trayMediaEmpty"
+        },
+        {
+          "seValue": "usedSupplyPrompt"
+        },
+        {
+          "seValue": "cartridgeSelectabilityNumberChange"
+        },
+        {
+          "seValue": "cartridgeLimitedInAvailability"
+        },
+        {
+          "seValue": "sizeMismatchInTray"
+        },
+        {
+          "seValue": "cartridgeBadMfgBatchInUse"
+        },
+        {
+          "seValue": "cartridgeBadMfgBatchError"
+        },
+        {
+          "seValue": "inkSystemInitializing"
+        },
+        {
+          "seValue": "inQuietMode"
+        },
+        {
+          "seValue": "quietModeIgnored"
+        },
+        {
+          "seValue": "calibrationRequired"
+        },
+        {
+          "seValue": "scannerError"
+        }
+      ]
+    },
+    {
+      "resourceGun": "com.hp.cdm.service.alert.version.1.resource.alert",
+      "propertyPointer": "/stringId",
+      "options": [
+        {
+          "iValue": 66230
+        },
+        {
+          "iValue": 65571
+        },
+        {
+          "iValue": 66012
+        },
+        {
+          "iValue": 66211
+        },
+        {
+          "iValue": 66017
+        },
+        {
+          "iValue": 66207
+        },
+        {
+          "iValue": 66018
+        },
+        {
+          "iValue": 66473
+        },
+        {
+          "iValue": 66222
+        },
+        {
+          "iValue": 66020
+        },
+        {
+          "iValue": 65660
+        },
+        {
+          "iValue": 66213
+        },
+        {
+          "iValue": 65585
+        },
+        {
+          "iValue": 66220
+        },
+        {
+          "iValue": 65541
+        },
+        {
+          "iValue": 66019
+        },
+        {
+          "iValue": 66021
+        },
+        {
+          "iValue": 66228
+        },
+        {
+          "iValue": 65597
+        },
+        {
+          "iValue": 65583
+        },
+        {
+          "iValue": 66090
+        },
+        {
+          "iValue": 66216
+        },
+        {
+          "iValue": 66257
+        },
+        {
+          "iValue": 66258
+        },
+        {
+          "iValue": 65573
+        },
+        {
+          "iValue": 65809
+        },
+        {
+          "iValue": 65810
+        },
+        {
+          "iValue": 66322
+        },
+        {
+          "iValue": 66323
+        },
+        {
+          "iValue": 65795
+        },
+        {
+          "iValue": 65811
+        },
+        {
+          "iValue": 65853
+        },
+        {
+          "iValue": 65569
+        },
+        {
+          "iValue": 65634
+        }
+      ]
+    }
+  ]
+}

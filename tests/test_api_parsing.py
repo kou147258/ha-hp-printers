@@ -150,8 +150,28 @@ async def test_async_get_data_parses_full_response() -> None:
         """
     )
 
+    media_handling = _xml(
+        """
+        <MediaHandlingDyn>
+          <MediaHandlingInfo>
+            <NumOfInputTrays>2</NumOfInputTrays>
+          </MediaHandlingInfo>
+          <InputTray>
+            <InputBin>Tray1</InputBin>
+            <TrayState>installed</TrayState>
+            <MediaState>present</MediaState>
+          </InputTray>
+          <InputTray>
+            <InputBin>ADF</InputBin>
+            <TrayState>installed</TrayState>
+            <MediaState>empty</MediaState>
+          </InputTray>
+        </MediaHandlingDyn>
+        """
+    )
+
     client._fetch = AsyncMock(  # noqa: SLF001
-        side_effect=[status, usage, consumable, logs, io_config]
+        side_effect=[status, usage, consumable, logs, io_config, media_handling]
     )
 
     data = await client.async_get_data()
@@ -173,6 +193,12 @@ async def test_async_get_data_parses_full_response() -> None:
     assert data.genuine_mono_impressions == 100
     assert data.genuine_supplies_only is True
     assert data.last_event is not None
+    # The ADF is empty in the document and must not be read as "no paper":
+    # only the main tray decides that.
+    assert data.paper_present is True
+    assert data.input_trays == ("Tray1", "ADF")
+    # No CumulativeMarkingAgentUsed in this document, so no ink figure.
+    assert data.marking_agent_used_ml is None
     assert data.last_event.code == "49.99.00"
     assert data.last_job is not None
     assert data.last_job.application_id == "AcmePrint"

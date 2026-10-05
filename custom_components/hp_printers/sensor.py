@@ -79,6 +79,39 @@ def _network_counter(
     )
 
 
+def _iso_date(value: str | None) -> date | None:
+    """Return the date part of an ISO timestamp, or None.
+
+    The device reports these as full ISO timestamps with a ``Z`` suffix; only
+    the date is exposed, matching the other manufacture-date sensors here.
+    A value that is not a date at all is dropped rather than passed through
+    as a string a DATE-class sensor cannot render.
+    """
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(value[:10])
+    except ValueError:
+        return None
+
+
+def _paper_value(data: PrinterData) -> float | int | None:
+    """Return the main tray's level in the unit the device reported.
+
+    A tray that counts sheets keeps sheets; one that measures a percentage
+    keeps percent. Converting both to a single number would mean either
+    comparing a sheet count against a percentage threshold or guessing a
+    tray capacity, and either way the sensor would be lying about what it
+    is reading.
+    """
+    tray = data.main_paper_tray
+    if tray is None:
+        return None
+    if tray.is_percent:
+        return tray.level_percent
+    return tray.level
+
+
 PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
     HPPrinterSensorDescription(
         key="status",
@@ -92,6 +125,25 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
             "raw_status": data.status,
             "message": data.status_message,
         },
+    ),
+    # --- paper ---
+    # Read over IPP; LEDM's media handling has no level and CDP has none at
+    # all, so this is the only paper figure either model can produce.
+    HPPrinterSensorDescription(
+        key="paper_level",
+        translation_key="paper_level",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data, _info: _paper_value(data),
+        attrs_fn=lambda data: (
+            {
+                "tray": tray.name,
+                "tray_type": tray.type,
+                "unit": tray.unit,
+                "max_capacity": tray.max_capacity,
+            }
+            if (tray := data.main_paper_tray) is not None
+            else None
+        ),
     ),
     # --- printer counters ---
     _counter(
@@ -210,6 +262,43 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         lambda d: d.copy.flatbed_images,
         "copy",
     ),
+    # --- paper, ink drawn, and device lifecycle ---
+    # The ink figure is the only counter that shows where the ink came from:
+    # the captured Smart Tank reports 1208 ml drawn against 0 ml ever shipped
+    # in a cartridge, which is the arithmetic behind refilled ink.
+    HPPrinterSensorDescription(
+        key="marking_agent_used",
+        translation_key="marking_agent_used",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.marking_agent_used_ml,
+        attrs_fn=lambda data: {
+            "shipped_with_cartridge_ml": data.marking_agent_inserted_ml,
+        },
+    ),
+    _counter(
+        "panel_cancel_presses",
+        "panel_cancel_presses",
+        lambda d: d.panel_cancel_presses,
+    ),
+    _counter("power_cycles", "power_cycles", lambda d: d.power_cycles),
+    HPPrinterSensorDescription(
+        key="installed_at",
+        translation_key="printer_installed_at",
+        device_class=SensorDeviceClass.DATE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # Only the CDP identity document carries this; a LEDM model has no
+        # equivalent, so the entity is simply not created there.
+        value_fn=lambda _data, info: (
+            info.installed_at.date() if info.installed_at else None
+        ),
+    ),
+    HPPrinterSensorDescription(
+        key="scanner_status",
+        translation_key="scanner_status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: data.scanner_status,
+        attrs_fn=lambda data: {"scanner_error": data.scanner_error},
+    ),
     # --- diagnostics: firmware and the device event log ---
     HPPrinterSensorDescription(
         key="firmware_date",
@@ -264,6 +353,9 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
                 {
                     "sequence": event.sequence,
                     "code": event.code,
+                    # LEDM's event log carries no severity; CDP's does. The
+                    # key is left out rather than guessed from the code.
+                    **({"severity": event.severity} if event.severity else {}),
                     "at_page": event.impressions,
                 }
                 for event in data.events
@@ -465,6 +557,28 @@ CONSUMABLE_SENSORS: tuple[HPConsumableSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda c: c.genuine_refills,
+    ),
+    # The supplier's own manufacture date. On the CDP models a cartridge is a
+    # printhead rather than an ink container, and this is the field that dates
+    # it -- ConsumableConfigDyn's Manufacturer/Date is absent for those.
+    HPConsumableSensorDescription(
+        key="supplier_manufacture_date",
+        translation_key="cartridge_supplier_manufacture_date",
+        device_class=SensorDeviceClass.DATE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda c: _iso_date(c.manufacture_date),
+    ),
+    # Why the device says what it says about this slot. ``usedConsumableInfo``
+    # is the explanation for a slot flagged as previously used, and it is NOT
+    # the same claim as "not genuine" -- that distinction is exactly the one
+    # that gets misread.
+    HPConsumableSensorDescription(
+        key="state_reason",
+        translation_key="cartridge_state_reason",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda c: ", ".join(c.state_reasons) or None,
     ),
     HPConsumableSensorDescription(
         key="warranty_expires_at",

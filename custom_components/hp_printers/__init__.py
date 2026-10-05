@@ -8,9 +8,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import HPPrinterError, LEDMClient
+from .api import HPPrinterError
+from .api_ipp import IPPClient
+from .client import async_build_client
 from .const import (
+    CONF_IPP_PORT,
+    CONF_IPP_SSL,
     CONF_SCAN_INTERVAL_SECONDS,
+    DEFAULT_IPP_PORT,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SSL,
@@ -26,16 +31,15 @@ PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: HPPrinterConfigEntry) -> bool:
     """Set up HP Printers from a config entry."""
-    client = LEDMClient(
-        async_get_clientsession(hass, verify_ssl=False),
-        entry.data[CONF_HOST],
-        entry.data.get(CONF_PORT, DEFAULT_PORT),
-        entry.data.get(CONF_SSL, DEFAULT_SSL),
-        printer_ssl_context(),
-    )
-
     try:
-        product_info = await client.async_validate()
+        # The protocol is discovered rather than configured: see client.py.
+        client, product_info = await async_build_client(
+            async_get_clientsession(hass, verify_ssl=False),
+            entry.data[CONF_HOST],
+            entry.data.get(CONF_PORT, DEFAULT_PORT),
+            entry.data.get(CONF_SSL, DEFAULT_SSL),
+            printer_ssl_context(),
+        )
     except HPPrinterError as error:
         raise ConfigEntryNotReady(
             translation_domain=DOMAIN,
@@ -59,7 +63,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: HPPrinterConfigEntry) ->
     )
 
     coordinator = HPPrinterDataUpdateCoordinator(
-        hass, entry, client, product_info, interval
+        hass,
+        entry,
+        client,
+        product_info,
+        interval,
+        ipp_client=IPPClient(
+            async_get_clientsession(hass, verify_ssl=False),
+            entry.data[CONF_HOST],
+            entry.data.get(CONF_IPP_PORT, DEFAULT_IPP_PORT),
+            entry.data.get(CONF_IPP_SSL, False),
+            printer_ssl_context(),
+        ),
     )
     await coordinator.async_config_entry_first_refresh()
 

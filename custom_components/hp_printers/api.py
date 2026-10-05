@@ -21,6 +21,7 @@ from .const import (
     COLOR_NAMES,
     ENDPOINT_CONSUMABLE_CONFIG,
     ENDPOINT_IO_CONFIG,
+    ENDPOINT_MEDIA_HANDLING,
     ENDPOINT_PRODUCT_CONFIG,
     ENDPOINT_PRODUCT_LOGS,
     ENDPOINT_PRODUCT_STATUS,
@@ -51,6 +52,18 @@ class HPPrinterConnectionError(HPPrinterError):
 
 class HPPrinterParseError(HPPrinterError):
     """Raised when a response is not the LEDM document we expected."""
+
+
+class HPPrinterNotSupportedError(HPPrinterError):
+    """Raised when the host answers 404 for a resource.
+
+    Distinct from a connection failure on purpose. A model that does not
+    serve LEDM at all answers 404 for every endpoint, and treating that as
+    "cannot connect" would report an online printer as offline. It is also
+    the signal the protocol probe uses to fall through to CDP, so collapsing
+    it into a connection error would make a supported printer look
+    unconfigured.
+    """
 
 
 def _localname(tag: str) -> str:
@@ -206,8 +219,15 @@ class LEDMClient:
             async with self._session.get(
                 url, timeout=REQUEST_TIMEOUT, ssl=self._ssl_context
             ) as response:
+                if response.status == 404:
+                    # Checked before raise_for_status: aiohttp folds this into
+                    # ClientResponseError, which is a ClientError, and the
+                    # handler below would report the printer as unreachable.
+                    raise HPPrinterNotSupportedError(f"404 from {endpoint}")
                 response.raise_for_status()
                 body = await response.text()
+        except HPPrinterError:
+            raise
         except TimeoutError as err:
             raise HPPrinterConnectionError(f"Timeout fetching {endpoint}") from err
         except ClientError as err:
@@ -269,12 +289,20 @@ class LEDMClient:
 
     async def async_get_data(self) -> PrinterData:
         """Fetch everything that changes, concurrently."""
-        status_doc, usage_doc, consumable_doc, logs_doc, io_doc = await asyncio.gather(
+        (
+            status_doc,
+            usage_doc,
+            consumable_doc,
+            logs_doc,
+            io_doc,
+            media_doc,
+        ) = await asyncio.gather(
             self._fetch(ENDPOINT_PRODUCT_STATUS),
             self._fetch(ENDPOINT_PRODUCT_USAGE),
             self._fetch(ENDPOINT_CONSUMABLE_CONFIG),
             self._fetch(ENDPOINT_PRODUCT_LOGS),
             self._fetch_optional(ENDPOINT_IO_CONFIG),
+            self._fetch_optional(ENDPOINT_MEDIA_HANDLING),
         )
 
         status_node = _find(status_doc, "Status")
@@ -302,6 +330,8 @@ class LEDMClient:
             genuine_color_impressions=_int(usage_doc, "OriginalHPColorImpressions"),
             genuine_mono_impressions=_int(usage_doc, "OriginalHPMonochromeImpressions"),
             network=self._parse_network(io_doc),
+            **_parse_marking_agent(usage_doc),
+            **_parse_media_handling(media_doc),
         )
 
     def _parse_network(self, io_doc: Element | None) -> NetworkHealth:
@@ -496,6 +526,62 @@ class LEDMClient:
         if not info.serial_number:
             raise HPPrinterParseError("Device did not report a serial number")
         return info
+
+
+def _parse_marking_agent(usage_doc: Element) -> dict[str, Any]:
+    """Return the ink-draw counters from ``ProductUsageDyn``.
+
+    Split out as a ``**kwargs`` fragment so ``async_get_data`` stays a single
+    readable call. The two values answer a question nothing else can: the
+    captured Smart Tank reports 1208 ml drawn against 0 ml ever shipped in a
+    cartridge, which is the arithmetic behind "these pages came from bottled
+    ink".
+    """
+    return {
+        "marking_agent_used_ml": _float(
+            usage_doc, "CumulativeMarkingAgentUsed", "ValueFloat"
+        ),
+        "marking_agent_inserted_ml": _float(
+            usage_doc, "CumulativeHPMarkingAgentInserted", "ValueFloat"
+        ),
+        "panel_cancel_presses": _int(usage_doc, "TotalFrontPanelCancelPresses"),
+    }
+
+
+def _parse_media_handling(media_doc: Element | None) -> dict[str, Any]:
+    """Return paper presence and the tray list from ``MediaHandlingDyn``.
+
+    Presence is the only paper signal this document carries -- no level, no
+    capacity -- which is why the percentage has to come from IPP.
+
+    ``MediaState`` is read per tray rather than from the document root: a
+    multifunction device reports an automatic document feeder alongside the
+    main tray, and an ADF that is empty is normal rather than a paper-out.
+    """
+    if media_doc is None:
+        return {"paper_present": None, "input_trays": ()}
+
+    trays: list[tuple[str, str | None]] = []
+    for tray in media_doc.iter("InputTray"):
+        name = _text(tray, "InputBin")
+        if name is None:
+            continue
+        trays.append((name, _text(tray, "MediaState")))
+
+    if not trays:
+        return {"paper_present": None, "input_trays": ()}
+
+    main_states = [
+        state
+        for name, state in trays
+        if "adf" not in name.lower() and "document" not in name.lower()
+    ]
+    states = main_states or [state for _, state in trays if state is not None]
+    present = any(state.strip().lower() == "present" for state in states)
+    return {
+        "paper_present": present if states else None,
+        "input_trays": tuple(name for name, _ in trays),
+    }
 
 
 def as_diagnostics(data: Any) -> Any:

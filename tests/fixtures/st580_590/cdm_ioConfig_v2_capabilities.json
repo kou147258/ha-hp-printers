@@ -1,0 +1,8 @@
+{
+  "bootpSupported": "false",
+  "interfaceIdentityCfgSupported": "false",
+  "interfaceIpCtrlSupported": "true",
+  "networkSwitchEnabled": "false",
+  "preferredDnsConfigMethodSupported": "true",
+  "version": "2.1.0"
+}

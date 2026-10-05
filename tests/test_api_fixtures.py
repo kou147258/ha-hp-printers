@@ -31,12 +31,23 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 def _load(endpoint: str, host_dir: Path) -> object | None:
-    """Return the namespace-stripped XML for an endpoint, or ``None``."""
+    """Return the namespace-stripped XML for an endpoint, or ``None``.
+
+    ``None`` covers two cases that are both meaningful rather than missing:
+    the capture did not include that endpoint, or the device answered with a
+    status line instead of a document. The second case is now ordinary --
+    a model that serves CDP writes ``HTTP 404`` into the ``.xml`` file for
+    the two LEDM paths, which is exactly the evidence that it has no LEDM
+    layer, and it must not take the whole test down as a parse error.
+    """
     filename = endpoint.lstrip("/").replace("/", "_")
     path = host_dir / filename
     if not path.exists():
         return None
-    return _strip_namespaces(DefusedET.fromstring(path.read_text(encoding="utf-8")))
+    try:
+        return _strip_namespaces(DefusedET.fromstring(path.read_text(encoding="utf-8")))
+    except DefusedET.ParseError:
+        return None
 
 
 def _iter_hosts() -> list[Path]:

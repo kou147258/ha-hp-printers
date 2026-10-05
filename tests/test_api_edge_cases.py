@@ -107,11 +107,23 @@ def test_parse_consumables_skips_entries_missing_identifiers() -> None:
 
 
 class _FakeResponse:
-    """Minimal aiohttp response supporting the client's usage."""
+    """Minimal aiohttp response supporting the client's usage.
 
-    def __init__(self, body: str, raise_exc: Exception | None = None) -> None:
+    ``status`` is part of the contract: the client reads it to tell a 404
+    (this resource is not served) from a transport failure, and a fake
+    without the attribute would raise AttributeError from inside the
+    ``async with`` block instead of exercising that branch.
+    """
+
+    def __init__(
+        self,
+        body: str,
+        raise_exc: Exception | None = None,
+        status: int = 200,
+    ) -> None:
         self._body = body
         self._raise = raise_exc
+        self.status = status
 
     def raise_for_status(self) -> None:
         if self._raise is not None:

@@ -1,0 +1,30 @@
+{
+  "defaultMediaSource": "main",
+  "inputs": [
+    {
+      "currentMediaSize": "iso_a4_210x297mm",
+      "currentMediaType": "stationery",
+      "currentMediaWidth": 59528,
+      "currentMediaLength": 84188,
+      "currentResolution": 7200,
+      "deviceIdentifier": 1,
+      "inputType": "sheetFeedAutoNonRemovableTray",
+      "mediaSourceId": "main",
+      "defaultMediaSizeForSmallGroup": "om_small-photo_100x150mm",
+      "defaultMediaTypeForSmallGroup": "photographic-glossy",
+      "defaultMediaSizeForMediumGroup": "na_5x7_5x7in",
+      "defaultMediaTypeForMediumGroup": "photographic-glossy",
+      "defaultMediaSizeForLargeGroup": "iso_a4_210x297mm",
+      "defaultMediaTypeForLargeGroup": "stationery"
+    }
+  ],
+  "outputs": [
+    {
+      "deviceIdentifier": 0,
+      "mediaDestinationId": "default",
+      "outputType": "bin",
+      "pageDeliveryOrientation": "faceUp"
+    }
+  ],
+  "version": "1.1.0"
+}

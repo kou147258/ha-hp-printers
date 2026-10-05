@@ -29,6 +29,7 @@ ENDPOINTS = (
     "/DevMgmt/ConsumableConfigDyn.xml",
     "/DevMgmt/ProductLogsDyn.xml",
     "/DevMgmt/IOConfigDyn.xml",
+    "/DevMgmt/MediaHandlingDyn.xml",
     "/DevMgmt/DiscoveryTree.xml",
 )
 

@@ -1,0 +1,1329 @@
+<ns0:ProductUsageDyn xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productusagedyn/2007/12/11" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/dictionaries/2008/10/10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/productusagedyn/2007/12/11 ../schemas/ProductUsageDyn.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.119</ns2:Revision>
+
+		<ns2:Date>2010-08-31</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:PrinterSubunit>
+
+		<ns2:TotalImpressions PEID="5082">44492</ns2:TotalImpressions>
+
+		<ns2:MonochromeImpressions>31223</ns2:MonochromeImpressions>
+
+		<ns2:ColorImpressions>13153</ns2:ColorImpressions>
+
+		<ns2:SimplexSheets>22904</ns2:SimplexSheets>
+
+		<ns2:DuplexSheets PEID="5088">10216</ns2:DuplexSheets>
+
+		<ns2:JamEvents PEID="16076">50</ns2:JamEvents>
+
+		<ns2:MispickEvents>326</ns2:MispickEvents>
+
+		<ns2:TotalFrontPanelCancelPresses PEID="30033">293</ns2:TotalFrontPanelCancelPresses>
+
+		<ns0:UsageByMarkingAgent>
+
+			<ns3:CumulativeMarkingAgentUsed PEID="64100">
+
+				<ns2:ValueFloat>1210</ns2:ValueFloat>
+
+				<ns2:Unit>milliliters</ns2:Unit>
+
+			</ns3:CumulativeMarkingAgentUsed>
+
+			<ns3:CumulativeHPMarkingAgentUsed PEID="64101">
+
+				<ns2:ValueFloat>1210</ns2:ValueFloat>
+
+				<ns2:Unit>milliliters</ns2:Unit>
+
+			</ns3:CumulativeHPMarkingAgentUsed>
+
+			<ns2:CumulativeHPMarkingAgentInserted PEID="64001">
+
+				<ns2:ValueFloat>0</ns2:ValueFloat>
+
+				<ns2:Unit>milliliters</ns2:Unit>
+
+			</ns2:CumulativeHPMarkingAgentInserted>
+
+		</ns0:UsageByMarkingAgent>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_executive_7.25x10.5in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5087">44485</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_letter_8.5x11in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5086">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_govt-letter_8x10in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_invoice_5.5x8.5in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_a5_148x210mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5087">44485</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_b5_176x250mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jis_b5_182x257mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jpn_oufuku-rot_148x200mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jpn_oufuku_148x200mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jpn_hagaki_100x148mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_a6_105x148mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5084">3</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_index-4x6_4x6in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>om_small-photo_100x150mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5085">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_5x7_5x7in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_index-5x8_5x8in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5083">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_number-10_4.125x9.5in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5083">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_dl_110x220mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5083">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>iso_c6_114x162mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5083">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5083">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>jpn_chou4_90x205mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>om_photo_89x127mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions PEID="5085">0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>custom_photo-2l-size-card_127x178mm</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMedia>
+
+			<ns2:TotalImpressions>0</ns2:TotalImpressions>
+
+			<ns2:MediaSizeName>na_foolscap_8.5x13in</ns2:MediaSizeName>
+
+		</ns0:UsageByMedia>
+
+		<ns0:UsageByMediaType>
+
+			<ns2:TotalImpressions PEID="5115">43672</ns2:TotalImpressions>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5048">5706</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>one</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5049">1915</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>two</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5050">2745</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>threeToFive</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5051">853</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>sixToTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5052">775</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>greaterThanTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByQuality>
+
+				<ns2:NormalImpressions PEID="5041">45550</ns2:NormalImpressions>
+
+				<ns2:DraftImpressions PEID="5042">0</ns2:DraftImpressions>
+
+				<ns2:BetterImpressions PEID="5043">44</ns2:BetterImpressions>
+
+			</ns2:UsageByQuality>
+
+			<ns2:MediaType>plain</ns2:MediaType>
+
+		</ns0:UsageByMediaType>
+
+		<ns0:UsageByMediaType>
+
+			<ns2:TotalImpressions PEID="5116">25</ns2:TotalImpressions>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5053">25</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>one</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5054">1</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>two</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5055">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>threeToFive</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5056">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>sixToTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5057">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>greaterThanTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByQuality>
+
+				<ns2:NormalImpressions PEID="5044">16</ns2:NormalImpressions>
+
+				<ns2:BetterImpressions PEID="5046">11</ns2:BetterImpressions>
+
+			</ns2:UsageByQuality>
+
+			<ns2:MediaType>photoStandard</ns2:MediaType>
+
+		</ns0:UsageByMediaType>
+
+		<ns0:UsageByMediaType>
+
+			<ns2:TotalImpressions PEID="5116">25</ns2:TotalImpressions>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5053">25</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>one</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5054">1</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>two</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5055">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>threeToFive</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5056">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>sixToTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="5057">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>greaterThanTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByQuality>
+
+				<ns2:NormalImpressions PEID="5044">16</ns2:NormalImpressions>
+
+				<ns2:BetterImpressions PEID="5046">11</ns2:BetterImpressions>
+
+			</ns2:UsageByQuality>
+
+			<ns2:MediaType>photoOther</ns2:MediaType>
+
+		</ns0:UsageByMediaType>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39000">7039</ns2:JobCount>
+
+			<ns2:JobDuration>lessthanTwoMinutes</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39001">896</ns2:JobCount>
+
+			<ns2:JobDuration>twoToFiveMinutes</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39002">1885</ns2:JobCount>
+
+			<ns2:JobDuration>fiveToThirtyMinutes</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39003">661</ns2:JobCount>
+
+			<ns2:JobDuration>thirtyToSixtyMinutes</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39004">1425</ns2:JobCount>
+
+			<ns2:JobDuration>oneToSixHours</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39005">835</ns2:JobCount>
+
+			<ns2:JobDuration>sixHoursToOneDay</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39006">76</ns2:JobCount>
+
+			<ns2:JobDuration>oneToThreeDays</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39007">2</ns2:JobCount>
+
+			<ns2:JobDuration>threeToSevenDays</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39008">0</ns2:JobCount>
+
+			<ns2:JobDuration>sevenDaysToOneMonth</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns2:UsageByTimeInterval>
+
+			<ns2:JobCount PEID="39009">0</ns2:JobCount>
+
+			<ns2:JobDuration>oneToThreeMonths</ns2:JobDuration>
+
+		</ns2:UsageByTimeInterval>
+
+		<ns0:UIButtonPressCounters>
+
+			<ns2:ButtonPressCount PEID="30039">0</ns2:ButtonPressCount>
+
+			<ns2:ButtonPressOptions>startScanButtonPress</ns2:ButtonPressOptions>
+
+		</ns0:UIButtonPressCounters>
+
+		<ns2:EWSAccessCount PEID="16081">154</ns2:EWSAccessCount>
+
+		<ns2:NetworkImpressions PEID="25000">14920</ns2:NetworkImpressions>
+
+		<ns2:WirelessNetworkImpressions PEID="25002">1676</ns2:WirelessNetworkImpressions>
+
+		<ns0:SubscriptionImpressions>0</ns0:SubscriptionImpressions>
+
+		<ns0:WirelessConfigUserSelectedOption PEID="30064">noSelectionMade</ns0:WirelessConfigUserSelectedOption>
+
+		<ns0:QuietModeImpressions><ns0:TotalImpressions PEID="5107">0</ns0:TotalImpressions></ns0:QuietModeImpressions>
+
+		<ns0:CalibrationUsage>
+
+			<ns0:SuccessCount PEID="30071">3</ns0:SuccessCount>
+
+			<ns0:FailureCount PEID="30072">4</ns0:FailureCount>
+
+			<ns0:CancelledCount PEID="30073">0</ns0:CancelledCount>
+
+			<ns0:SkippedCount PEID="30074">0</ns0:SkippedCount>
+
+			<ns0:Status PEID="30075">failed</ns0:Status>
+
+		</ns0:CalibrationUsage>
+
+		<ns0:OOBESetupBy>
+
+			<ns0:SetupByOS PEID="36033">Windows10</ns0:SetupByOS>
+
+			<ns0:SetupByApp PEID="36034">Gotham</ns0:SetupByApp>
+
+		</ns0:OOBESetupBy>
+
+	</ns0:PrinterSubunit>
+
+	<ns0:ConsumableSubunit>
+
+		<ns0:Consumable>
+
+			<ns2:ConsumableStation>0</ns2:ConsumableStation>
+
+			<ns2:MarkerColor>CyanMagentaYellow</ns2:MarkerColor>
+
+			<ns2:ConsumableTypeEnum>inkCartridge</ns2:ConsumableTypeEnum>
+
+			<ns3:CumulativeConsumableCount>1</ns3:CumulativeConsumableCount>
+
+			<ns3:CumulativeMarkingAgentUsed PEID="64104">
+
+				<ns2:ValueFloat>309</ns2:ValueFloat>
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+			</ns3:CumulativeMarkingAgentUsed>
+
+			<ns2:ConsumableState>unknown</ns2:ConsumableState>
+
+			<ns2:ConsumableRawPercentageLevelRemaining>0</ns2:ConsumableRawPercentageLevelRemaining>
+
+			<ns2:PVPCartridgeCounter PEID="28025">0</ns2:PVPCartridgeCounter>
+
+			<ns2:PVPCartridgeCounter PEID="28026">0</ns2:PVPCartridgeCounter>
+
+			<ns2:PVPCartridgeCounter PEID="28027">0</ns2:PVPCartridgeCounter>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11001">58313242</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>HPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11002">57924329</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>HPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11003">63892057</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>HPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11057">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>LDWDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11057">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>LDWDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11058">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>LDWDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11059">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>LDWDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11039">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>nonHPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11070">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>OOISensorFiredDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11015">90546490</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>serviceDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByPenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64219">3876359005</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>zero</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64220">871424</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>one</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64221">401472</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>two</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64222">16</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>three</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:TijGenAndVersion PEID="64227">6</ns2:TijGenAndVersion>
+
+				<ns2:NonHPFlagCounter PEID="28022">0</ns2:NonHPFlagCounter>
+
+				<ns2:PenStallNumber>1</ns2:PenStallNumber>
+
+			</ns2:UsageByPenStall>
+
+			<ns2:UsageByPenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64223">655382851</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>zero</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64224">3768947345</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>one</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64225">2142284647</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>two</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64226">3410489852</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>three</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:TijGenAndVersion PEID="64228">6</ns2:TijGenAndVersion>
+
+				<ns2:NonHPFlagCounter PEID="28023">0</ns2:NonHPFlagCounter>
+
+				<ns2:PenStallNumber>2</ns2:PenStallNumber>
+
+			</ns2:UsageByPenStall>
+
+			<ns2:RefilledCount>
+
+				<ns2:CounterfeitRefilledCount PEID="16086">0</ns2:CounterfeitRefilledCount>
+
+				<ns2:GenuineRefilledCount>0</ns2:GenuineRefilledCount>
+
+			</ns2:RefilledCount>
+
+			<ns2:PenInsertionTriggerSnapshotCounter PEID="28031">2</ns2:PenInsertionTriggerSnapshotCounter>
+
+			<ns3:CumulativeHPMarkingAgentUsed PEID="64105">
+
+				<ns2:ValueFloat>309</ns2:ValueFloat>
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+			</ns3:CumulativeHPMarkingAgentUsed>
+
+			<ns0:UsedSupplyFullAtInstall PEID="64112">false</ns0:UsedSupplyFullAtInstall>
+
+		</ns0:Consumable>
+
+		<ns0:Consumable>
+
+			<ns2:ConsumableStation>1</ns2:ConsumableStation>
+
+			<ns2:MarkerColor>Black</ns2:MarkerColor>
+
+			<ns2:ConsumableTypeEnum>inkCartridge</ns2:ConsumableTypeEnum>
+
+			<ns3:CumulativeConsumableCount>1</ns3:CumulativeConsumableCount>
+
+			<ns3:CumulativeMarkingAgentUsed PEID="64102">
+
+				<ns2:ValueFloat>901</ns2:ValueFloat>
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+			</ns3:CumulativeMarkingAgentUsed>
+
+			<ns2:ConsumableState>unknown</ns2:ConsumableState>
+
+			<ns2:ConsumableRawPercentageLevelRemaining>0</ns2:ConsumableRawPercentageLevelRemaining>
+
+			<ns2:PVPCartridgeCounter PEID="28024">0</ns2:PVPCartridgeCounter>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11000">266632993</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>HPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11038">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>nonHPDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11069">0</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>OOISensorFiredDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByMarkingAgentCount>
+
+				<ns2:MarkingAgentCount PEID="11014">34372802</ns2:MarkingAgentCount>
+
+				<ns2:MarkingAgentCountType>serviceDropsCount</ns2:MarkingAgentCountType>
+
+			</ns2:UsageByMarkingAgentCount>
+
+			<ns2:UsageByPenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64219">3876359005</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>zero</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64220">871424</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>one</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64221">401472</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>two</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64222">16</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>three</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:TijGenAndVersion PEID="64227">6</ns2:TijGenAndVersion>
+
+				<ns2:NonHPFlagCounter PEID="28022">0</ns2:NonHPFlagCounter>
+
+				<ns2:PenStallNumber>1</ns2:PenStallNumber>
+
+			</ns2:UsageByPenStall>
+
+			<ns2:UsageByPenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64223">655382851</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>zero</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64224">3768947345</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>one</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64225">2142284647</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>two</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:PenStall>
+
+					<ns2:PenStallValue PEID="64226">3410489852</ns2:PenStallValue>
+
+					<ns2:PenStallValueLocation>three</ns2:PenStallValueLocation>
+
+				</ns2:PenStall>
+
+				<ns2:TijGenAndVersion PEID="64228">6</ns2:TijGenAndVersion>
+
+				<ns2:NonHPFlagCounter PEID="28023">0</ns2:NonHPFlagCounter>
+
+				<ns2:PenStallNumber>2</ns2:PenStallNumber>
+
+			</ns2:UsageByPenStall>
+
+			<ns2:RefilledCount>
+
+				<ns2:CounterfeitRefilledCount PEID="16086">0</ns2:CounterfeitRefilledCount>
+
+				<ns2:GenuineRefilledCount>0</ns2:GenuineRefilledCount>
+
+			</ns2:RefilledCount>
+
+			<ns2:PenInsertionTriggerSnapshotCounter PEID="28031">2</ns2:PenInsertionTriggerSnapshotCounter>
+
+			<ns3:CumulativeHPMarkingAgentUsed PEID="64103">
+
+				<ns2:ValueFloat>901</ns2:ValueFloat>
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+			</ns3:CumulativeHPMarkingAgentUsed>
+
+			<ns0:UsedSupplyFullAtInstall PEID="64111">false</ns0:UsedSupplyFullAtInstall>
+
+		</ns0:Consumable>
+
+	</ns0:ConsumableSubunit>
+
+	<ns0:ScannerEngineSubunit>
+
+		<ns2:ScanImages PEID="6000">1222</ns2:ScanImages>
+
+		<ns0:UsageByScanMediaSize>
+
+			<ns2:ScanImages PEID="6000">1222</ns2:ScanImages>
+
+			<ns2:ScanMediaSize>any</ns2:ScanMediaSize>
+
+		</ns0:UsageByScanMediaSize>
+
+		<ns0:UsageByScanMediaSize>
+
+			<ns2:ScanImages PEID="6021">0</ns2:ScanImages>
+
+			<ns2:ScanMediaSize>na_legal_8.5x14in</ns2:ScanMediaSize>
+
+		</ns0:UsageByScanMediaSize>
+
+		<ns2:AdfImages PEID="6011">295</ns2:AdfImages>
+
+		<ns2:FlatbedImages>888</ns2:FlatbedImages>
+
+		<ns2:JamEvents>7</ns2:JamEvents>
+
+		<ns2:MispickEvents>22</ns2:MispickEvents>
+
+		<ns0:UsageByADF>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="6016">64</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>oneToTen</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="6017">12</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>elevenToTwenty</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="6018">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>twentyOneToThirtyFive</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns2:UsageByJobSize>
+
+				<ns2:TotalImpressions PEID="6019">0</ns2:TotalImpressions>
+
+				<ns2:PagesPerJob>greaterThanThirtyfive</ns2:PagesPerJob>
+
+			</ns2:UsageByJobSize>
+
+			<ns0:TotalLegalScanlmages PEID="6022">0</ns0:TotalLegalScanlmages>
+
+			<ns0:UsageByJobSizeAndMedia>
+
+				<ns0:UsageByJobSize>
+
+					<ns2:TotalImpressions PEID="6023">0</ns2:TotalImpressions>
+
+					<ns2:PagesPerJob>oneToTen</ns2:PagesPerJob>
+
+				</ns0:UsageByJobSize>
+
+				<ns0:MediaSizeName>na_legal_8.5x14in</ns0:MediaSizeName>
+
+			</ns0:UsageByJobSizeAndMedia>
+
+			<ns0:UsageByJobSizeAndMedia>
+
+				<ns0:UsageByJobSize>
+
+					<ns2:TotalImpressions PEID="6024">0</ns2:TotalImpressions>
+
+					<ns2:PagesPerJob>elevenToTwenty</ns2:PagesPerJob>
+
+				</ns0:UsageByJobSize>
+
+				<ns0:MediaSizeName>na_legal_8.5x14in</ns0:MediaSizeName>
+
+			</ns0:UsageByJobSizeAndMedia>
+
+			<ns0:UsageByJobSizeAndMedia>
+
+				<ns0:UsageByJobSize>
+
+					<ns2:TotalImpressions PEID="6025">0</ns2:TotalImpressions>
+
+					<ns2:PagesPerJob>twentyOneToThirtyFive</ns2:PagesPerJob>
+
+				</ns0:UsageByJobSize>
+
+				<ns0:MediaSizeName>na_legal_8.5x14in</ns0:MediaSizeName>
+
+			</ns0:UsageByJobSizeAndMedia>
+
+			<ns0:UsageByJobSizeAndMedia>
+
+				<ns0:UsageByJobSize>
+
+					<ns2:TotalImpressions PEID="6026">0</ns2:TotalImpressions>
+
+					<ns2:PagesPerJob>greaterThanThirtyfive</ns2:PagesPerJob>
+
+				</ns0:UsageByJobSize>
+
+				<ns0:MediaSizeName>na_legal_8.5x14in</ns0:MediaSizeName>
+
+			</ns0:UsageByJobSizeAndMedia>
+
+		</ns0:UsageByADF>
+
+	</ns0:ScannerEngineSubunit>
+
+	<ns0:CopyApplicationSubunit>
+
+		<ns2:TotalImpressions PEID="3019">750</ns2:TotalImpressions>
+
+		<ns2:ColorImpressions>714</ns2:ColorImpressions>
+
+		<ns2:MonochromeImpressions>36</ns2:MonochromeImpressions>
+
+		<ns2:AdfImages>31</ns2:AdfImages>
+
+		<ns2:FlatbedImages>715</ns2:FlatbedImages>
+
+		<ns0:TotalAdfLegallmages PEID="3027">0</ns0:TotalAdfLegallmages>
+
+	</ns0:CopyApplicationSubunit>
+
+	<ns0:ScanApplicationSubunit>
+
+		<ns2:AdfImages>263</ns2:AdfImages>
+
+		<ns2:FlatbedImages>170</ns2:FlatbedImages>
+
+		<ns2:ScanToHostImages PEID="6001">433</ns2:ScanToHostImages>
+
+	</ns0:ScanApplicationSubunit>
+
+	<ns0:PrintApplicationSubunit>
+
+		<ns2:TotalImpressions PEID="7009">45721</ns2:TotalImpressions>
+
+		<ns2:PhotoImpressions PEID="7002">26</ns2:PhotoImpressions>
+
+		<ns2:MediaSize_4x6in_10x15cm_Impressions PEID="7006">3</ns2:MediaSize_4x6in_10x15cm_Impressions>
+
+		<ns2:CloudPrintImpressions PEID="36016">10</ns2:CloudPrintImpressions>
+
+		<ns0:ReportsImpressionsInRTP>135</ns0:ReportsImpressionsInRTP>
+
+	</ns0:PrintApplicationSubunit>
+
+	<ns0:PonyExpressSubunit>
+
+		<ns0:PECounter PEID="5000">46314</ns0:PECounter>
+
+		<ns0:PECounter PEID="5021">11431</ns0:PECounter>
+
+		<ns0:PECounter PEID="5033">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5031">3</ns0:PECounter>
+
+		<ns0:PECounter PEID="5032">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5037">46401</ns0:PECounter>
+
+		<ns0:PECounter PEID="5011">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="3001">36</ns0:PECounter>
+
+		<ns0:PECounter PEID="5106">31293</ns0:PECounter>
+
+		<ns0:PECounter PEID="5105">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5108">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5109">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="64106">1210000</ns0:PECounter>
+
+		<ns0:PECounter PEID="64107">901000</ns0:PECounter>
+
+		<ns0:PECounter PEID="64108">901000</ns0:PECounter>
+
+		<ns0:PECounter PEID="64109">309000</ns0:PECounter>
+
+		<ns0:PECounter PEID="64110">309000</ns0:PECounter>
+
+		<ns0:PECounter PEID="5110">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5111">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5112">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5113">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30065">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30066">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30067">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30068">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30069">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="30070">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="3026">0</ns0:PECounter>
+
+		<ns0:PECounter PEID="5003">45594</ns0:PECounter>
+
+		<ns0:PECounter PEID="5004">27</ns0:PECounter>
+
+	</ns0:PonyExpressSubunit>
+
+	<ns0:MobileApplicationSubunit>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36024">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+			<ns0:DriverType>ePrint</ns0:DriverType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36025">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+			<ns0:DriverType>inOS</ns0:DriverType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36026">41523</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+			<ns0:DriverType>discrete</ns0:DriverType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36028">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+			<ns0:DriverType>UniversalPrintDriver</ns0:DriverType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36027">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+			<ns0:DriverType>inOS</ns0:DriverType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36032">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Chrome</ns0:RemoteDeviceType>
+
+		</ns0:TotalUsage>
+
+		<ns0:TotalUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36023">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>samsung</ns0:RemoteDeviceType>
+
+		</ns0:TotalUsage>
+
+		<ns0:DocumentUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36017">3</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+		</ns0:DocumentUsage>
+
+		<ns0:DocumentUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36018">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>iOS</ns0:RemoteDeviceType>
+
+		</ns0:DocumentUsage>
+
+		<ns0:DocumentUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36021">59</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Android</ns0:RemoteDeviceType>
+
+		</ns0:DocumentUsage>
+
+		<ns0:PhotoUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36019">2</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+		</ns0:PhotoUsage>
+
+		<ns0:PhotoUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36020">0</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>iOS</ns0:RemoteDeviceType>
+
+		</ns0:PhotoUsage>
+
+		<ns0:PhotoUsage>
+
+			<ns0:Counter>
+
+				<ns0:TotalImpressions PEID="36022">7</ns0:TotalImpressions>
+
+			</ns0:Counter>
+
+			<ns0:RemoteDeviceType>Android</ns0:RemoteDeviceType>
+
+		</ns0:PhotoUsage>
+
+	</ns0:MobileApplicationSubunit>
+
+</ns0:ProductUsageDyn>

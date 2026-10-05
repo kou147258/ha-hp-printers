@@ -1,5 +1,6 @@
 """Coordinator for the HP Printers integration."""
 
+from dataclasses import replace
 from datetime import timedelta
 import logging
 from time import monotonic
@@ -8,9 +9,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import HPPrinterError, LEDMClient
+from .api import HPPrinterError
+from .api_ipp import IPPClient
+from .client import HPPrinterClient
 from .const import DOMAIN
-from .models import PrinterData, ProductInfo
+from .models import PaperTray, PrinterData, ProductInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,12 +49,19 @@ def backoff_interval(base: timedelta, failures: int) -> timedelta:
 
 
 async def async_fetch_update(
-    client: LEDMClient,
+    client: HPPrinterClient,
     product_info: ProductInfo,
     static_fetched_at: float,
     device_name: str,
+    ipp_client: IPPClient | None = None,
 ) -> tuple[PrinterData, ProductInfo, float]:
     """Fetch dynamic data and refresh static product info when stale.
+
+    The paper level is read over IPP and is allowed to fail on its own: no
+    model this integration serves reports a level over LEDM or CDP, so a
+    printer that answers those but not IPP still updates normally, it just
+    grows no paper entity. Raising here would take every other entity down
+    with it.
 
     Raises ``UpdateFailed`` if the printer cannot be reached. The function
     is factored out of the coordinator class so it can be unit-tested
@@ -59,6 +69,7 @@ async def async_fetch_update(
     """
     try:
         data = await client.async_get_data()
+        trays = await _async_get_paper(ipp_client)
         if monotonic() - static_fetched_at > STATIC_REFRESH_INTERVAL:
             product_info = await client.async_get_product_info()
             static_fetched_at = monotonic()
@@ -71,7 +82,34 @@ async def async_fetch_update(
                 "error": repr(error),
             },
         ) from error
+    if trays is not None:
+        data = replace(data, paper_trays=trays)
     return data, product_info, static_fetched_at
+
+
+async def _async_get_paper(
+    ipp_client: IPPClient | None,
+) -> tuple[PaperTray, ...] | None:
+    """Return the printer's paper trays, or None when IPP is unavailable."""
+    if ipp_client is None:
+        return None
+    try:
+        records = await ipp_client.async_get_paper_level()
+    except HPPrinterError as error:
+        _LOGGER.debug("Paper level unavailable: %s", error)
+        return None
+    return tuple(
+        PaperTray(
+            name=record.get("name"),
+            type=record.get("type"),
+            level=record.get("level"),
+            max_capacity=record.get("max_capacity"),
+            unit=record.get("unit"),
+        )
+        for record in records
+        if isinstance(record.get("level"), int)
+        or isinstance(record.get("max_capacity"), int)
+    )
 
 
 class HPPrinterDataUpdateCoordinator(DataUpdateCoordinator[PrinterData]):
@@ -83,12 +121,20 @@ class HPPrinterDataUpdateCoordinator(DataUpdateCoordinator[PrinterData]):
         self,
         hass: HomeAssistant,
         config_entry: HPPrinterConfigEntry,
-        client: LEDMClient,
+        client: HPPrinterClient,
         product_info: ProductInfo,
         update_interval: timedelta,
+        *,
+        ipp_client: IPPClient | None = None,
     ) -> None:
-        """Initialize the coordinator."""
+        """Initialize the coordinator.
+
+        ``ipp_client`` is keyword-only and optional: the paper level is a
+        second protocol on a second port, so it is a dependency to be
+        supplied rather than something the coordinator can assume.
+        """
         self.client = client
+        self.ipp_client = ipp_client
         self.product_info = product_info
         self.device_name = config_entry.title
         self._static_fetched_at = monotonic()
@@ -119,6 +165,7 @@ class HPPrinterDataUpdateCoordinator(DataUpdateCoordinator[PrinterData]):
                 self.product_info,
                 self._static_fetched_at,
                 self.device_name,
+                self.ipp_client,
             )
         except UpdateFailed:
             self._consecutive_failures += 1

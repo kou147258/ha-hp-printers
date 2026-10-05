@@ -250,7 +250,19 @@ def main() -> None:
     output.mkdir(parents=True, exist_ok=True)
 
     for path in sorted(args.input.glob("*.xml")):
-        replacements = anonymize_file(path, output / path.name)
+        # A capture can legitimately contain a file that is named .xml but is
+        # not XML: a response recorded as an HTTP status line when the device
+        # does not serve that resource at all, and a truncated body if the
+        # fetch was cut short. Either way the document is a record of the
+        # device *not* answering, and it has nothing to anonymize -- copying it
+        # through is the faithful thing to do. Aborting the whole run on one
+        # such file would lose the replacements made for every file before it.
+        try:
+            replacements = anonymize_file(path, output / path.name)
+        except Exception as exc:  # noqa: BLE001 - deliberately broad, see above
+            print(f"{path.name}: not XML ({type(exc).__name__}), copied as-is")  # noqa: T201
+            output.joinpath(path.name).write_bytes(path.read_bytes())
+            continue
         print(f"{path.name}: {len(replacements)} replacement(s)")  # noqa: T201
         for local, original, replacement in replacements:
             print(f"  {local}: {original!r} -> {replacement!r}")  # noqa: T201

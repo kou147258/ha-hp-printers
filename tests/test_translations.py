@@ -262,7 +262,14 @@ def test_translation_declares_a_unit_for_every_counter() -> None:
         "cartridge_raw_level",
         "cartridge_low_threshold",
     }
-    expected = page_counters | packet_counters | percent_sensors
+    # A counter of consumed ink. Listed separately because it is neither a
+    # page count, a packet count nor a percentage, and the test below exists
+    # to keep units off sensors that do not have one -- so a genuine unit
+    # still has to be added here, deliberately.
+    volume_sensors = {
+        "marking_agent_used",
+    }
+    expected = page_counters | packet_counters | percent_sensors | volume_sensors
 
     entity = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]["sensor"]
     with_unit = {key for key, entry in entity.items() if "unit_of_measurement" in entry}

@@ -22,6 +22,29 @@ PARALLEL_UPDATES = 0
 # veryLow, outOfSupply, unauthorised variants -- is treated as a problem.
 HEALTHY_CONSUMABLE_STATES = {"ok", "newgenuinehp", "new", "good"}
 
+# The level at which the paper sensor is treated as low, as a percentage of
+# capacity. HP does not publish a paper threshold the way it publishes a
+# cartridge one, and the captured models fill a 100-sheet tray rather than
+# warning first, so this is an integration policy rather than a device
+# reading. It is deliberately generous: the point is to catch a printer
+# about to stop mid-job, not to nag.
+PAPER_LOW_PERCENT = 20
+
+
+def _paper_low(data: PrinterData) -> bool | None:
+    """Return True when the main tray is low, False when it is fine.
+
+    None when the printer reports no level, so the entity is not created
+    rather than sitting at a reassuring "off".
+    """
+    tray = data.main_paper_tray
+    if tray is None:
+        return None
+    percent = tray.level_percent
+    if percent is None:
+        return None
+    return percent < PAPER_LOW_PERCENT
+
 
 @dataclass(frozen=True, kw_only=True)
 class HPPrinterBinarySensorDescription(BinarySensorEntityDescription):
@@ -38,6 +61,33 @@ class HPConsumableBinarySensorDescription(BinarySensorEntityDescription):
 
 
 PRINTER_BINARY_SENSORS: tuple[HPPrinterBinarySensorDescription, ...] = (
+    HPPrinterBinarySensorDescription(
+        key="paper_low",
+        translation_key="paper_low",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        # Off means "not low", and only when the printer actually reports a
+        # level. A model with no paper sensor reports nothing, and the
+        # entity is not created at all -- an always-off "paper is fine" would
+        # be a worse answer than no entity, because it reads as a reading.
+        value_fn=lambda data, _info: _paper_low(data),
+    ),
+    HPPrinterBinarySensorDescription(
+        key="paper_present",
+        translation_key="paper_present",
+        device_class=BinarySensorDeviceClass.RUNNING,
+        # Presence only. LEDM reports no level, so this is the paper signal
+        # available without IPP, and it says nothing about how much is left.
+        value_fn=lambda data, _info: data.paper_present,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="low_ink_messaging",
+        translation_key="low_ink_messaging",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # A model whose ink tanks have no level sensor keeps this enabled and
+        # can never act on it, so the interesting answer is usually "on, and
+        # still silent" -- which is why it is a sensor rather than a problem.
+        value_fn=lambda data, _info: data.low_ink_messaging,
+    ),
     HPPrinterBinarySensorDescription(
         key="firmware_fault",
         translation_key="firmware_fault",
@@ -85,6 +135,24 @@ CONSUMABLE_BINARY_SENSORS: tuple[HPConsumableBinarySensorDescription, ...] = (
         # HP labels third-party cartridges "clone" even when enforcement is
         # switched off, so this is reported regardless of whether it matters.
         value_fn=lambda c: c.is_genuine,
+    ),
+    HPConsumableBinarySensorDescription(
+        key="refilled",
+        translation_key="cartridge_refilled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # Distinct from `genuine`: a part can be a genuine HP cartridge that
+        # the supplier refilled. Read alone, "refilled: true" says nothing
+        # about whether it is fake, and conflating the two is how a false
+        # counterfeit alarm gets raised.
+        value_fn=lambda c: c.is_refilled,
+    ),
+    HPConsumableBinarySensorDescription(
+        key="previously_used",
+        translation_key="cartridge_previously_used",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        # A part the device has seen in service before. HP asks the owner to
+        # acknowledge it; it says nothing about the part's origin.
+        value_fn=lambda c: c.is_used,
     ),
 )
 

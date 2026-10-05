@@ -1,0 +1,10 @@
+{
+  "snmpV1V2Config": {
+    "accessOption": "readOnly",
+    "enabled": "true",
+    "readOnlyCommunityNameSet": "true",
+    "readOnlyPublicAllowed": "true",
+    "writeOnlyCommunityNameSet": "false"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "hardwareEvents": {
+    "jamEventCount": 3,
+    "mispickEventCount": 15
+  }
+}

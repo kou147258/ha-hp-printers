@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "supplyUsageBySlot": [
+    {
+      "numberOfSupplies": 5,
+      "supplyColorCode": "CMY",
+      "slot": 1,
+      "supplyType": "inkCartridge"
+    },
+    {
+      "numberOfSupplies": 5,
+      "supplyColorCode": "K",
+      "slot": 2,
+      "supplyType": "inkCartridge"
+    }
+  ]
+}

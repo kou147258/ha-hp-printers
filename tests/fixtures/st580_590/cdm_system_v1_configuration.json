@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "countryRegion": "CN",
+  "deviceDescription": "",
+  "deviceLanguage": "zh-CN",
+  "deviceLocation": "",
+  "links": [
+    {
+      "href": "/cdm/system/v1/configuration/constraints",
+      "rel": "constraints",
+      "hints": [
+        {
+          "method": "get"
+        }
+      ]
+    }
+  ]
+}

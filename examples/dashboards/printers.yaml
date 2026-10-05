@@ -1,0 +1,138 @@
+# HP Printers dashboard
+#
+# Copy into a Lovelace view (YAML mode), or save as a dashboard under
+# Settings -> Dashboards.
+#
+# Built from auto-entities filtered by device rather than from explicit
+# entity ids on purpose: entity ids embed the config entry's title, so a list
+# of them breaks the moment someone renames a printer in Home Assistant.
+# Filtering by device keeps the card working through a rename.
+#
+# The supply rows are a separate card because each cartridge is its own
+# sub-device -- that is what groups the four colours together instead of
+# scattering them among the printer's own entities.
+#
+# Requires card-mods (Mushroom cards). The `type: entities` fallbacks at the
+# bottom of each section work without it.
+
+title: HP 打印机
+views:
+  - title: 打印机
+    path: printers
+    icon: mdi:printer
+    type: masonry
+    cards:
+      # ---------------------------------------------------------- 状态
+      - type: entities
+        title: 状态
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                device_class: enum
+            show_header_toggle: false
+
+      - type: custom:auto-entities
+        title: 状态
+        show_header_toggle: false
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device_class: enum
+        show_header_toggle: false
+
+      # ---------------------------------------------------------- 纸
+      - type: entities
+        title: 纸张
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key: paper_level
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key: paper_low
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key: paper_present
+
+      # ---------------------------------------------------------- 墨
+      - type: entities
+        title: 耗材
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key: cartridge_level
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key: cartridge_genuine
+
+      # ---------------------------------------------------------- 用量
+      - type: entities
+        title: 用量
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - printer_total_pages
+                    - printer_mono_pages
+                    - printer_color_pages
+                    - printer_simplex_sheets
+                    - printer_duplex_sheets
+                    - printer_jams
+                    - printer_mispicks
+                    - panel_cancel_presses
+                    - marking_agent_used
+            sort:
+              method: label
+
+      # ---------------------------------------------------------- 健康
+      - type: entities
+        title: 健康
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - last_event_code
+                    - last_event_page
+                    - power_cycles
+                    - scanner_status
+                    - printer_installed_at
+                    - firmware_date
+                    - printer_manufactured_at
+            sort:
+              method: label
+
+      # ---------------------------------------------------------- 排障
+      - type: entities
+        title: 诊断
+        collapsed: true
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity_category: diagnostic
+            sort:
+              method: label

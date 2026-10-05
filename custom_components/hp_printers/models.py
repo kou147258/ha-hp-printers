@@ -28,6 +28,10 @@ class ProductInfo:
     # Whether the EWS admin password has been set. Note this gates *writes*
     # only -- LEDM reads stay open either way.
     password_set: bool | None = None
+    # When the printer was installed. Only the CDP identity document carries
+    # this; LEDM's ProductConfigDyn has no equivalent for the consumer models
+    # measured so far, so it is absent rather than zero on those.
+    installed_at: datetime | None = None
     duplex_unit: str | None = None
     friendly_name: str | None = None
     power_save: str | None = None
@@ -73,9 +77,38 @@ class Consumable:
     low_threshold_percent: float | None = None
     measured_state: str | None = None
 
+    # --- Provenance, for the consumable kinds that carry it. ---
+    # The CDP supply service states these as strings ("true"/"false"). They
+    # are the fields that separate a genuine HP part from a refill and from a
+    # part that has been in service before, which is exactly the distinction
+    # an owner of an ink-tank printer cannot otherwise make.
+    #
+    # ``state_reasons`` is the device's own explanation, e.g.
+    # ``usedConsumableInfo`` -- a used part that has been acknowledged, which
+    # is NOT the same claim as "not genuine".
+    is_genuine_reported: bool | None = None
+    is_refilled: bool | None = None
+    is_used: bool | None = None
+    is_trial: bool | None = None
+    is_setup: bool | None = None
+    state_reasons: tuple[str, ...] = ()
+    # ISO timestamp as the device reports it. Kept as text because the
+    # precision varies by firmware and truncating it would lose information
+    # rather than add clarity.
+    manufacture_date: str | None = None
+
     @property
     def is_genuine(self) -> bool | None:
-        """Return True when the device reports a genuine HP cartridge."""
+        """Return True when the device reports a genuine HP cartridge.
+
+        Two sources, in order of trust. The CDP supply service states this
+        outright as ``isGenuineHP``. LEDM does not, and has to be inferred
+        from ``Brand`` -- which is where the ``clone`` wording comes from, and
+        why the derivation is only as good as the brand string. A part that
+        reports a brand of ``unknown`` is deliberately not called genuine.
+        """
+        if self.is_genuine_reported is not None:
+            return self.is_genuine_reported
         if self.brand is None:
             return None
         return self.brand.lower().replace(" ", "") not in ("clone", "unknown")
@@ -144,12 +177,63 @@ class NetworkHealth:
 
 
 @dataclass(frozen=True, slots=True)
+class PaperTray:
+    """One input tray as IPP describes it.
+
+    ``level`` is a count in ``unit`` (sheets, or percent when the device
+    measures it), never a fraction. ``level`` is None whenever the device
+    does not report one -- including the ``-2`` sentinel a model without a
+    paper sensor sends. "I cannot tell" and "the tray is empty" must stay
+    distinct, because only the second is worth waking someone for.
+    """
+
+    name: str | None = None
+    type: str | None = None
+    level: int | None = None
+    max_capacity: int | None = None
+    unit: str | None = None
+
+    @property
+    def is_percent(self) -> bool:
+        """Return True when the level is a percentage of capacity."""
+        return (self.unit or "").strip().lower() == "percent"
+
+    @property
+    def has_level(self) -> bool:
+        """Return True when the device reported a usable level."""
+        return self.level is not None
+
+    @property
+    def level_percent(self) -> float | None:
+        """Return the level as a percentage, or None when it cannot be derived.
+
+        Only defined when both a level and a capacity are reported, or when
+        the unit is already percent. A tray reporting "12 sheets" out of an
+        unknown capacity has no percentage, and inventing one from a
+        guessed capacity is how a level sensor ends up lying.
+        """
+        if self.level is None:
+            return None
+        if self.is_percent:
+            return float(self.level)
+        if self.max_capacity:
+            return 100.0 * self.level / self.max_capacity
+        return None
+
+
+@dataclass(frozen=True, slots=True)
 class EventLogEntry:
-    """One entry from the device event log."""
+    """One entry from the device event log.
+
+    ``severity`` is only reported by the CDP event service; LEDM's EventLog
+    carries no severity and leaves it None rather than guessing one from the
+    code.
+    """
 
     sequence: int | None = None
     code: str | None = None
     impressions: int | None = None
+    severity: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -186,6 +270,49 @@ class PrinterData:
     assert_text: str | None = None
     genuine_supplies_only: bool | None = None
     network: NetworkHealth = field(default_factory=NetworkHealth)
+    # --- CDP-only ---
+    # Times the device has been power-cycled. Useful as a proxy for how often
+    # it loses power or is hard-reset, which nothing else reports.
+    power_cycles: int | None = None
+    scanner_status: str | None = None
+    scanner_error: str | None = None
+    # Whether the firmware's low-ink messaging is switched on. Recorded
+    # because a model with no ink level sensor has the feature but cannot act
+    # on it, and that pair is the answer to "why is my printer not warning me".
+    low_ink_messaging: bool | None = None
+    # Input trays, read over IPP. Empty on a model whose only tray is not
+    # described, which is different from a model reporting zero trays.
+    paper_trays: tuple[PaperTray, ...] = ()
+    # --- LEDM-only, and the reason some of these cannot be cross-checked ---
+    # Millilitres of ink the engine has drawn. The captured Smart Tank has
+    # drawn 1.2 litres while reporting 0 ml ever shipped in a cartridge, which
+    # is the clearest available evidence that the pages came from bottled
+    # refills. None on a model that does not meter it.
+    marking_agent_used_ml: float | None = None
+    marking_agent_inserted_ml: float | None = None
+    # Cancels pressed on the front panel. A jump here with no matching job
+    # count usually means paper problems, which is what the jam and mispick
+    # counters do not show.
+    panel_cancel_presses: int | None = None
+    # Whether the main input tray holds media. LEDM reports presence, not a
+    # level, so this is the only paper signal available without IPP.
+    paper_present: bool | None = None
+    input_trays: tuple[str, ...] = ()
+
+    @property
+    def main_paper_tray(self) -> PaperTray | None:
+        """Return the tray worth alerting on.
+
+        The main tray is the one whose ``type`` names a sheet feed, or --
+        failing that, simply the first the device lists. An automatic
+        document feeder is excluded: it holds originals, is refilled
+        constantly, and "low" on it means nothing.
+        """
+        for tray in self.paper_trays:
+            tray_type = (tray.type or "").lower()
+            if "sheetfeed" in tray_type or "cassette" in tray_type:
+                return tray
+        return self.paper_trays[0] if self.paper_trays else None
 
     @property
     def last_job(self) -> JobEntry | None:

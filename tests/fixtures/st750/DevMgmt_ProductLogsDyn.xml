@@ -1,0 +1,97 @@
+<ns0:ProductLogsDyn xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productlogsdyn/2008/01/16" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/productlogsdyn/2008/01/16 ../schemas/ProductLogsDyn.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.29</ns2:Revision>
+
+		<ns2:Date>2010-05-13</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:EventLog>
+
+		<ns0:Event>
+
+			<ns2:SequenceNumber>1</ns2:SequenceNumber>
+
+			<ns2:EventOccurrences>1</ns2:EventOccurrences>
+
+			<ns2:EventCode>74899</ns2:EventCode>
+
+		</ns0:Event>
+
+	</ns0:EventLog>
+
+	<ns0:ErrorLog> 
+#0Error Code: B81FC4C2
+File: .
+Line:   0
+When: 10/03/2026 00:50:32Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: EC1FC4C2
+
+#1Error Code: B3306A70
+File: .
+Line:   0
+When: 10/02/2026 01:25:05Page:      0
+SUB TYPE: 3
+EXECUTION ADDRESS: 4D306A70
+
+#2Error Code: B83F272C
+File: .
+Line:   0
+When: 09/30/2026 09:46:00Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: EC3F272C
+
+#3Error Code: B829C666
+File: .
+Line:   0
+When: 09/28/2026 09:04:14Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#4Error Code: B829C666
+File: .
+Line:   0
+When: 09/05/2026 02:24:36Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#5Error Code: B829C666
+File: .
+Line:   0
+When: 05/27/2026 00:29:58Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#6Error Code: B829C666
+File: .
+Line:   0
+When: 03/31/2026 02:52:19Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#7Error Code: B829C666
+File: .
+Line:   0
+When: 03/20/2026 00:56:59Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#8Error Code: B829C666
+File: .
+Line:   0
+When: 10/12/2025 23:04:33Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+
+#9Error Code: B829C666
+File: .
+Line:   0
+When: 08/19/2025 00:07:09Page:      0
+SUB TYPE: 8
+EXECUTION ADDRESS: 4E29C666
+</ns0:ErrorLog>
+
+</ns0:ProductLogsDyn>

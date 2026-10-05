@@ -174,6 +174,233 @@
   },
   "entity": {
     "sensor": {
+      "cartridge_brand": {
+        "name": "Brand"
+      },
+      "cartridge_counterfeit_refills": {
+        "name": "Unauthenticated refills"
+      },
+      "cartridge_genuine_refills": {
+        "name": "Genuine refills"
+      },
+      "cartridge_installed_at": {
+        "name": "Installed"
+      },
+      "cartridge_level": {
+        "name": "Level",
+        "unit_of_measurement": "%"
+      },
+      "cartridge_low_threshold": {
+        "name": "Low threshold",
+        "unit_of_measurement": "%"
+      },
+      "cartridge_manufactured_at": {
+        "name": "Manufactured"
+      },
+      "cartridge_pages_printed": {
+        "name": "Pages printed",
+        "unit_of_measurement": "pages"
+      },
+      "cartridge_pages_remaining": {
+        "name": "Pages remaining",
+        "unit_of_measurement": "pages"
+      },
+      "cartridge_part_number": {
+        "name": "Part number"
+      },
+      "cartridge_previous_developer_life": {
+        "name": "Previous cartridge developer life"
+      },
+      "cartridge_previous_drum_life": {
+        "name": "Previous cartridge drum life"
+      },
+      "cartridge_previous_part_number": {
+        "name": "Previous cartridge part number"
+      },
+      "cartridge_raw_level": {
+        "name": "Level (raw)",
+        "unit_of_measurement": "%"
+      },
+      "cartridge_state_reason": {
+        "name": "Supply state reason"
+      },
+      "cartridge_supplier_manufacture_date": {
+        "name": "Supplier manufacture date"
+      },
+      "cartridge_warranty_expires_at": {
+        "name": "Warranty expires"
+      },
+      "copy_adf_pages": {
+        "name": "Pages copied from feeder",
+        "unit_of_measurement": "pages"
+      },
+      "copy_color_pages": {
+        "name": "Color copies",
+        "unit_of_measurement": "pages"
+      },
+      "copy_flatbed_pages": {
+        "name": "Pages copied from glass",
+        "unit_of_measurement": "pages"
+      },
+      "copy_mono_pages": {
+        "name": "Black and white copies",
+        "unit_of_measurement": "pages"
+      },
+      "copy_total_pages": {
+        "name": "Pages copied",
+        "unit_of_measurement": "pages"
+      },
+      "firmware_date": {
+        "name": "Firmware date"
+      },
+      "genuine_color_pages": {
+        "name": "Color pages on genuine supplies",
+        "unit_of_measurement": "pages"
+      },
+      "genuine_mono_pages": {
+        "name": "Black and white pages on genuine supplies",
+        "unit_of_measurement": "pages"
+      },
+      "language_pack_version": {
+        "name": "Language pack version"
+      },
+      "last_event_code": {
+        "name": "Last event code"
+      },
+      "last_event_page": {
+        "name": "Last event at page",
+        "unit_of_measurement": "pages"
+      },
+      "last_job_source": {
+        "name": "Last job source"
+      },
+      "marking_agent_used": {
+        "name": "Ink drawn",
+        "unit_of_measurement": "mL"
+      },
+      "network_bad_packets": {
+        "name": "Bad packets received",
+        "unit_of_measurement": "packets"
+      },
+      "network_errors": {
+        "name": "Network errors"
+      },
+      "network_framing_errors": {
+        "name": "Framing errors",
+        "unit_of_measurement": "packets"
+      },
+      "network_late_collisions": {
+        "name": "Late collisions",
+        "unit_of_measurement": "packets"
+      },
+      "network_link_mode": {
+        "name": "Link mode"
+      },
+      "network_packets_received": {
+        "name": "Packets received",
+        "unit_of_measurement": "packets"
+      },
+      "network_packets_transmitted": {
+        "name": "Packets transmitted",
+        "unit_of_measurement": "packets"
+      },
+      "network_transmit_collisions": {
+        "name": "Transmit collisions",
+        "unit_of_measurement": "packets"
+      },
+      "network_unsendable_packets": {
+        "name": "Unsendable packets",
+        "unit_of_measurement": "packets"
+      },
+      "panel_cancel_presses": {
+        "name": "Panel cancels"
+      },
+      "paper_level": {
+        "name": "Paper"
+      },
+      "power_cycles": {
+        "name": "Power cycles"
+      },
+      "power_save_timeout": {
+        "name": "Power save timeout"
+      },
+      "printer_color_pages": {
+        "name": "Color pages",
+        "unit_of_measurement": "pages"
+      },
+      "printer_duplex_sheets": {
+        "name": "Double-sided sheets",
+        "unit_of_measurement": "pages"
+      },
+      "printer_installed_at": {
+        "name": "Installed"
+      },
+      "printer_jams": {
+        "name": "Paper jams",
+        "unit_of_measurement": "pages"
+      },
+      "printer_manufactured_at": {
+        "name": "Manufactured"
+      },
+      "printer_mispicks": {
+        "name": "Mispicks",
+        "unit_of_measurement": "pages"
+      },
+      "printer_mono_pages": {
+        "name": "Black and white pages",
+        "unit_of_measurement": "pages"
+      },
+      "printer_simplex_sheets": {
+        "name": "Single-sided sheets",
+        "unit_of_measurement": "pages"
+      },
+      "printer_total_pages": {
+        "name": "Pages printed",
+        "unit_of_measurement": "pages"
+      },
+      "scan_job_adf_pages": {
+        "name": "Scan job pages from feeder",
+        "unit_of_measurement": "pages"
+      },
+      "scan_job_duplex_sheets": {
+        "name": "Double-sided scan job sheets",
+        "unit_of_measurement": "pages"
+      },
+      "scan_job_flatbed_pages": {
+        "name": "Scan job pages from glass",
+        "unit_of_measurement": "pages"
+      },
+      "scan_job_pages": {
+        "name": "Scan job pages",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_adf_images": {
+        "name": "Pages scanned from feeder",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_duplex_sheets": {
+        "name": "Double-sided sheets scanned",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_flatbed_images": {
+        "name": "Pages scanned from glass",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_images": {
+        "name": "Pages scanned",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_jams": {
+        "name": "Scanner jams",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_mispicks": {
+        "name": "Scanner mispicks",
+        "unit_of_measurement": "pages"
+      },
+      "scanner_status": {
+        "name": "Scanner status"
+      },
       "status": {
         "name": "Status",
         "state": {
@@ -193,225 +420,38 @@
           "trayempty": "Tray empty",
           "unknown": "Unknown"
         }
-      },
-      "printer_total_pages": {
-        "name": "Pages printed",
-        "unit_of_measurement": "pages"
-      },
-      "printer_mono_pages": {
-        "name": "Black and white pages",
-        "unit_of_measurement": "pages"
-      },
-      "printer_color_pages": {
-        "name": "Color pages",
-        "unit_of_measurement": "pages"
-      },
-      "printer_simplex_sheets": {
-        "name": "Single-sided sheets",
-        "unit_of_measurement": "pages"
-      },
-      "printer_duplex_sheets": {
-        "name": "Double-sided sheets",
-        "unit_of_measurement": "pages"
-      },
-      "printer_jams": {
-        "name": "Paper jams",
-        "unit_of_measurement": "pages"
-      },
-      "printer_mispicks": {
-        "name": "Mispicks",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_images": {
-        "name": "Pages scanned",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_adf_images": {
-        "name": "Pages scanned from feeder",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_flatbed_images": {
-        "name": "Pages scanned from glass",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_duplex_sheets": {
-        "name": "Double-sided sheets scanned",
-        "unit_of_measurement": "pages"
-      },
-      "scan_job_pages": {
-        "name": "Scan job pages",
-        "unit_of_measurement": "pages"
-      },
-      "scan_job_adf_pages": {
-        "name": "Scan job pages from feeder",
-        "unit_of_measurement": "pages"
-      },
-      "scan_job_flatbed_pages": {
-        "name": "Scan job pages from glass",
-        "unit_of_measurement": "pages"
-      },
-      "scan_job_duplex_sheets": {
-        "name": "Double-sided scan job sheets",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_jams": {
-        "name": "Scanner jams",
-        "unit_of_measurement": "pages"
-      },
-      "scanner_mispicks": {
-        "name": "Scanner mispicks",
-        "unit_of_measurement": "pages"
-      },
-      "copy_total_pages": {
-        "name": "Pages copied",
-        "unit_of_measurement": "pages"
-      },
-      "copy_mono_pages": {
-        "name": "Black and white copies",
-        "unit_of_measurement": "pages"
-      },
-      "copy_color_pages": {
-        "name": "Color copies",
-        "unit_of_measurement": "pages"
-      },
-      "copy_adf_pages": {
-        "name": "Pages copied from feeder",
-        "unit_of_measurement": "pages"
-      },
-      "copy_flatbed_pages": {
-        "name": "Pages copied from glass",
-        "unit_of_measurement": "pages"
-      },
-      "firmware_date": {
-        "name": "Firmware date"
-      },
-      "printer_manufactured_at": {
-        "name": "Manufactured"
-      },
-      "language_pack_version": {
-        "name": "Language pack version"
-      },
-      "last_event_code": {
-        "name": "Last event code"
-      },
-      "last_event_page": {
-        "name": "Last event at page",
-        "unit_of_measurement": "pages"
-      },
-      "network_errors": {
-        "name": "Network errors"
-      },
-      "network_link_mode": {
-        "name": "Link mode"
-      },
-      "network_bad_packets": {
-        "name": "Bad packets received",
-        "unit_of_measurement": "packets"
-      },
-      "network_framing_errors": {
-        "name": "Framing errors",
-        "unit_of_measurement": "packets"
-      },
-      "network_transmit_collisions": {
-        "name": "Transmit collisions",
-        "unit_of_measurement": "packets"
-      },
-      "network_late_collisions": {
-        "name": "Late collisions",
-        "unit_of_measurement": "packets"
-      },
-      "network_unsendable_packets": {
-        "name": "Unsendable packets",
-        "unit_of_measurement": "packets"
-      },
-      "network_packets_received": {
-        "name": "Packets received",
-        "unit_of_measurement": "packets"
-      },
-      "network_packets_transmitted": {
-        "name": "Packets transmitted",
-        "unit_of_measurement": "packets"
-      },
-      "last_job_source": {
-        "name": "Last job source"
-      },
-      "cartridge_level": {
-        "name": "Level",
-        "unit_of_measurement": "%"
-      },
-      "cartridge_pages_remaining": {
-        "name": "Pages remaining",
-        "unit_of_measurement": "pages"
-      },
-      "cartridge_pages_printed": {
-        "name": "Pages printed",
-        "unit_of_measurement": "pages"
-      },
-      "cartridge_brand": {
-        "name": "Brand"
-      },
-      "cartridge_part_number": {
-        "name": "Part number"
-      },
-      "cartridge_manufactured_at": {
-        "name": "Manufactured"
-      },
-      "cartridge_installed_at": {
-        "name": "Installed"
-      },
-      "cartridge_warranty_expires_at": {
-        "name": "Warranty expires"
-      },
-      "cartridge_raw_level": {
-        "name": "Level (raw)",
-        "unit_of_measurement": "%"
-      },
-      "cartridge_low_threshold": {
-        "name": "Low threshold",
-        "unit_of_measurement": "%"
-      },
-      "cartridge_counterfeit_refills": {
-        "name": "Unauthenticated refills"
-      },
-      "cartridge_genuine_refills": {
-        "name": "Genuine refills"
-      },
-      "genuine_color_pages": {
-        "name": "Color pages on genuine supplies",
-        "unit_of_measurement": "pages"
-      },
-      "genuine_mono_pages": {
-        "name": "Black and white pages on genuine supplies",
-        "unit_of_measurement": "pages"
-      },
-      "power_save_timeout": {
-        "name": "Power save timeout"
-      },
-      "cartridge_previous_developer_life": {
-        "name": "Previous cartridge developer life"
-      },
-      "cartridge_previous_drum_life": {
-        "name": "Previous cartridge drum life"
-      },
-      "cartridge_previous_part_number": {
-        "name": "Previous cartridge part number"
       }
     },
     "binary_sensor": {
+      "admin_password_set": {
+        "name": "Admin password set"
+      },
+      "cartridge_genuine": {
+        "name": "Genuine"
+      },
+      "cartridge_previously_used": {
+        "name": "Previously used"
+      },
+      "cartridge_problem": {
+        "name": "Problem"
+      },
+      "cartridge_refilled": {
+        "name": "Refilled"
+      },
       "firmware_fault": {
         "name": "Firmware fault recorded"
       },
       "genuine_supplies_only": {
         "name": "Genuine supplies enforced"
       },
-      "admin_password_set": {
-        "name": "Admin password set"
+      "low_ink_messaging": {
+        "name": "Low-ink messaging enabled"
       },
-      "cartridge_problem": {
-        "name": "Problem"
+      "paper_low": {
+        "name": "Paper low"
       },
-      "cartridge_genuine": {
-        "name": "Genuine"
+      "paper_present": {
+        "name": "Paper present"
       }
     }
   }

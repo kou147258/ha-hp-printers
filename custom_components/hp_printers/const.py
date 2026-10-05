@@ -15,6 +15,15 @@ DEFAULT_PORT: Final = 80
 DEFAULT_PORT_SSL: Final = 443
 DEFAULT_SSL: Final = False
 
+# The IPP port is a separate question from the web-server port: the embedded
+# web server answers on 80/443 while IPP answers on 631, and a printer
+# configured for IPPS serves it on the same port. This is the same
+# distinction the config flow already makes for the zeroconf-advertised IPP
+# port, so the default stays fixed rather than following ``DEFAULT_PORT``.
+DEFAULT_IPP_PORT: Final = 631
+CONF_IPP_PORT: Final = "ipp_port"
+CONF_IPP_SSL: Final = "ipp_ssl"
+
 CONF_SCAN_INTERVAL_SECONDS: Final = "scan_interval_seconds"
 MIN_SCAN_INTERVAL_SECONDS: Final = 15
 MAX_SCAN_INTERVAL_SECONDS: Final = 3600
@@ -32,6 +41,30 @@ ENDPOINT_PRODUCT_LOGS: Final = "/DevMgmt/ProductLogsDyn.xml"
 # advertises it, so it is fetched tolerantly: a printer without it still
 # updates normally, it just grows no network entities.
 ENDPOINT_IO_CONFIG: Final = "/DevMgmt/IOConfigDyn.xml"
+
+# Paper handling. TrayState/MediaState are the only paper signal LEDM offers:
+# present or absent, with no level. The percentage lives in IPP and is read
+# by api_ipp.py.
+ENDPOINT_MEDIA_HANDLING: Final = "/DevMgmt/MediaHandlingDyn.xml"
+
+# CDP ("Common Data Platform") endpoints. HP publishes no specification for
+# these either, and the map was read off a live device: the paths appear in
+# the printer's own web UI scripts and in the ``resourcePath`` fields of its
+# own alert payloads. Models that serve this layer answer 404 on
+# DiscoveryTree.xml, which is how the two protocols are told apart at setup.
+#
+# Every version segment here was measured, not assumed -- a wrong version
+# returns 404 and looks exactly like an absent feature.
+CDP_IDENTITY: Final = "/cdm/system/v1/identity"
+CDP_SYSTEM_STATUS: Final = "/cdm/system/v1/status"
+CDP_SYSTEM_STATISTICS: Final = "/cdm/system/v1/statistics"
+CDP_DEVICE_USAGE: Final = "/cdm/deviceUsage/v1/lifetimeCounters"
+CDP_DEVICE_SERVICE_COUNTERS: Final = "/cdm/deviceUsage/v1/serviceCounters"
+CDP_SUPPLIES: Final = "/cdm/supply/v1/suppliesPublic"
+CDP_SUPPLY_CONFIG: Final = "/cdm/supply/v1/configPublic"
+CDP_PRINT_STATUS: Final = "/cdm/print/v2/status"
+CDP_SCAN_STATUS: Final = "/cdm/scan/v1/status"
+CDP_EVENTS: Final = "/cdm/diagnostic/v1/systemEvents"
 
 # Endpoints fetched once at setup rather than on every poll.
 STATIC_ENDPOINTS: Final = (ENDPOINT_PRODUCT_CONFIG,)
@@ -76,6 +109,15 @@ CONSUMABLE_NOUNS: Final = {
     "inktank": "Ink Tank",
     "drum": "Drum",
     "maintenancekit": "Maintenance Kit",
+    # Consumer ink-tank models report their **printheads** as
+    # ``inkCartridge`` -- verified on Smart Tank 750 and 580-590. Without this
+    # key the noun falls back to "Cartridge" and the entity is named "Black
+    # Cartridge" for what is a printhead, and the printhead's remaining-life
+    # percentage is presented as though it were ink left in a tank. The value
+    # is capitalised for the translation key; the English label is rendered by
+    # the translation itself.
+    "inkcartridge": "Printhead",
+    "inkcartridges": "Printhead",
 }
 DEFAULT_CONSUMABLE_NOUN: Final = "Cartridge"
 

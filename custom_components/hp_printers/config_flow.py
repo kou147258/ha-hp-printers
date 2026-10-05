@@ -22,7 +22,8 @@ from homeassistant.helpers.selector import (
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 import voluptuous as vol
 
-from .api import HPPrinterConnectionError, HPPrinterError, LEDMClient
+from .api import HPPrinterConnectionError, HPPrinterError
+from .client import async_build_client
 from .const import (
     CONF_SCAN_INTERVAL_SECONDS,
     DEFAULT_PORT,
@@ -97,15 +98,14 @@ class HPPrintersConfigFlow(ConfigFlow, domain=DOMAIN):
         self, data: dict[str, Any]
     ) -> tuple[dict[str, str], str | None, str | None]:
         """Try to talk to the printer. Returns (errors, serial, model)."""
-        client = LEDMClient(
-            async_get_clientsession(self.hass, verify_ssl=False),
-            data[CONF_HOST],
-            data[CONF_PORT],
-            data[CONF_SSL],
-            printer_ssl_context(),
-        )
         try:
-            info = await client.async_validate()
+            _client, info = await async_build_client(
+                async_get_clientsession(self.hass, verify_ssl=False),
+                data[CONF_HOST],
+                data[CONF_PORT],
+                data[CONF_SSL],
+                printer_ssl_context(),
+            )
         except HPPrinterConnectionError:
             return {"base": "cannot_connect"}, None, None
         except HPPrinterError:
