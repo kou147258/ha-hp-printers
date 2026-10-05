@@ -330,6 +330,12 @@ class PrinterData:
     non_hp_flag_count: int | None = None
     quiet_mode: bool | None = None
     auto_jam_recovery: bool | None = None
+    # How the last printhead alignment went. A failed alignment is a real
+    # fault -- the printer is online and prints, but its output can be skewed
+    # or banded -- and no other counter here would reveal it.
+    calibration_last_result: str | None = None
+    calibration_failure_reason: str | None = None
+    calibration_status: str | None = None
 
     @property
     def main_paper_tray(self) -> PaperTray | None:

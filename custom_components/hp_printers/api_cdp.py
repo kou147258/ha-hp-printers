@@ -34,6 +34,7 @@ from .api import (
     _percent,
 )
 from .const import (
+    CDP_CALIBRATION,
     CDP_DEVICE_SERVICE_COUNTERS,
     CDP_DEVICE_USAGE,
     CDP_EVENTS,
@@ -330,11 +331,18 @@ class CDPClient:
             self._fetch(CDP_DEVICE_SERVICE_COUNTERS),
             self._fetch(CDP_SUPPLIES),
         )
-        status_doc, scan_doc, supply_config, print_config = await asyncio.gather(
+        (
+            status_doc,
+            scan_doc,
+            supply_config,
+            print_config,
+            calibration,
+        ) = await asyncio.gather(
             self._fetch(CDP_PRINT_STATUS),
             self._fetch_optional(CDP_SCAN_STATUS),
             self._fetch_optional(CDP_SUPPLY_CONFIG),
             self._fetch_optional(CDP_PRINT_CONFIG),
+            self._fetch_optional(CDP_CALIBRATION),
         )
         events_doc = await self._fetch_optional(CDP_EVENTS)
 
@@ -357,6 +365,9 @@ class CDPClient:
             # "off" here means the device will not try to clear a jam on
             # its own -- a reading worth having, and not a fault.
             auto_jam_recovery=_auto_jam(print_config or {}),
+            calibration_last_result=_text(calibration or {}, "lastResult"),
+            calibration_failure_reason=_text(calibration or {}, "failureReason"),
+            calibration_status=_text(calibration or {}, "calibrationStatus"),
             # Genuine-supplies enforcement. LEDM spells it
             # GenuineHPSuppliesOnly; CDP calls the same thing the anti-theft
             # mode and states it in the supply service. Both answer "would the

@@ -251,6 +251,7 @@ async def test_get_data_against_the_captured_documents() -> None:
         "/cdm/supply/v1/configPublic": "cdm_supply_v1_configPublic.json",
         "/cdm/print/v2/status": "cdm_print_v2_status.json",
         "/cdm/scan/v1/status": "cdm_scan_v1_status.json",
+        "/cdm/calibration/v1/calibration/penAlignSemiauto": "cdm_calibration_penAlignSemiauto.json",
         "/cdm/diagnostic/v1/systemEvents": "cdm_diagnostic_v1_systemEvents.json",
     }
 

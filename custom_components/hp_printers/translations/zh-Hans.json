@@ -180,6 +180,9 @@
       "better_quality_pages": {
         "name": "较高质量页数（全纸材合计）"
       },
+      "calibration_result": {
+        "name": "上次打印头校准结果"
+      },
       "cartridge_brand": {
         "name": "品牌"
       },

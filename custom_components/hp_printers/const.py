@@ -67,6 +67,7 @@ CDP_PRINT_CONFIG: Final = "/cdm/print/v2/configuration"
 CDP_SCAN_STATUS: Final = "/cdm/scan/v1/status"
 CDP_EVENTS: Final = "/cdm/diagnostic/v1/systemEvents"
 CDP_SECURITY_CONFIG: Final = "/cdm/security/v1/deviceAdminConfig"
+CDP_CALIBRATION: Final = "/cdm/calibration/v1/calibration/penAlignSemiauto"
 
 # Endpoints fetched once at setup rather than on every poll.
 STATIC_ENDPOINTS: Final = (ENDPOINT_PRODUCT_CONFIG,)

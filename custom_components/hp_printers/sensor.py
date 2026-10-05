@@ -335,6 +335,25 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
     _counter(
         "photo_quality_pages", "photo_quality_pages", lambda d: d.photo_quality_pages
     ),
+    # How the last printhead alignment went. A failure here is a real fault
+    # that a page counter never shows: the printer is online and prints, and
+    # the output is skewed or banded.
+    HPPrinterSensorDescription(
+        key="calibration_result",
+        translation_key="calibration_result",
+        device_class=SensorDeviceClass.ENUM,
+        options=["passed", "failed", "cancelled", "unknown"],
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: (
+            data.calibration_last_result
+            if data.calibration_last_result in ("passed", "failed", "cancelled")
+            else "unknown"
+        ),
+        attrs_fn=lambda data: {
+            "status": data.calibration_status,
+            "failure_reason": data.calibration_failure_reason,
+        },
+    ),
     # --- diagnostics: firmware and the device event log ---
     HPPrinterSensorDescription(
         key="firmware_date",

@@ -180,6 +180,9 @@
       "better_quality_pages": {
         "name": "Better quality pages (all media)"
       },
+      "calibration_result": {
+        "name": "Last printhead alignment"
+      },
       "cartridge_brand": {
         "name": "Brand"
       },
