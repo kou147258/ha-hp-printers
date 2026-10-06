@@ -514,10 +514,10 @@ class PrinterData:
     pen_stalls: tuple[tuple[str, int], ...] = ()
 
     # Where a print job went, beyond "network" and "wireless": the cloud
-    # print path is a separate counter on the device and is neither of those
-    # two. (The Instant Ink subscription counter was already declared and
-    # parsed; it had no entity, which is what this change adds.)
+    # print path and the Instant Ink subscription are separate counters on the
+    # device and neither is one of the other two.
     cloud_printed_pages: int | None = None
+    subscription_printed_pages: int | None = None
 
     # ------------------------------------------------------------------
     # Security and health facts that have no other home.

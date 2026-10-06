@@ -612,6 +612,29 @@
         "name": "Sign-in attempts left",
         "unit_of_measurement": "attempts",
         "description": "Failed web-interface sign-in attempts left before it locks. This is why a factory-default admin password is worth changing."
+      },
+      "successful_attempts_remaining": {
+        "name": "EWS sign-in attempts remaining",
+        "description": "The other half of the failed-attempt budget the device publishes alongside it. Read the two together."
+      },
+      "printhead_hp_drops": {
+        "name": "Ink drops printed (genuine HP)"
+      },
+      "printhead_non_hp_drops": {
+        "name": "Ink drops printed (not recognised as HP)",
+        "description": "The printhead's own tally of drops it could not attribute to genuine HP ink. Not the same claim as a cartridge's brand field: a clone chip reports the genuine part number, so a third-party cartridge can present as HP while this counter disagrees. Zero is the reassuring reading."
+      },
+      "printhead_ooi_drops": {
+        "name": "Out-of-ink protection firings"
+      },
+      "printhead_service_drops": {
+        "name": "Ink drops printed in service"
+      },
+      "cloud_printed_pages": {
+        "name": "Cloud-printed pages"
+      },
+      "subscription_printed_pages": {
+        "name": "Subscription-printed pages (Instant Ink)"
       }
     },
     "binary_sensor": {
