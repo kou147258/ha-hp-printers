@@ -168,15 +168,37 @@ Two rules the anonymizer has already been bitten by:
   1. No write is reachable from the coordinator. Not from a poll, a restart,
      a reload, or a repair. Only from `ButtonEntity.async_press`.
   2. A button exists only for an operation the device lists in its own
-     reports document, and only when a password is configured. A visible
-     button that cannot work is worse than none, because the user cannot
-     tell it from a broken feature.
+     reports document. A model with no `cleaningPage` gets no clean button,
+     because the alternative is a button that answers "this printer does not
+     offer that".
   3. Refuse before sending whenever the device has told us something that
      would waste the cycle — the calibration type is not offered, the input
      tray reports empty.
   4. Log every write at warning level with the endpoint and body. That line
-     is the audit trail for a request that costs ink and paper. It must
-     never contain the credential.
+     is the audit trail for a request that costs ink and paper.
+- **CDP writes do not authenticate, and the admin password is never sent.**
+  Measured on the Smart Tank 580-590: every CDP document is served with no
+  credential, and attaching a *correct* HTTP Basic header turns working 200s
+  into 401s. `/AuthChk` does not discriminate — the right password, a wrong
+  one, and none at all all answer 300 on that model (on a *LEDM* model the
+  same endpoint does discriminate: 200 with the right password, 300 without).
+  So `_auth_header` sends no Authorization header, and the password stays in
+  memory. Do not "fix" this by adding Basic back: on CDP it is not merely
+  useless, it turns working requests into 401s, and a value the protocol
+  ignores is one leak away from appearing in a log.
+- **`/cdm/remoteAuthentication/v1` is the cartridge-bay PIN, not EWS admin
+  auth.** Its capabilities report `pinLabelLocation: "cartridgeAccessArea"`
+  and `pushbuttonSupported: true`. POSTing to its `tokens` endpoint answers
+  409, or 500 for an empty object, with an empty body — for every body shape
+  tried, including the obvious `username`/`password`. It reveals nothing and
+  is not the answer to "how does a CDP write authenticate".
+- **The request body for a report is the `reportId` the device publishes** in
+  `/cdm/report/v1/reports`, on the link that advertises `PATCH`. That part is
+  evidence. The calibration body is **not**: `GET /cdm/calibration/v1/calibration`
+  answers 400, so there is no representation to copy the request from, and the
+  device answers 400 with an *empty* body for every body shape tried. The
+  calibration request is the one unverified thing in the write path, and
+  pressing the button is what will confirm it.
 - **The only supported write path is CDP.** A model that speaks LEDM gets
   no buttons, because its maintenance surface is behind the EWS web
   application rather than in a documented LEDM resource — `DiscoveryTree.xml`

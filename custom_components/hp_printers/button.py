@@ -17,12 +17,10 @@ action. The entity only does something when a person presses it.
 Which buttons appear is decided by the device
 ---------------------------------------------
 A button is created only for an operation the printer lists in its own
-reports document, and only when an admin password is configured. Two reasons
-for the second condition: without a password the write cannot succeed, and a
-button that is visible but cannot work reads as a broken feature. A model
-without a printhead clean has no ``cleaningPage`` in its reports, so it gets
-no ink-clean buttons -- the alternative is offering the user a button that
-answers "this printer does not offer that".
+reports document. A model without a printhead clean has no ``cleaningPage``
+to offer, and offering the button anyway produces an error the user would
+have to decode. The admin password is not part of this condition: CDP does
+not authenticate writes, so gating on it would hide a working feature.
 """
 
 from dataclasses import dataclass
@@ -189,9 +187,9 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     client = coordinator.client
 
-    # No write method at all: a CDP-only feature on a printer that speaks
-    # LEDM, or no password configured. Either way there is nothing honest to
-    # put on the card.
+    # No write path on this client: an LEDM model, whose maintenance surface
+    # is not a documented LEDM resource. Either way there is nothing honest
+    # to put on the card.
     if not getattr(client, "can_write", False):
         _LOGGER.debug(
             "No write path for %s; maintenance buttons not created", entry.title

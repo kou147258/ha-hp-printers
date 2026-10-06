@@ -90,14 +90,25 @@ async def test_a_printer_offering_everything_gets_every_button() -> None:
     }
 
 
-async def test_a_printer_with_no_password_gets_no_buttons_at_all() -> None:
-    """Without a credential the writes cannot succeed.
+async def test_a_printer_with_no_write_path_gets_no_buttons() -> None:
+    """An LEDM client has no write path, so there is nothing to offer.
 
-    The alternative -- creating the buttons and letting them fail -- looks
-    like a broken feature rather than one that was never available, and the
-    user has no way to tell which it is.
+    Not a password condition: CDP does not authenticate writes, so the
+    buttons must appear whether or not one is configured.
     """
     assert await _collect(_coordinator(can_write=False)) == []
+
+
+async def test_buttons_appear_without_a_password_too() -> None:
+    """No credential is required, so no credential may be demanded.
+
+    Gating the buttons on the password would remove the feature from exactly
+    the machines that most need it, for a credential the protocol ignores.
+    """
+    coordinator = _coordinator()
+    keys = await _collect(coordinator)
+    assert "calibrate_printhead" in keys
+    assert len(keys) == 6
 
 
 async def test_a_printer_reporting_no_reports_gets_no_buttons() -> None:

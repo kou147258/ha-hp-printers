@@ -8,10 +8,11 @@ originally targeted; they serve a JSON API instead (**CDP**), and report paper
 level over **IPP**. All three are supported, and which one a given printer
 speaks is worked out at setup — there is no protocol setting to fill in.
 
-An optional EWS admin password enables buttons for the cleaning and printhead
-alignment operations the printer itself offers. Those spend ink and paper, so
-they are buttons you press, never something a poll or an automation fires on
-its own. Everything else works without the password.
+An optional EWS admin password field is accepted and deliberately unused — see
+[Maintenance buttons](#maintenance-buttons) for why sending it would be
+actively harmful on a CDP printer. Cleaning and printhead alignment appear as
+buttons you press. Those spend ink and paper, so they are never something a
+poll or an automation fires on its own.
 
 ## What you get
 
@@ -91,7 +92,7 @@ everything else works without it.
 | **Host** | Prefer the printer's mDNS name over its IP — HP sets one from the MAC, such as `NPI2E7F3D.local` (you'll find it on the printer's Network Summary page, or in the TLS certificate's common name). It resolves to a MAC-derived IPv6 address that cannot change on a lease renewal, so no DHCP reservation is needed. An IP works too; entries are keyed on serial number, so an address change will not orphan your entities either way. |
 | **Name** | Optional. Drives the device name and every entity ID. Leave blank to use the model name. |
 | **Port / HTTPS** | Under *Advanced settings*. Defaults to port 80. Printers serve a self-signed certificate, which is not verified. |
-| **Admin password** | Under *Advanced settings*, and optional. It is used by the [maintenance buttons](#maintenance-buttons) and by nothing else — no sensor, no status, no counter needs it. Leave it blank and those buttons are simply not created. |
+| **Admin password** | Under *Advanced settings*, and optional. **Nothing currently uses it**: CDP writes are served with no credential, and an LEDM model has no maintenance interface to protect. It is kept for a firmware that starts requiring one, and it is held in memory and never sent — an EWS password attached to a CDP request turns working responses into 401s. |
 
 Polling defaults to **60 seconds** and is adjustable under *Configure*. Printers
 sleep between jobs and polling wakes them, so slower is gentler on the hardware.
@@ -268,9 +269,8 @@ type the printer reports.
 
 ## Maintenance buttons
 
-If you enter the EWS admin password under *Advanced settings*, the printer
-grows buttons for the maintenance operations **it reports itself as having**.
-On a CDP model that is six:
+The printer enumerates its own maintenance operations, and this turns the ones
+it reports into buttons:
 
 | Button | What it runs | Cost |
 |---|---|---|
@@ -290,9 +290,10 @@ that hides the choice.
   from the printer's own service document at setup. A model with no
   level-3 purge gets no level-3 button, because the alternative is a button
   that answers "this printer does not offer that".
-- **They only exist if a password is configured.** Without one the write
-  cannot succeed, and a visible button that quietly does nothing is worse
-  than no button — you cannot tell it from a broken feature.
+- **They need no password, and none is used.** On a CDP model every document
+  is served with no credential at all; sending an admin password with the
+  request turns working responses into 401s. The password is held in memory
+  and never transmitted. You can leave the field blank.
 - **They never fire on their own.** No poll, restart, reload, or repair can
   reach them. They run when you press them, which is the point: each one
   spends ink and paper, and that should be a decision rather than a
@@ -300,14 +301,26 @@ that hides the choice.
 - **A press is not a completion.** The printer acknowledges the request and
   runs the cycle on its own; a clean takes minutes. The button confirms the
   request was *accepted*. Watch the printer's own status for when it is done.
-- **The printer's reason for refusing is passed through.** Busy, no paper and
-  a wrong password all arrive as an error, and only the device can tell them
-  apart — so its message is what you see.
+- **The printer's reason for refusing is passed through** — where it gives
+  one. Busy, no paper and a wrong operation all arrive as an error, and the
+  device is the only thing that can tell them apart. Note that on a CDP
+  model a rejected request comes back as a 400 with an *empty* body, so
+  sometimes there is genuinely nothing to say beyond "the printer declined".
 
 Alignment is refused up front if the printer reports its input tray empty. A
 printer that reports no paper level at all is not treated as empty, because
 that would leave the button permanently unpressable on exactly the machines
 where an alignment is most likely to have failed.
+
+### Which printers get buttons
+
+A CDP printer that reports at least one of the operations above. An **LEDM
+printer does not**, and this is measured rather than assumed: its
+`DiscoveryTree.xml` lists 24 resources and none is a maintenance endpoint, its
+`MaintenanceManifest.xml` paths answer 404, and its own CDP service document —
+8 services, 28 links — carries no report, calibration or supply service at
+all. On such a model the cleaning and alignment controls exist only as
+physical buttons on the machine.
 
 ## Dashboard
 

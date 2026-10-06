@@ -23,7 +23,7 @@
             "data_description": {
               "port": "The embedded web server port. Leave at 80 and it will follow to 443 automatically if you turn on HTTPS.",
               "ssl": "Printers use a self-signed certificate, which is not verified.",
-              "password": "Optional. Only used by the cleaning and printhead-alignment buttons, which spend ink and paper. Leave it blank and those buttons are simply not created; every sensor keeps working without it."
+              "password": "Optional and currently unused: CDP writes are served with no credential, and an LEDM model has no maintenance interface. Kept for a firmware that starts requiring one; it is held in memory and never sent."
             }
           }
         }

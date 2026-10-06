@@ -10,7 +10,6 @@ mostly the refusals. A test that only proves "the PATCH went out" would be
 the least useful one in the file.
 """
 
-import base64
 import json
 from unittest.mock import AsyncMock, MagicMock
 
@@ -109,54 +108,75 @@ async def test_calibration_request_names_the_advertised_type() -> None:
     assert '"calibrationType":"penAlignSemiauto"' in body.replace(" ", "")
 
 
-async def test_write_carries_basic_auth_for_admin() -> None:
-    """HTTP Basic, user admin -- what the printer's own web app sends."""
+async def test_a_write_sends_no_credential_at_all() -> None:
+    """CDP does not authenticate with the EWS password.
+
+    Measured: every CDP document answers with no credential, and attaching a
+    correct Basic header turns working 200s into 401s. So the password is held
+    in memory and never put on the wire. Sending a value the protocol ignores
+    is not harmless -- the day it is echoed into a log or an error it becomes
+    a credential leak that bought nothing.
+    """
     session = _session()
     client = _client(session)
 
     await client.async_run_report("cleaningPage")
 
     headers = session.patch.call_args.kwargs["headers"]
-    assert headers["Authorization"].startswith("Basic ")
-    decoded = base64.b64decode(headers["Authorization"].split(" ", 1)[1]).decode()
-    assert decoded == f"admin:{TEST_PASSWORD}"
+    assert "Authorization" not in headers
+    assert headers["Content-Type"] == "application/json"
+    # And nothing anywhere in the request carries the secret.
+    assert TEST_PASSWORD not in str(session.patch.call_args)
 
 
 # --------------------------------------------------- refusing to write at all
 
 
-async def test_without_a_password_the_write_is_refused_before_any_request() -> None:
-    """No password means no request, not a request that fails with 401.
+async def test_a_write_needs_no_password_and_still_sends_the_request() -> None:
+    """No credential is required, so none is asked for.
 
-    The buttons are not created in this state, so reaching here would mean a
-    caller bypassed the availability check. The guard exists so a bypassed
-    check still cannot send an unauthenticated write to a printer.
+    This is the measured behaviour, and it is the opposite of the first
+    version of this test, which asserted that a missing password blocked the
+    request. That assertion was written from the assumption that a write needs
+    a credential; the device says it does not, and a guard built on the
+    assumption would have refused every write on every CDP printer.
     """
     session = _session()
     client = _client(session, password=None)
 
-    assert client.can_write is False
-    with pytest.raises(HPPrinterWriteError):
-        await client.async_run_report("cleaningPage")
-    session.patch.assert_not_called()
+    assert client.can_write is True
+    await client.async_run_report("cleaningPage")
+    session.patch.assert_called_once()
 
 
 async def test_a_rejected_write_does_not_blame_the_password() -> None:
     """A 401 must not be reported as a wrong password.
 
-    Measured on the CDP model: every document is served with no credential,
-    and adding a correct Basic header turns working 200s into 401s. So a 401
-    means the *mechanism* is wrong, not the secret. "Wrong password" would
-    send the user to re-enter a credential that is already correct, and they
-    would never find the real problem.
+    Measured on the CDP model, a correct Basic header turns working documents
+    into 401s, so a 401 means the *mechanism* is wrong, not the secret.
+    "Wrong password" would send the user to re-enter a credential that is
+    already correct, and they would never find the real problem.
     """
     client = _client(_session(status=401, body=""))
     with pytest.raises(HPPrinterWriteError) as caught:
         await client.async_run_report("cleaningPage")
 
     message = str(caught.value)
-    assert "CDP token" in message
-    assert "admin password" not in message
+    assert "does not authenticate with the EWS" in message
+    assert "wrong password" not in message.lower()
+
+
+async def test_an_empty_rejection_body_is_reported_as_such() -> None:
+    """The CDP model answers a rejected body with 400 and nothing else.
+
+    An error that says only "request failed" reads like a broken integration.
+    Saying the device gave no reason is the accurate and more useful message.
+    """
+    client = _client(_session(status=400, body=""))
+    with pytest.raises(HPPrinterWriteError) as caught:
+        await client.async_run_report("cleaningPage")
+
+    assert "no detail given" in str(caught.value)
 
 
 async def test_a_printer_without_the_resource_says_so() -> None:

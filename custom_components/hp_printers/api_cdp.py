@@ -17,7 +17,6 @@ entities, config flow -- has to know which protocol a printer speaks.
 """
 
 import asyncio
-import base64
 from dataclasses import replace
 from datetime import datetime
 import json
@@ -287,38 +286,45 @@ class CDPClient:
 
     @property
     def can_write(self) -> bool:
-        """Return whether a write could be attempted at all.
+        """Return whether this client has a write path at all.
 
-        The password is not optional for a write, so without one the buttons
-        are not created rather than created and left to fail. A button that
-        cannot work is worse than no button: it looks like the feature is
-        there and silently does nothing.
+        True for every CDP client. It is **not** conditioned on the password,
+        because CDP does not authenticate writes: the measured model answers
+        reads and writes alike with no credential, and attaching one turns
+        working 200s into 401s. Gating the buttons on a password would hide a
+        feature that works on exactly the machines most likely to need it.
+
+        The password is still accepted, held in memory, and deliberately never
+        transmitted -- see :meth:`_auth_header`. A model whose firmware starts
+        requiring one is the reason to keep the field; nothing today depends
+        on it, and the README says so rather than implying otherwise.
         """
-        return bool(self._password)
+        return True
 
     def _auth_header(self) -> dict[str, str]:
-        """Return the Authorization header for a write.
+        """Return the headers a CDP write carries.
 
-        **Known wrong for CDP, and deliberately still here.** Measured on the
-        Smart Tank 580-590: every CDP document is served with no credential at
-        all, and adding a Basic header turns working 200s into 401s. So CDP
-        does not use HTTP Basic, and the password is not what a CDP write
-        authenticates with.
+        **Deliberately no Authorization header.** Measured on the Smart Tank
+        580-590: every CDP document is served with no credential at all, and
+        attaching a correct HTTP Basic header turns working 200s into 401s.
+        ``/AuthChk`` does not discriminate either -- the right password, a
+        wrong one, and none at all all answer 300. So CDP does not
+        authenticate with the EWS password.
 
-        The mechanism CDP does advertise is
-        ``/cdm/remoteAuthentication/v1/tokens`` (``delete,post``). How to ask
-        for a token, and what carries it afterwards, is not readable from any
-        document the device serves -- it cannot be discovered without issuing
-        a POST, which is a write to the printer and therefore not something to
-        do unasked.
+        The other service named "remoteAuthentication" is a red herring:
+        ``/cdm/remoteAuthentication/v1/capabilities`` reports
+        ``pinLabelLocation: "cartridgeAccessArea"`` and
+        ``pushbuttonSupported: true``, which is the physical PIN that unlocks
+        the cartridge bay -- a different feature that happens to share a name.
+        POSTing to its token endpoint answers 409 or 500 with an empty body
+        for every body shape tried, and reveals nothing.
 
-        So the header is sent as-is and the resulting 401 is reported as what
-        it is -- an authentication this client does not have -- rather than as
-        a wrong password, which is the reading the user would otherwise take
-        and which would send them to re-enter a credential that is correct.
+        What a write actually gets is the configured password on a header the
+        protocol ignores, which is worse than sending nothing: if the value is
+        ever echoed into a log or an error it becomes a credential leak for no
+        benefit. So it is held in memory and never transmitted.
         """
-        token = base64.b64encode(f"admin:{self._password}".encode()).decode()
-        return {"Authorization": f"Basic {token}", "Content-Type": "application/json"}
+        return {"Content-Type": "application/json"}
 
     async def _patch(self, endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
         """PATCH one CDP document.
@@ -330,14 +336,11 @@ class CDPClient:
         would mean every write inherited the reads' "carry on quietly"
         contract.
         """
-        if not self._password:
-            raise HPPrinterWriteError(
-                "No EWS admin password configured, so the printer refused the request"
-            )
         url = f"{self.base_url}{endpoint}"
         payload = json.dumps(body)
         # The log line is the audit trail for a request that spends ink and
-        # paper. It records the operation, never the credential.
+        # paper. It records the operation, never the credential -- which is
+        # easy here, because the credential is never sent at all.
         _LOGGER.warning("User-requested write: PATCH %s body=%s", endpoint, payload)
         try:
             async with self._session.patch(
@@ -357,15 +360,14 @@ class CDPClient:
             raise HPPrinterWriteError(f"Error writing {endpoint}: {err}") from err
 
         if status in (401, 403):
-            # Deliberately not "wrong password". Measured on the CDP model, a
-            # correct Basic header turns working documents into 401s, so a 401
-            # here means the credential mechanism is not one this client has,
-            # not that the user typed something wrong. Saying otherwise would
-            # send them to re-enter a password that is already correct.
+            # Measured: a CDP write answers 400 for a body it will not accept,
+            # not 401/403, so reaching this means the device wants a
+            # credential it has not been given. Name that, and do not blame
+            # the password -- CDP does not authenticate with it.
             raise HPPrinterWriteError(
-                f"Printer refused the request (HTTP {status}). CDP does not "
-                "authenticate with the EWS password and this client holds no "
-                "CDP token, so the write was not authorised."
+                f"Printer wants a credential this client does not have "
+                f"(HTTP {status}). CDP does not authenticate with the EWS "
+                "password, so the write was not authorised."
             )
         if status == 404:
             raise HPPrinterWriteError(
@@ -373,10 +375,13 @@ class CDPClient:
             )
         if status >= 400:
             # The body is the only place the reason appears, and it is the
-            # difference between "wrong password" and "busy" and "no paper".
-            detail = raw.strip()[:200] if raw.strip() else "no detail"
+            # difference between "busy" and "no paper". On the CDP model
+            # measured, a rejected body comes back as a 400 with an *empty*
+            # body -- so there is often nothing to add, and saying so is
+            # worth more than an error that reads like a broken integration.
+            detail = raw.strip()[:200] if raw.strip() else "no detail given"
             raise HPPrinterWriteError(
-                f"Printer refused {endpoint}: HTTP {status} {detail}"
+                f"Printer rejected {endpoint}: HTTP {status}, {detail}"
             )
 
         try:
