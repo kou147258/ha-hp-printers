@@ -313,16 +313,17 @@ class LEDMClient:
         Retried once, and it still raises: the protocol probe depends on this
         read failing for a machine that does not speak LEDM, so swallowing it
         would turn "not this protocol" into a later crash instead.
+
+        Written without a loop on purpose. Two attempts is the whole policy,
+        and a loop would be a linter's ``try``-inside-loop for a case that has
+        exactly two states.
         """
-        for attempt in range(2):
-            try:
-                return await self._fetch(endpoint)
-            except HPPrinterError:
-                if attempt:
-                    raise
-                _LOGGER.debug("%s dropped the connection; retrying once", endpoint)
-                await asyncio.sleep(SLOW_RETRY_DELAY_SECONDS)
-        raise AssertionError("unreachable")  # pragma: no cover
+        try:
+            return await self._fetch(endpoint)
+        except HPPrinterError:
+            _LOGGER.debug("%s dropped the connection; retrying once", endpoint)
+            await asyncio.sleep(SLOW_RETRY_DELAY_SECONDS)
+        return await self._fetch(endpoint)
 
     async def async_get_product_info(self) -> ProductInfo:
         """Read static device information."""
