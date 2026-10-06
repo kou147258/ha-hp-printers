@@ -1,0 +1,109 @@
+{
+  "version": "1.1.0",
+  "suppliesList": [
+    {
+      "slotIdentifier": 109,
+      "slot": 1,
+      "supplyType": "inkCartridge",
+      "supplyColorCode": "CMY",
+      "colors": [
+        "C",
+        "M",
+        "Y"
+      ],
+      "supplyState": "inform",
+      "stateReasons": [
+        "usedConsumableInfo"
+      ],
+      "isSetup": "false",
+      "isTrial": "false",
+      "isUsed": "true",
+      "selectabilityNumber": "M0H50A",
+      "brand": "HP",
+      "iconHint": "triDot",
+      "serialNumber": "SN-ANON-0000",
+      "region": 1,
+      "orderSelectabilityNumber": "M0H50A",
+      "manufactureDate": "2025-01-01T00:00:00.000Z",
+      "isGenuineHP": "true",
+      "isRefilled": "false"
+    },
+    {
+      "slotIdentifier": 108,
+      "slot": 2,
+      "supplyType": "inkCartridge",
+      "supplyColorCode": "K",
+      "colors": [
+        "K"
+      ],
+      "supplyState": "inform",
+      "stateReasons": [
+        "usedConsumableInfo"
+      ],
+      "isSetup": "false",
+      "isTrial": "false",
+      "isUsed": "true",
+      "selectabilityNumber": "X4E75A",
+      "brand": "HP",
+      "iconHint": "singleCircle",
+      "serialNumber": "SN-ANON-0000",
+      "region": 1,
+      "orderSelectabilityNumber": "X4E75A",
+      "manufactureDate": "2025-01-01T00:00:00.000Z",
+      "isGenuineHP": "true",
+      "isRefilled": "false"
+    },
+    {
+      "slotIdentifier": 114,
+      "slot": 3,
+      "supplyType": "inkTank",
+      "supplyColorCode": "K",
+      "colors": [
+        "K"
+      ],
+      "supplyState": "ok",
+      "percentLifeDisplay": 100,
+      "iconHint": "colorLetter",
+      "levelState": "ok"
+    },
+    {
+      "slotIdentifier": 115,
+      "slot": 4,
+      "supplyType": "inkTank",
+      "supplyColorCode": "C",
+      "colors": [
+        "C"
+      ],
+      "supplyState": "ok",
+      "percentLifeDisplay": 100,
+      "iconHint": "colorLetter",
+      "levelState": "ok"
+    },
+    {
+      "slotIdentifier": 116,
+      "slot": 5,
+      "supplyType": "inkTank",
+      "supplyColorCode": "M",
+      "colors": [
+        "M"
+      ],
+      "supplyState": "ok",
+      "percentLifeDisplay": 100,
+      "iconHint": "colorLetter",
+      "levelState": "ok"
+    },
+    {
+      "slotIdentifier": 117,
+      "slot": 6,
+      "supplyType": "inkTank",
+      "supplyColorCode": "Y",
+      "colors": [
+        "Y"
+      ],
+      "supplyState": "ok",
+      "percentLifeDisplay": 100,
+      "iconHint": "colorLetter",
+      "levelState": "ok"
+    }
+  ]
+}

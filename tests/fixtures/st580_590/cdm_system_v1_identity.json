@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "countryRegion": "CN",
+  "derivativeNumber": "DERIV-ANON-0000",
+  "deviceLanguage": "zh-CN",
+  "deviceUuid": "00000000-0000-0000-0000-000000000000",
+  "firmwareCompatibilityId": "lwp1cn",
+  "firmwareDateCode": "202607240158",
+  "firmwareRelease": "31.2630.02",
+  "firmwareVersion": "LWP1CN2630CR",
+  "installDate": "3/14/2025 12:00:00 AM",
+  "makeAndModel": {
+    "base": "Smart Tank 580-590 series",
+    "family": "Smart Tank 580-590 series",
+    "name": "Smart Tank 580-590 series"
+  },
+  "manufacturer": "HP",
+  "productNumber": "ANON-0000",
+  "serialNumber": "SN-ANON-0000",
+  "serviceId": "00000000-0000-0000-0000-000000000000",
+  "skuIdentifier": "SKU-ANON-0000"
+}

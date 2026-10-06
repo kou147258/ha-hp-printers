@@ -1,0 +1,19 @@
+{
+  "events": {
+    "events": [
+      {
+        "eventCode": "74899",
+        "severity": "error"
+      },
+      {
+        "eventCode": "69552",
+        "severity": "error"
+      },
+      {
+        "eventCode": "70350",
+        "severity": "warning"
+      }
+    ],
+    "version": "1.0.0"
+  }
+}

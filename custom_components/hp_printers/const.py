@@ -283,6 +283,49 @@ SUBUNIT_KEYS: Final = {
     "copy": "subunit_copier",
 }
 
+# The wording each sub-device translation carries, used as the stored fallback
+# name. Home Assistant writes a device's name into its registry when the device
+# is created, and a translation lookup that misses leaves the raw key there --
+# so the value stored has to be the text a person can read. Kept identical to
+# the translations on purpose: the two paths then agree instead of competing.
+SUBUNIT_NAMES: Final = {
+    "scanner": "扫描仪",
+    "copy": "复印机",
+}
+
+# The same idea for cartridges, keyed by the device key rather than by noun and
+# colour separately, because that is the unit the translation is written in.
+# Generated from translations/zh-Hans.json and asserted against it in
+# tests/test_subdevice_names.py, so the two cannot drift apart silently --
+# which is the only thing that makes a duplicated table acceptable.
+CONSUMABLE_DEVICE_FALLBACK: Final = {
+    "consumable_cartridge_black": "黑色墨盒",
+    "consumable_cartridge_cyan": "青色墨盒",
+    "consumable_cartridge_magenta": "品红色墨盒",
+    "consumable_cartridge_tricolor": "三色墨盒",
+    "consumable_cartridge_yellow": "黄色墨盒",
+    "consumable_drum_black": "黑色硒鼓",
+    "consumable_drum_cyan": "青色硒鼓",
+    "consumable_drum_magenta": "品红色硒鼓",
+    "consumable_drum_tricolor": "三色硒鼓",
+    "consumable_drum_yellow": "黄色硒鼓",
+    "consumable_ink_tank_black": "黑色墨仓",
+    "consumable_ink_tank_cyan": "青色墨仓",
+    "consumable_ink_tank_magenta": "品红色墨仓",
+    "consumable_ink_tank_tricolor": "三色墨仓",
+    "consumable_ink_tank_yellow": "黄色墨仓",
+    "consumable_maintenance_kit_black": "黑色维护套件",
+    "consumable_maintenance_kit_cyan": "青色维护套件",
+    "consumable_maintenance_kit_magenta": "品红色维护套件",
+    "consumable_maintenance_kit_tricolor": "三色维护套件",
+    "consumable_maintenance_kit_yellow": "黄色维护套件",
+    "consumable_printhead_black": "黑色打印头",
+    "consumable_printhead_cyan": "青色打印头",
+    "consumable_printhead_magenta": "品红色打印头",
+    "consumable_printhead_tricolor": "三色打印头",
+    "consumable_printhead_yellow": "黄色打印头",
+}
+
 
 def consumable_device_key(noun: str, color: str | None) -> str:
     """Return the device translation key that names a consumable sub-device.

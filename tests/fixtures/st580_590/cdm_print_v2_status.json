@@ -1,0 +1,8 @@
+{
+  "printerIsAcceptingJobs": "true",
+  "printerState": "idle",
+  "printerStateReasons": [
+    "none"
+  ],
+  "version": "2.1.0"
+}
