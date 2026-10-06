@@ -269,7 +269,26 @@ def test_translation_declares_a_unit_for_every_counter() -> None:
     volume_sensors = {
         "marking_agent_used",
     }
-    expected = page_counters | packet_counters | percent_sensors | volume_sensors
+    # Plain counts of things: how many alerts are up, how many cartridges a
+    # slot has held, how many region-reset attempts are left. Not pages,
+    # packets, percentages or millilitres, so they get their own set rather
+    # than being forced into one of the others -- and their presence here is
+    # the point: a unit that is not declared leaves Home Assistant showing a
+    # bare number, which for "3 attempts left" is not obviously a count.
+    count_sensors = {
+        "active_alert_count",
+        "adapter_errors",
+        "cartridge_changes",
+        "default_copies",
+        "region_reset_remaining",
+    }
+    expected = (
+        page_counters
+        | packet_counters
+        | percent_sensors
+        | volume_sensors
+        | count_sensors
+    )
 
     entity = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]["sensor"]
     with_unit = {key for key, entry in entity.items() if "unit_of_measurement" in entry}

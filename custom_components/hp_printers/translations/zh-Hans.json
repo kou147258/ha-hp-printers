@@ -468,6 +468,80 @@
           "trayempty": "纸盒已空",
           "unknown": "未知"
         }
+      },
+      "setup_state": {
+        "name": "开机设置进度",
+        "description": "首次开机设置的进度。这里还有待完成步骤，正是校准报 failed 的原因。"
+      },
+      "active_alert_count": {
+        "name": "当前告警数",
+        "unit_of_measurement": "条",
+        "description": "打印机当前正在报的告警。事件日志是历史，这个是当下。"
+      },
+      "active_alert_worst": {
+        "name": "当前最高告警级别",
+        "description": "按设备自己的排序，最紧急那条告警的级别。"
+      },
+      "firmware_update_result": {
+        "name": "上次固件更新结果",
+        "description": "上次固件更新是否成功。固件日期码不会告诉你这件事。"
+      },
+      "firmware_update_available": {
+        "name": "可用固件版本"
+      },
+      "certificate_expires": {
+        "name": "网页证书到期日",
+        "description": "自签证书签发十年后到期，到期前没有任何提醒。"
+      },
+      "adapter_errors": {
+        "name": "网络接口错误计数",
+        "unit_of_measurement": "次",
+        "description": "按网络接口分别统计的错误计数。分开看才知道哪个口是活的。"
+      },
+      "internet_diagnostics": {
+        "name": "联网诊断结果",
+        "description": "打印机自己做的联网测试。设备没有 RTC，时间戳不可用。"
+      },
+      "carriage_status": {
+        "name": "小车状态"
+      },
+      "cartridge_changes": {
+        "name": "该仓位已用墨盒数",
+        "unit_of_measurement": "支",
+        "description": "这个仓位一共装过几支墨盒。取各仓位最大值，因为它们各自独立更换。"
+      },
+      "region_reset_remaining": {
+        "name": "区域重置剩余次数",
+        "unit_of_measurement": "次",
+        "description": "按设备区域重置方案，在它不再允许之前还剩几次机会。"
+      },
+      "service_id": {
+        "name": "服务 ID"
+      },
+      "print_services": {
+        "name": "已启用的打印服务"
+      },
+      "full_model_string": {
+        "name": "型号 / SKU / 区域"
+      },
+      "print_quality": {
+        "name": "打印质量设置"
+      },
+      "resolution_setting": {
+        "name": "分辨率设置"
+      },
+      "default_copies": {
+        "name": "默认份数",
+        "unit_of_measurement": "份"
+      },
+      "current_media": {
+        "name": "当前纸张"
+      },
+      "panel_language": {
+        "name": "面板语言"
+      },
+      "instant_ink_status": {
+        "name": "即时墨订阅状态"
       }
     },
     "binary_sensor": {
@@ -509,6 +583,27 @@
       },
       "quiet_mode": {
         "name": "静音模式"
+      },
+      "snmp_public": {
+        "name": "SNMP 允许 public 团体字",
+        "description": "打开表示打印机接受内置的 public 团体字，同网段任何主机都能读走它的管理信息。"
+      },
+      "bluetooth_beaconing": {
+        "name": "蓝牙信标广播"
+      },
+      "auto_update_enabled": {
+        "name": "自动固件更新"
+      },
+      "setup_incomplete": {
+        "name": "仍有开机设置未完成",
+        "description": "还有开机设置步骤没做完时为开。"
+      },
+      "firmware_update_failed": {
+        "name": "上次固件更新失败",
+        "description": "最近一次固件更新失败时为开。"
+      },
+      "holo_enabled": {
+        "name": "Holo 防伪认证"
       }
     },
     "button": {

@@ -468,6 +468,80 @@
           "trayempty": "Tray empty",
           "unknown": "Unknown"
         }
+      },
+      "setup_state": {
+        "name": "Setup state",
+        "description": "First-time setup progress. A step still pending here is why a calibration reports as failed."
+      },
+      "active_alert_count": {
+        "name": "Active alerts",
+        "unit_of_measurement": "alerts",
+        "description": "Alerts the printer is raising right now. The event log is history; this is the present."
+      },
+      "active_alert_worst": {
+        "name": "Most severe active alert",
+        "description": "Severity of the most urgent active alert, in the device's own order."
+      },
+      "firmware_update_result": {
+        "name": "Last firmware update",
+        "description": "Whether the last firmware update succeeded. The build date does not say."
+      },
+      "firmware_update_available": {
+        "name": "Firmware available"
+      },
+      "certificate_expires": {
+        "name": "Web certificate expires",
+        "description": "The self-signed certificate expires ten years after issue, with nothing to warn first."
+      },
+      "adapter_errors": {
+        "name": "Network interface errors",
+        "unit_of_measurement": "errors",
+        "description": "Error counters per network interface. The split is what shows which port is live."
+      },
+      "internet_diagnostics": {
+        "name": "Internet connectivity",
+        "description": "The printer's own connectivity test. Its timestamp is unusable without a real-time clock."
+      },
+      "carriage_status": {
+        "name": "Carriage status"
+      },
+      "cartridge_changes": {
+        "name": "Cartridges used in this slot",
+        "unit_of_measurement": "cartridges",
+        "description": "How many cartridges this slot has held. The maximum across slots, since they are refilled independently."
+      },
+      "region_reset_remaining": {
+        "name": "Region reset attempts left",
+        "unit_of_measurement": "attempts",
+        "description": "Attempts left under the device's region-reset scheme before it stops allowing them."
+      },
+      "service_id": {
+        "name": "Service ID"
+      },
+      "print_services": {
+        "name": "Enabled print services"
+      },
+      "full_model_string": {
+        "name": "Model, SKU and region"
+      },
+      "print_quality": {
+        "name": "Print quality setting"
+      },
+      "resolution_setting": {
+        "name": "Resolution setting"
+      },
+      "default_copies": {
+        "name": "Default copies",
+        "unit_of_measurement": "copies"
+      },
+      "current_media": {
+        "name": "Current media"
+      },
+      "panel_language": {
+        "name": "Panel language"
+      },
+      "instant_ink_status": {
+        "name": "Instant ink programme"
       }
     },
     "binary_sensor": {
@@ -509,6 +583,27 @@
       },
       "quiet_mode": {
         "name": "Quiet mode"
+      },
+      "snmp_public": {
+        "name": "SNMP accepts the public community",
+        "description": "On means the printer accepts the built-in public community string, so any host on the network can read its management data."
+      },
+      "bluetooth_beaconing": {
+        "name": "Bluetooth beaconing"
+      },
+      "auto_update_enabled": {
+        "name": "Automatic firmware updates"
+      },
+      "setup_incomplete": {
+        "name": "Setup steps outstanding",
+        "description": "On while a first-time setup step is outstanding."
+      },
+      "firmware_update_failed": {
+        "name": "Last firmware update failed",
+        "description": "On when the most recent firmware update attempt failed."
+      },
+      "holo_enabled": {
+        "name": "Holo authentication"
       }
     },
     "button": {

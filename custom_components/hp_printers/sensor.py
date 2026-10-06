@@ -112,6 +112,20 @@ def _paper_value(data: PrinterData) -> float | int | None:
     return tray.level
 
 
+def _worst_alert(data: PrinterData) -> str | None:
+    """Return the severity of the most urgent alert the device is raising.
+
+    The device already orders its alerts by its own priority, and a document
+    with no alerts is not the same as one whose worst alert is
+    ``information``. So the first entry is taken as-is rather than ranked
+    again here: a second ranking scheme would disagree with the device's at
+    some boundary, and the device is the one that has to act on it.
+    """
+    if not data.active_alerts:
+        return None
+    return data.active_alerts[0].severity
+
+
 PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
     HPPrinterSensorDescription(
         key="status",
@@ -425,6 +439,220 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         value_fn=lambda data, _info: (
             data.last_event.impressions if data.last_event else None
         ),
+    ),
+    # --- setup progress ---
+    # The single most actionable reading in this group, and the one that
+    # explains a calibration failure: the device carries a first-time setup
+    # checklist and marks each step, and on the model measured the alignment
+    # step is the one still pending. "failed" and "never done" look identical
+    # from the result field alone and call for opposite responses.
+    HPPrinterSensorDescription(
+        key="setup_state",
+        translation_key="setup_state",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorDeviceClass.ENUM,
+        options=["idle", "actionPending", "inProgress", "complete"],
+        value_fn=lambda data, _info: data.setup_operation_state,
+        attrs_fn=lambda data: {
+            "pending_steps": list(data.setup_pending_steps),
+            "setup_complete": not data.setup_pending_steps,
+        },
+    ),
+    # --- alerts currently raised ---
+    # The event log is a record of what happened; this is what the machine is
+    # saying right now. A clean log with a live alert is a printer that is
+    # fine and is complaining, which no combination of the existing counters
+    # would show.
+    HPPrinterSensorDescription(
+        key="active_alert_count",
+        translation_key="active_alert_count",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data, _info: len(data.active_alerts) or None,
+        attrs_fn=lambda data: {
+            "alerts": [
+                {
+                    "category": alert.category,
+                    "severity": alert.severity,
+                    "priority": alert.priority,
+                }
+                for alert in data.active_alerts
+            ],
+            "categories": sorted(
+                {a.category for a in data.active_alerts if a.category}
+            ),
+        },
+    ),
+    HPPrinterSensorDescription(
+        key="active_alert_worst",
+        translation_key="active_alert_worst",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorDeviceClass.ENUM,
+        # The device orders its own alerts by priority, so the first is the
+        # one it considers most urgent. The severity words are its own
+        # vocabulary, taken from alert/v1/capabilities.
+        options=["information", "warning", "error", "critical"],
+        value_fn=lambda data, _info: _worst_alert(data),
+    ),
+    # --- firmware ---
+    # The firmware build date was the only version marker before this, and it
+    # says nothing about whether an update succeeded. On the model measured
+    # auto-update is on, no update is available, and every attempt in the
+    # history failed -- a combination the date cannot show.
+    HPPrinterSensorDescription(
+        key="firmware_update_result",
+        translation_key="firmware_update_result",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorDeviceClass.ENUM,
+        options=["succeeded", "failed", "cancelled", "inProgress", "unknown"],
+        value_fn=lambda data, _info: data.firmware_update_result,
+    ),
+    HPPrinterSensorDescription(
+        key="firmware_update_available",
+        translation_key="firmware_update_available",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.firmware_update_available or None,
+    ),
+    # --- certificate ---
+    # Issued for ten years with nothing to warn when it runs out. On that day
+    # HTTPS access to the printer's own web interface stops working and the
+    # reason is not obvious from the symptom.
+    HPPrinterSensorDescription(
+        key="certificate_expires",
+        translation_key="certificate_expires",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda data, _info: data.certificate_expires,
+        attrs_fn=lambda data: {"valid_from": data.certificate_valid_from},
+    ),
+    # --- network, per interface ---
+    # The LEDM side reports one aggregate set of counters. Split by interface
+    # is what tells a printer working over Wi-Fi from one whose cable is
+    # unplugged: both report a small number, and only the split shows which
+    # port is live.
+    HPPrinterSensorDescription(
+        key="adapter_errors",
+        translation_key="adapter_errors",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: (
+            max((a.error_total for a in data.adapter_stats), default=0)
+            if data.adapter_stats
+            else None
+        ),
+        attrs_fn=lambda data: {
+            adapter.name: {
+                "received_bytes": adapter.received_bytes,
+                "transmitted_packets": adapter.transmitted_packets,
+                "received_unicast": adapter.received_unicast,
+                "received_multicast": adapter.received_multicast,
+                "errors": adapter.error_total,
+            }
+            for adapter in data.adapter_stats
+        },
+    ),
+    HPPrinterSensorDescription(
+        key="internet_diagnostics",
+        translation_key="internet_diagnostics",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorDeviceClass.ENUM,
+        options=["connected", "disconnected", "unknown", "notTested"],
+        value_fn=lambda data, _info: data.internet_diagnostics_result,
+    ),
+    # --- printer mechanics and consumables ---
+    HPPrinterSensorDescription(
+        key="carriage_status",
+        translation_key="carriage_status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorDeviceClass.ENUM,
+        options=["ok", "notOk", "unknown"],
+        value_fn=lambda data, _info: data.carriage_status,
+    ),
+    HPPrinterSensorDescription(
+        key="cartridge_changes",
+        translation_key="cartridge_changes",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.cartridge_changes,
+    ),
+    HPPrinterSensorDescription(
+        key="region_reset_remaining",
+        translation_key="region_reset_remaining",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data, _info: data.region_reset_remaining,
+    ),
+    HPPrinterSensorDescription(
+        key="service_id",
+        translation_key="service_id",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.service_id,
+    ),
+    HPPrinterSensorDescription(
+        key="print_services",
+        translation_key="print_services",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: ", ".join(data.print_services) or None,
+    ),
+    HPPrinterSensorDescription(
+        key="full_model_string",
+        translation_key="full_model_string",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.full_model_string,
+    ),
+    # --- LEDM print configuration ---
+    # Settings, not measurements: this says how the machine is configured,
+    # not what came out of it. Worth having because "the output got worse"
+    # is often a resolution someone changed, and nothing else shows it.
+    HPPrinterSensorDescription(
+        key="print_quality",
+        translation_key="print_quality",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.print_quality,
+    ),
+    HPPrinterSensorDescription(
+        key="resolution_setting",
+        translation_key="resolution_setting",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.resolution_setting,
+    ),
+    HPPrinterSensorDescription(
+        key="default_copies",
+        translation_key="default_copies",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.default_copies,
+    ),
+    HPPrinterSensorDescription(
+        key="current_media",
+        translation_key="current_media",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: (
+            f"{data.current_media_type} / {data.current_media_size}"
+            if data.current_media_type or data.current_media_size
+            else None
+        ),
+    ),
+    HPPrinterSensorDescription(
+        key="panel_language",
+        translation_key="panel_language",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.panel_language,
+    ),
+    HPPrinterSensorDescription(
+        key="instant_ink_status",
+        translation_key="instant_ink_status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.instant_ink_status,
     ),
     # --- diagnostics: network health ---
     # The one entity of this group that is on by default: a single number to

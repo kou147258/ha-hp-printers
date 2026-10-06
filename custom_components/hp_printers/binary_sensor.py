@@ -61,6 +61,66 @@ class HPConsumableBinarySensorDescription(BinarySensorEntityDescription):
 
 
 PRINTER_BINARY_SENSORS: tuple[HPPrinterBinarySensorDescription, ...] = (
+    # --- attack surface ---
+    # Each of these is something switched on in the printer's own settings
+    # that lets something else on the network reach it. They are not faults
+    # -- most are on by default and the machine works perfectly -- but they
+    # are the answers to "is this thing exposed", and nothing else in the
+    # integration would let anyone see them.
+    HPPrinterBinarySensorDescription(
+        key="snmp_public",
+        translation_key="snmp_public",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.SAFETY,
+        # True means the device accepts the built-in "public" community
+        # string. Both printers measured ship with it enabled, which means
+        # any host on the segment can read the management data with a
+        # credential nobody has to guess.
+        value_fn=lambda data, _info: data.snmp_public_allowed,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="bluetooth_beaconing",
+        translation_key="bluetooth_beaconing",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.bluetooth_beaconing,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="auto_update_enabled",
+        translation_key="auto_update_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.auto_update_enabled,
+    ),
+    # --- setup ---
+    HPPrinterBinarySensorDescription(
+        key="setup_incomplete",
+        translation_key="setup_incomplete",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        # On means a first-time setup step is still outstanding. On the model
+        # measured this is the alignment step, which is the same underlying
+        # fact as a failed calibration and explains it.
+        value_fn=lambda data, _info: data.setup_incomplete,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="firmware_update_failed",
+        translation_key="firmware_update_failed",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        value_fn=lambda data, _info: (
+            data.firmware_update_result.lower() == "failed"
+            if data.firmware_update_result
+            else None
+        ),
+    ),
+    HPPrinterBinarySensorDescription(
+        key="holo_enabled",
+        translation_key="holo_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.holo_enabled,
+    ),
     HPPrinterBinarySensorDescription(
         key="paper_low",
         translation_key="paper_low",
