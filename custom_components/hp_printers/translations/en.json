@@ -640,9 +640,6 @@
         "name": "Wi-Fi encryption in use",
         "description": "The cipher the printer's Wi-Fi allows. The device also reports the network's name and its pass phrase in clear text; neither is read by this integration and neither will appear here or in a diagnostics download."
       },
-      "http_proxy_enabled": {
-        "name": "HTTP proxy configured"
-      },
       "firmware_update_failure_reason": {
         "name": "Why the last firmware update failed",
         "description": "The update status says the attempt failed but not why, and the reason is the diagnosis: 'manifestNotFound' means the printer cannot find any firmware to install, which is a different problem from a failed download."
@@ -732,6 +729,9 @@
       "auto_duplex_enabled": {
         "name": "Automatic duplex",
         "description": "The auto-duplex setting. A machine with a duplexer can have this off and still have printed thousands of double-sided sheets."
+      },
+      "http_proxy_enabled": {
+        "name": "HTTP proxy configured"
       }
     },
     "button": {

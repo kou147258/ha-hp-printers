@@ -923,14 +923,9 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
             "wpa_version": info.wifi_wpa_version,
         },
     ),
-    HPPrinterSensorDescription(
-        key="http_proxy_enabled",
-        translation_key="http_proxy_enabled",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-        device_class=SensorDeviceClass.ENUM,
-        value_fn=lambda data, info: info.http_proxy_enabled,
-    ),
+    # The proxy flag is not here. It is a boolean, and a boolean in the
+    # sensor table is rejected outright by Home Assistant rather than
+    # tolerated -- it belongs in binary_sensor.py, which is where it now is.
     # Why the last firmware update failed, which updateStatus does not say.
     HPPrinterSensorDescription(
         key="firmware_update_failure_reason",

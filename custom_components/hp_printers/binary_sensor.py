@@ -144,6 +144,19 @@ PRINTER_BINARY_SENSORS: tuple[HPPrinterBinarySensorDescription, ...] = (
         value_fn=lambda data, _info: data.https_redirection_enabled,
     ),
     HPPrinterBinarySensorDescription(
+        key="http_proxy_enabled",
+        translation_key="http_proxy_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        device_class=BinarySensorDeviceClass.SAFETY,
+        # A proxy is a decision the printer was configured with, and a printer
+        # that reaches the network through one is worth seeing. It belongs here
+        # rather than in the sensor table because it is a boolean, and
+        # Home Assistant rejects a boolean sensor outright rather than
+        # rendering it as something odd.
+        value_fn=lambda data, info: info.http_proxy_enabled,
+    ),
+    HPPrinterBinarySensorDescription(
         key="duplexer_installed",
         translation_key="duplexer_installed",
         entity_category=EntityCategory.DIAGNOSTIC,
