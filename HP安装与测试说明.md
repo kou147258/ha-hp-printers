@@ -8,28 +8,35 @@
 
 **1. 解压**
 
-把 `hp_printers_HA安装包.zip` 解压到 Home Assistant 的 **config 目录**（不是 `custom_components` 目录）。
+> ⚠️ **必须先删掉旧目录再解压，不要直接覆盖。**
+>
+> 覆盖解压是这几轮反复装不上新版的唯一原因：旧文件没被替换掉，
+> 于是代码是旧的、翻译也是旧的，而这两者的症状**看起来几乎一样**，
+> 让人以为已经修好了。
+>
+> 在 HA 的「设置 → 系统 → 终端」里直接跑这两行（Docker 部署请在
+> **宿主机**上跑同名的 rm 和 unzip）：
 
-解压后必须是这个结构：
+```bash
+rm -rf /config/custom_components/hp_printers
+mkdir -p /config/custom_components/hp_printers
+```
+
+然后把 zip 里的 `custom_components` 整个解压到 `/config/`，得到：
 
 ```
-<你的 config 目录>/
-└── custom_components/
-    └── hp_printers/
-        ├── __init__.py
-        ├── manifest.json
-        ├── sensor.py
-        └── ...
+/config/custom_components/hp_printers/
+    ├── __init__.py
+    ├── manifest.json
+    ├── sensor.py
+    ├── binary_sensor.py
+    ├── button.py
+    └── translations/
+        ├── en.json
+        └── zh-Hans.json
 ```
 
-config 目录的位置，取决于你怎么装的 HA：
-
-| 方式 | 路径 |
-|---|---|
-| Home Assistant OS / 绿色安装 | 用「配置 → 加载项 → 终端」，里面 `cd /config` 就是 |
-| Supervised | `/usr/share/hassio/homeassistant` |
-| Docker（官方镜像） | 宿主机上 HA 挂载的那个目录，通常是 `./config` |
-| Container / venv | 你启动 HA 时 `--config` 指的那个目录 |
+解压到 **config 目录**（不是 `custom_components` 目录）。
 
 **2. 确认目标目录在 volumes 里**（Docker 部署必看）
 
@@ -43,16 +50,22 @@ volumes 挂载范围内，否则改了文件 HA 也看不见。要确认就在 H
 
 **4. 确认新代码真的生效了**（这一步别跳）
 
-重启不一定够。如果是覆盖解压，HA 可能还在跑旧代码——而**旧代码的症状和新
-代码几乎一样**，不确认清楚就会一直在错的那一版上排查。装完在 HA 的
-「设置 → 系统 → 终端」里跑：
+两行都要跑，两行都要对：
 
 ```bash
 grep version /config/custom_components/hp_printers/manifest.json
+ls /config/custom_components/hp_printers/translations/
 ```
 
-输出必须包含本包的版本号（包根目录的「这是哪个版本.txt」写着同一个号）。
-**对不上就是新代码没生效。**
+- 第一行必须输出 `"version": "2026.10.0"`
+- 第二行必须列出 `en.json` 和 `zh-Hans.json` **两个文件**
+
+> **症状对照**：如果实体名字只显示打印机名（`Smart Tank 750 series`）
+> 而没有后面的中文，说明 `translations/` 没装上或没被读到。
+> 如果实体名字后面跟着一个奇怪的中文词（比如三个安全项都叫同一个词），
+> 那也不是翻译生效了——那是**设备类别的名字**，说明翻译同样没读到。
+>
+> 判断依据是**实体名里设备名后面有没有属于它自己的那几个字**。
 
 **5. 删掉两个打印机条目，重新添加**
 
