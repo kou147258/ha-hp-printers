@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<man:Manifest xmlns:man="http://www.hp.com/schemas/imaging/con/ledm/manifest/2009/03/24"
+xmlns:map="http://www.hp.com/schemas/imaging/con/ledm/resourcemap/2009/01/27" 
+              xmlns:cal="http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08" 
+              xmlns:dd="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" 
+              xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="
+    http://www.hp.com/schemas/imaging/con/ledm/manifest/2009/03/24 ../schemas/Manifest.xsd
+    http://www.hp.com/schemas/imaging/con/ledm/resourcemap/2009/01/27 ../schemas/ResourceMap.xsd
+    http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd
+    http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08 ../inkprototype/schemas/MarkingAgentCalibration_025.xsd">
+  <dd:Version>
+    <dd:Revision>SVN.3367</dd:Revision>
+  </dd:Version>
+  <man:InterfaceNamespaces>
+    <man:InterfaceNamespace>http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08</man:InterfaceNamespace>
+  </man:InterfaceNamespaces>
+  <map:ResourceMap>
+	<map:ResourceLink>
+      		<dd:ResourceURI>/Calibration</dd:ResourceURI>
+		<map:Base>Root</map:Base>
+    </map:ResourceLink>
+    <map:ResourceNode>
+        <map:ResourceLink>
+            <dd:ResourceURI>/Capabilities</dd:ResourceURI>
+        </map:ResourceLink>
+        <map:ResourceType>
+            <cal:CalibrationType>Capabilities</cal:CalibrationType>
+        </map:ResourceType>
+        <map:Methods>
+            <map:Method><map:Verb>Get</map:Verb></map:Method>
+        </map:Methods>
+        <map:XmlElement>
+            <cal:Capabilities xsi:nil="true"/>
+        </map:XmlElement>
+    </map:ResourceNode>
+	<map:ResourceNode>
+		<map:ResourceLink>
+			<dd:ResourceURI>/State</dd:ResourceURI>
+		</map:ResourceLink>
+		<map:ResourceType>
+			<cal:CalibrationType>CalibrationState</cal:CalibrationType>
+		</map:ResourceType>
+		<map:Methods>
+			<map:Method><map:Verb>Get</map:Verb></map:Method>
+		</map:Methods>
+		<map:XmlElement>
+			<cal:CalibrationState xsi:nil="true"/>
+		</map:XmlElement>
+	</map:ResourceNode>
+	<map:ResourceNode>
+		<map:ResourceLink>
+			<dd:ResourceURI>/Session</dd:ResourceURI>
+		</map:ResourceLink>
+		<map:ResourceType>
+			<cal:CalibrationType>CalibrationSession</cal:CalibrationType>
+		</map:ResourceType>
+		<map:Methods>
+			<map:Method><map:Verb>Post</map:Verb></map:Method>
+		</map:Methods>
+		<map:XmlElement>
+			<cal:CalibrationState xsi:nil="true"/>
+		</map:XmlElement>
+		<map:ResourceMap>
+			<map:ResourceNode>
+				<map:ResourceLink>
+					<dd:ResourceURI>/{session-id}</dd:ResourceURI>
+					<cal:session-id>xs:positiveInteger</cal:session-id>
+				</map:ResourceLink>
+				<map:ResourceType>
+					<cal:CalibrationType>CalibrationSession</cal:CalibrationType>
+				</map:ResourceType>
+				<map:Methods>
+					<map:Method><map:Verb>Get</map:Verb></map:Method>
+					<map:Method><map:Verb>Put</map:Verb></map:Method>
+				</map:Methods>
+				<map:XmlElement>
+					<cal:CalibrationState xsi:nil="true"/>
+				</map:XmlElement>
+			</map:ResourceNode>
+        </map:ResourceMap>
+    </map:ResourceNode>
+    <map:ResourceNode>
+        <map:ResourceLink>
+            <dd:ResourceURI>/SessionV2</dd:ResourceURI>
+        </map:ResourceLink>
+        <map:ResourceType>
+            <cal:CalibrationType>CalibrationSessionV2</cal:CalibrationType>
+        </map:ResourceType>
+        <map:Methods>
+            <map:Method><map:Verb>Post</map:Verb></map:Method>
+        </map:Methods>
+        <map:XmlElement>
+            <cal:CalibrationSetting xsi:nil="true"/>
+        </map:XmlElement>
+        <map:ResourceMap>
+            <map:ResourceNode>
+                <map:ResourceLink>
+                    <dd:ResourceURI>/{session-id}</dd:ResourceURI>
+                    <cal:session-id>xs:positiveInteger</cal:session-id>
+                </map:ResourceLink>
+                <map:ResourceType>
+                    <cal:CalibrationType>CalibrationSessionV2</cal:CalibrationType>
+                </map:ResourceType>
+                <map:Methods>
+                    <map:Method><map:Verb>Get</map:Verb></map:Method>
+                    <map:Method><map:Verb>Put</map:Verb></map:Method>
+                </map:Methods>
+                <map:XmlElement>
+                    <cal:CalibrationSetting xsi:nil="true"/>
+                </map:XmlElement>
+            </map:ResourceNode>
+        </map:ResourceMap>
+    </map:ResourceNode>
+  </map:ResourceMap>
+</man:Manifest>
+

@@ -20,10 +20,14 @@ from aiohttp import ClientError, ClientSession, ClientTimeout
 from defusedxml import ElementTree as DefusedET
 
 from .const import (
+    CALIBRATION_ALIGNMENT_STATE,
+    CALIBRATION_SESSION_ELEMENT,
     CDP_LEDM_INSTANT_INK,
     CDP_LEDM_PANEL,
     CDP_LEDM_QUIET_MODE,
     COLOR_NAMES,
+    ENDPOINT_CALIBRATION_CAP,
+    ENDPOINT_CALIBRATION_SESSION,
     ENDPOINT_CONSUMABLE_CONFIG,
     ENDPOINT_INTERNAL_PRINT_CAP,
     ENDPOINT_INTERNAL_PRINT_DYN,
@@ -37,6 +41,7 @@ from .const import (
     ENDPOINT_PRODUCT_STATUS,
     ENDPOINT_PRODUCT_USAGE,
     ENDPOINT_SHOP_FOR_SUPPLIES,
+    NS_CALIBRATION,
     STATUS_OPTIONS,
 )
 from .models import (
@@ -473,7 +478,114 @@ class LEDMClient:
             "</ipdyn:InternalPrintDyn>"
         ).encode()
 
-        url = f"{self.base_url}{ENDPOINT_INTERNAL_PRINT_DYN}"
+        await self._async_post_write(
+            ENDPOINT_INTERNAL_PRINT_DYN,
+            body,
+            what=job_type,
+        )
+
+    async def async_get_calibration_capabilities(self) -> dict[str, Any]:
+        """Return what this LEDM model can align.
+
+        Read from ``/Calibration/Capabilities`` -- the document the printer's
+        own calibration page reads before it offers anything, and which names
+        the routines it supports under ``CalibrationJobTypeSupport``.
+
+        The key is the one the CDP side already uses, deliberately: one
+        description table serves both protocols, and that only holds while the
+        two answer the same question under the same name. The *values* are the
+        device's own and do not match across protocols -- CDP says
+        ``penAlignSemiauto``, this says ``Alignment`` -- which is precisely why
+        they are two separate button descriptions and not one.
+        """
+        root = await self._fetch_optional(ENDPOINT_CALIBRATION_CAP)
+        if root is None:
+            return {}
+        # Deduplicated because the device lists the same routine twice: its
+        # answer is a list of supported routines, not a per-source list, and a
+        # caller comparing contents should not have to know that.
+        types = list(
+            dict.fromkeys(
+                (node.text or "").strip()
+                for node in root.iter()
+                if _localname(node.tag) == "CalibrationJobType"
+                and (node.text or "").strip()
+            )
+        )
+        return {
+            "availableCalibrations": types,
+            "scanCalibration": (_text(root, "ScanCalibration") or "").lower() == "true",
+        }
+
+    async def async_run_calibration(self, calibration_type: str) -> dict[str, Any]:
+        """Start the printhead alignment named by the capability document.
+
+        A third protocol, a third URL, and a fourth body shape. None of it is
+        discoverable from the resources a GET reaches, and the failure mode is
+        the same each time -- a 404 with an empty body that reads exactly like
+        "this printer has no such feature".
+
+        Everything below is read out of the printer's own calibration manifest,
+        ``/Calibration/CalibrationManifest.xml``, which pairs every URI with
+        the XML element that resource accepts:
+
+            POST /Calibration/Session   <cal:CalibrationState>Printing</...>
+              xmlns:cal=".../cnx/markingagentcalibration/2009/04/08"
+
+        The body carries a *state*, not the routine's name. The printer's own
+        page sends ``Printing`` to begin the phase that prints the alignment
+        pattern, and only after checking that the model's alignment mode is one
+        of semiAutomatic/automatic/manual -- which is the branch this model
+        takes, its mode being ``semiAutomatic``. The alternative branch in that
+        same code posts a ``cal:CalibrationJobType`` element to
+        ``/Calibration/SessionV2``; that is line-feed calibration, a different
+        operation, and it is not what this button means.
+
+        The device answers ``201 Created`` with a ``Location`` pointing at the
+        job it queued, and the alignment then waits on the user: the pattern
+        has to go on the scanner glass before the routine can finish. That is
+        why this returns as soon as the request is accepted rather than
+        reporting a result.
+        """
+        if not calibration_type:
+            raise HPPrinterWriteError("No calibration type given")
+
+        available = (await self.async_get_calibration_capabilities()).get(
+            "availableCalibrations"
+        ) or []
+        if calibration_type not in available:
+            raise HPPrinterWriteError(
+                f"This printer does not offer an alignment called {calibration_type}"
+            )
+
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            f'<cal:{CALIBRATION_SESSION_ELEMENT} xmlns:cal="{NS_CALIBRATION}" '
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+            f'xsi:schemaLocation="{NS_CALIBRATION} '
+            '../inkprototype/schemas/MarkingAgentCalibration_025.xsd"'
+            f">{CALIBRATION_ALIGNMENT_STATE}</cal:{CALIBRATION_SESSION_ELEMENT}>"
+        ).encode()
+
+        return await self._async_post_write(
+            ENDPOINT_CALIBRATION_SESSION,
+            body,
+            what=f"alignment {calibration_type}",
+        )
+
+    async def _async_post_write(
+        self, endpoint: str, body: bytes, *, what: str
+    ) -> dict[str, Any]:
+        """POST an XML body to a maintenance resource, with the admin password.
+
+        One transport for both LEDM writes, because they are one request:
+        POST, an XML body, the EWS admin credential, a ``Location`` pointing at
+        the job that was queued. Only the URI and the document differ, and
+        duplicating the credential handling would be duplicating the reason it
+        exists -- this is the one place on this protocol that authenticates,
+        which is the opposite of CDP, where sending a password breaks the read.
+        """
+        url = f"{self.base_url}{endpoint}"
         try:
             async with self._session.post(
                 url,
@@ -491,24 +603,25 @@ class LEDMClient:
                 detail = (await response.text())[:200]
         except TimeoutError as err:
             raise HPPrinterWriteError(
-                f"Timeout starting {job_type}; the printer may still be running it"
+                f"Timeout starting {what}; the printer may still be running it"
             ) from err
         except ClientError as err:
-            raise HPPrinterWriteError(f"Error starting {job_type}: {err}") from err
+            raise HPPrinterWriteError(f"Error starting {what}: {err}") from err
 
         # Logged with the job and the resulting state resource, never the
         # credential, for the same reason the CDP side does not send one.
         _LOGGER.warning(
-            "User-requested write: POST %s job=%s -> %s",
-            ENDPOINT_INTERNAL_PRINT_DYN,
-            job_type,
+            "User-requested write: POST %s %s -> %s",
+            endpoint,
+            what,
             location or "(no Location)",
         )
         if status >= 400:
             raise HPPrinterWriteError(
-                f"Printer refused {job_type}: HTTP {status} "
+                f"Printer refused {what}: HTTP {status} "
                 f"{detail.strip() or 'no detail given'}"
             )
+        return {"location": location}
 
     async def async_ledm_cdp(self) -> tuple[bool | None, str | None, str | None]:
         """Read the three CDP documents an LEDM printer also answers.

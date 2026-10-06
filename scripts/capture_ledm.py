@@ -54,6 +54,23 @@ ENDPOINTS = (
     # Adding it to this list is what put those four on the anonymizer's list
     # -- see IDENTIFIER_TAGS in anonymize_ledm.py.
     "/DevMgmt/ShopForSupplies.xml",
+    # The calibration interface, which is advertised in DiscoveryTree.xml at
+    # "/Calibration/CalibrationManifest.xml" -- the manifest owner as a path
+    # segment. Every path guessed from the pattern "/CalibrationManifest.xml"
+    # 404s, which is how this went missing for so long.
+    #
+    # Identity audit, recorded because the rule is to record it: all three
+    # carry no device identity at all. The manifest is a resource map -- URIs,
+    # verbs, element names and schema URIs -- and the other two are the
+    # capability and current-state documents, which name routines and a state
+    # token. No serial, no hostname, no model, no counters, and nothing that
+    # varies between two machines of the same model. Nothing to add to
+    # IDENTIFIER_TAGS, and the anonymizer passes them through untouched, which
+    # is checked rather than assumed: the fixtures assert the absence of the
+    # values actually observed on the machine measured.
+    "/Calibration/CalibrationManifest.xml",
+    "/Calibration/Capabilities",
+    "/Calibration/State",
 )
 
 

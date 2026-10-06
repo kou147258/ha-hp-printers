@@ -776,6 +776,9 @@
       },
       "ledm_privacy_report": {
         "name": "Print security and privacy report"
+      },
+      "ledm_calibrate_printhead": {
+        "name": "Align printhead (prints a pattern to put on the scanner glass)"
       }
     }
   }

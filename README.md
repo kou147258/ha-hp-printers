@@ -499,8 +499,8 @@ name them:
 
 | | Where the printer lists them | How a job is started |
 |---|---|---|
-| **CDP printer** | `/cdm/report/v1/reports` and the calibration capabilities | `PATCH`, JSON body, no credential |
-| **LEDM printer** | `/DevMgmt/InternalPrintCap.xml` | `POST`, XML body, admin password |
+| **CDP printer** | `/cdm/report/v1/reports` and `/cdm/calibration/v1/capabilities` | `PATCH`, JSON body, no credential |
+| **LEDM printer** | `/DevMgmt/InternalPrintCap.xml` and `/Calibration/Capabilities` | `POST`, XML body, admin password |
 
 Both lists are read from the device, so a model offering fewer gets fewer and
 a button is never created for something the printer cannot do.
@@ -516,8 +516,47 @@ interface does not exist.
 
 Its capability document lists nineteen job types on the model measured: three
 cleaning strengths, a rib-smear clean, a cleaning verification page, and a
-dozen reports. It lists **no alignment**, so the LEDM printer gets cleaning and
-report buttons and no calibration button.
+dozen reports. It lists no alignment, because alignment on this protocol is
+not an internal print job at all.
+
+### The alignment lives somewhere else entirely
+
+Which is why this took three attempts to find. The LEDM printer's alignment
+button was missing for most of this integration's life, and the reason on
+paper was that the capability document does not mention one. The capability
+document is not supposed to: alignment is a **calibration** resource, with its
+own manifest, its own namespace and its own request.
+
+`/Calibration/CalibrationManifest.xml` *is* listed in `DiscoveryTree.xml`. It
+was missed because 324 candidate paths were built on the pattern
+`/CalibrationManifest.xml/...` — dropping the `/Calibration/` segment that the
+discovery tree spells out — and every one of them answered 404. A 404 with an
+empty body from a maintenance interface looks exactly like a feature that does
+not exist.
+
+That manifest is worth more than the path it gave: it pairs every URI with the
+XML element the body is expected to carry, so the request was built by reading
+the device's own resource map rather than by guessing. Its namespace is the one
+thing here that could not have been inferred — every other schema on this
+printer sits under `.../con/ledm/...`, and this one sits under `cnx`:
+
+```
+POST /Calibration/Session
+<cal:CalibrationState xmlns:cal=".../cnx/markingagentcalibration/2009/04/08"
+                      xmlns:xsi="...">Printing</cal:CalibrationState>
+```
+
+The body carries a **state**, not the routine's name. `Alignment` is what
+`/Calibration/Capabilities` advertises; `Printing` is the state that starts the
+phase which prints the alignment pattern, and the routine is implied by which
+button was pressed. The printer's own code checks the model's alignment mode
+before sending, and only proceeds for `semiAutomatic`, `automatic` and
+`manual` — the model measured is `semiAutomatic`.
+
+Alignment is a two-party job and the second half is the user: the printer
+prints a pattern and then waits for it to be placed on the scanner glass. The
+button reports that the request was **accepted**, never that the alignment
+**finished**, because the printer has not said so.
 
 ## Dashboard
 

@@ -142,6 +142,41 @@ ENDPOINT_INTERNAL_PRINT_DYN: Final = "/DevMgmt/InternalPrintDyn.xml"
 ENDPOINT_USAGE_CAP: Final = "/DevMgmt/ProductUsageCap.xml"
 ENDPOINT_CONSUMABLE_CAP: Final = "/DevMgmt/ConsumableConfigCap.xml"
 
+# --- the LEDM calibration interface ----------------------------------------
+#
+# Unlike the internal-print surface, this one *is* in DiscoveryTree.xml -- at
+# "/Calibration/CalibrationManifest.xml", with the manifest owner as a path
+# segment of its own. The printer's own page addresses the same resources as
+# "/Calibration/Session", dropping the manifest name, which is the same
+# shorthand "/DevMgmt/InternalPrintDyn.xml" is.
+#
+# That prefix is the whole reason this interface was written off as absent:
+# 324 candidate paths built on the pattern "/CalibrationManifest.xml/..."
+# every one of them 404, because the real document is one segment deeper. A
+# manifest found in the discovery tree beats a path pattern, and reading it
+# first would have cost one request.
+ENDPOINT_CALIBRATION_CAP: Final = "/Calibration/Capabilities"
+ENDPOINT_CALIBRATION_STATE: Final = "/Calibration/State"
+ENDPOINT_CALIBRATION_SESSION: Final = "/Calibration/Session"
+
+# The namespace the printer declares on its own calibration manifest, read out
+# of the manifest's root element rather than guessed. It is the only
+# namespace on this device outside the ".../con/ledm/..." tree -- it sits
+# under "cnx" -- so it could not have been inferred from the others, and a
+# plausible-looking URI in the wrong namespace is accepted-looking enough to
+# survive review.
+NS_CALIBRATION: Final = (
+    "http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08"
+)
+
+# The element /Calibration/Session accepts, and the state it takes to start an
+# alignment. Both come from the manifest's own resource map, which pairs the
+# URI with the element the body is expected to carry. The routine this starts
+# is advertised in /Calibration/Capabilities under "Alignment"; that token is a
+# button identity, so it lives with the buttons rather than here.
+CALIBRATION_SESSION_ELEMENT: Final = "CalibrationState"
+CALIBRATION_ALIGNMENT_STATE: Final = "Printing"
+
 # The cleaning operations are deliberately NOT named here. The device lists
 # them in /cdm/report/v1/reports with its own identifiers, and button.py is
 # the single place those identifiers are mapped onto buttons. A second table

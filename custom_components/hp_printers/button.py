@@ -216,6 +216,19 @@ BUTTONS: tuple[HPMaintenanceButtonDescription, ...] = (
         translation_key="ledm_privacy_report",
         job_type="privacyReport",
     ),
+    # --- LEDM: the printhead alignment, named by Calibration/Capabilities --
+    #
+    # The same physical routine as ``calibrate_printhead`` above, reached over
+    # a third protocol and under a name of the device's own choosing: CDP says
+    # ``penAlignSemiauto``, this printer says ``Alignment``. Two descriptions
+    # rather than one, because a single ``calibration_type`` shared by two
+    # protocols would have to hold two vocabularies and would create the
+    # button on whichever printer happened to answer first.
+    HPMaintenanceButtonDescription(
+        key="ledm_calibrate_printhead",
+        translation_key="ledm_calibrate_printhead",
+        calibration_type="Alignment",
+    ),
 )
 
 

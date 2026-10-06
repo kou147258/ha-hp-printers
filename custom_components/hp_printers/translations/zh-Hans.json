@@ -776,6 +776,9 @@
       },
       "ledm_privacy_report": {
         "name": "打印安全与隐私报告"
+      },
+      "ledm_calibrate_printhead": {
+        "name": "校准打印头（会打印一张校准图，需放到扫描台上）"
       }
     }
   }
