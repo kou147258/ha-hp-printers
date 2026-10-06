@@ -1,0 +1,12 @@
+{
+  "bonjour": {
+    "domainName": "HP246A0EF3EC0B.local.",
+    "enabled": "true",
+    "highestPriorityPrintService": "ipp",
+    "serviceName": "HP Smart Tank 580-590 series [F3EC0B]"
+  },
+  "version": "1.0.0",
+  "wsDiscovery": {
+    "enabled": "true"
+  }
+}

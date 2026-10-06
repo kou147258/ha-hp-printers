@@ -64,6 +64,13 @@ IDENTIFIER_KEYS: dict[str, str | None] = {
     "deviceLocation": "Test Location",
     "deviceDescription": "Test Device",
     "productNumber": None,  # replaced with the captured makeAndModel
+    # The self-signed certificate's common name is derived from the MAC
+    # (HPF3EC0B from 00:0f:3e:c0:b0:8f), so it is a network identifier wearing
+    # an X.509 costume. The postal fields are HP's own registered address and
+    # not personal data, so they are left alone -- over-scrubbing them would
+    # make the fixture useless for testing the validity-date parsing without
+    # making anything safer.
+    "commonName": "printer.local",
 }
 
 

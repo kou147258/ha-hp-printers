@@ -1,0 +1,23 @@
+{
+  "eth0": {
+    "receivedBytes": 0,
+    "receivedMulticastPackets": 0,
+    "receivedUnicastPackets": 0,
+    "receiverErrors": 0,
+    "transmittedPackets": 0,
+    "transmitterCollisions": 0,
+    "transmitterErrors": 0,
+    "transmitterLateCollisions": 0
+  },
+  "version": "2.1.0",
+  "wifi0": {
+    "receivedBytes": 90428,
+    "receivedMulticastPackets": 19150,
+    "receivedUnicastPackets": 71278,
+    "receiverErrors": 0,
+    "transmittedPackets": 36556,
+    "transmitterCollisions": 0,
+    "transmitterErrors": 0,
+    "transmitterLateCollisions": 0
+  }
+}

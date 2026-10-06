@@ -1,0 +1,24 @@
+{
+  "certificateAttributes": {
+    "cityOrLocality": "Vancouver",
+    "commonName": "printer.local",
+    "countryOrRegion": "US",
+    "organization": "HP",
+    "stateOrProvince": "Washington"
+  },
+  "lastResult": "success",
+  "links": [
+    {
+      "href": "/cdm/certificate/v1/certificates/10001",
+      "rel": "certificates"
+    }
+  ],
+  "privateKeyExportable": "false",
+  "signatureAlgorithm": "sha256WithRsa",
+  "state": "idle",
+  "validity": {
+    "fromDate": "2025-03-07",
+    "toDate": "2035-03-05"
+  },
+  "version": "1.0.0"
+}

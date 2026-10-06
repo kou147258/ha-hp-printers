@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "currentBeaconingEnabled": "true",
+  "requestedBeaconingEnabled": "true",
+  "hwPresent": "true"
+}

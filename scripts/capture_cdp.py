@@ -73,6 +73,44 @@ ENDPOINTS = (
     "/cdm/ioConfig/v2/capabilities",
     "/cdm/network/v1/snmpConfig",
     "/cdm/security/v1/deviceAdminConfig",
+    # Added after asking the device what it advertises rather than guessing:
+    # /cdm/servicesDiscovery lists 89 links on the model measured, and these
+    # are the ones that answer a question a user asks. The four *Private
+    # documents are deliberately absent -- the device does not redact them, so
+    # capturing one would put a real cartridge serial in the repository.
+    "/cdm/servicesDiscovery",
+    "/cdm/deviceSetup/v1/status",
+    "/cdm/firmwareUpdate/v2/updateStatus",
+    "/cdm/firmwareUpdate/v2/updateCheck",
+    "/cdm/firmwareUpdate/v2/configuration",
+    "/cdm/firmwareUpdate/v2/updateHistory",
+    "/cdm/alert/v1/criticalAlerts",
+    "/cdm/alert/v1/errorAlerts",
+    "/cdm/certificate/v1/certificates/selfSignedCertificate",
+    "/cdm/certificate/v1/capabilities",
+    "/cdm/ioConfig/v2/adapterStats",
+    "/cdm/network/v1/internetDiagnostics",
+    "/cdm/network/v1/printServices",
+    "/cdm/network/v1/proxyConfig",
+    "/cdm/network/v1/discoveryServices",
+    "/cdm/network/v1/nameResolverServices",
+    "/cdm/supply/v1/configPrivate",
+    "/cdm/supply/v1/regionReset",
+    "/cdm/print/v2/printCapabilities",
+    "/cdm/print/v2/setupStatus",
+    "/cdm/ble/v1/configuration",
+    "/cdm/system/v1/serviceConfig",
+    "/cdm/system/v1/images",
+    "/cdm/power/v1/configuration",
+    "/cdm/calibration/v1/capabilities",
+    "/cdm/calibration/v1/calibrations",
+    "/cdm/report/v1/reports",
+    # An LEDM printer answers these three alongside its XML, and they are the
+    # only place its quiet-print flag, panel language and instant-ink status
+    # exist. A model serving none of them answers 404 and they are skipped.
+    "/cdm/print/v1/printModeConfiguration",
+    "/cdm/controlPanel/v1/configuration",
+    "/cdm/consumableSubscription/v1/info",
 )
 
 # Sent so a 404 is recorded as a body-less response rather than crashing the

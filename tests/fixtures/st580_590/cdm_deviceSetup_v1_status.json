@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "setupOperationState": "actionPending",
+  "softwareCompletionState": "completed",
+  "actionLanguageCountry": {
+    "status": "completed",
+    "transitionType": "auto",
+    "suggestedOrder": 1,
+    "links": [
+      {
+        "href": "/cdm/system/v1/configuration",
+        "rel": "configuration",
+        "hints": [
+          {
+            "method": "get"
+          },
+          {
+            "method": "put"
+          },
+          {
+            "method": "patch"
+          }
+        ]
+      }
+    ]
+  },
+  "actionFillInkTanks": {
+    "status": "completed",
+    "transitionType": "manual",
+    "suggestedOrder": 2,
+    "links": [
+      {
+        "href": "/cdm/supply/v1/suppliesPublic",
+        "rel": "suppliesPublic",
+        "hints": [
+          {
+            "method": "get"
+          }
+        ]
+      }
+    ]
+  },
+  "actionInstallPha": {
+    "status": "completed",
+    "transitionType": "manual",
+    "suggestedOrder": 3,
+    "links": [
+      {
+        "href": "/cdm/supply/v1/suppliesPublic",
+        "rel": "suppliesPublic",
+        "hints": [
+          {
+            "method": "get"
+          }
+        ]
+      }
+    ]
+  },
+  "actionLoadMainTray": {
+    "status": "completed",
+    "transitionType": "manual",
+    "suggestedOrder": 4,
+    "links": [
+      {
+        "href": "/cdm/media/v1/configuration",
+        "rel": "configuration",
+        "hints": [
+          {
+            "method": "get"
+          }
+        ]
+      }
+    ]
+  },
+  "actionSemiAutoCalibration": {
+    "status": "pending",
+    "transitionType": "manual",
+    "suggestedOrder": 5,
+    "links": [
+      {
+        "href": "/cdm/report/v1/print",
+        "rel": "print",
+        "hints": [
+          {
+            "method": "get"
+          },
+          {
+            "method": "patch"
+          }
+        ]
+      },
+      {
+        "href": "/cdm/calibration/v1/calibrations/penAlignSemiauto",
+        "rel": "penAlignSemiauto",
+        "hints": [
+          {
+            "method": "get"
+          },
+          {
+            "method": "patch"
+          }
+        ]
+      }
+    ]
+  }
+}

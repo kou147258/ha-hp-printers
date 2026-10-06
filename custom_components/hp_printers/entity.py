@@ -5,11 +5,13 @@ from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    CONSUMABLE_DEVICE_FALLBACK,
     CONSUMABLE_NOUNS,
     DEFAULT_CONSUMABLE_NOUN,
     DOMAIN,
     MANUFACTURER,
     SUBUNIT_KEYS,
+    SUBUNIT_NAMES,
     consumable_device_key,
 )
 from .coordinator import HPPrinterDataUpdateCoordinator
@@ -84,6 +86,18 @@ class HPSubunitEntity(CoordinatorEntity[HPPrinterDataUpdateCoordinator]):
             translation_placeholders={
                 "device_name": coordinator.config_entry.title,
             },
+            # ...and the same string again, as the stored fallback.
+            #
+            # A device's name is written into Home Assistant's device registry
+            # when the device is first created, and that stored value is what
+            # the user sees whenever the frontend cannot resolve the
+            # translation. With `translation_key` alone and a lookup that
+            # misses, what gets stored is the key itself: measured on a real
+            # install, the device page read `consumable_ink_tank_black` and
+            # `subunit_copier` while the entity names beside them were
+            # correctly localised. The value here is deliberately the same
+            # text the translation carries, so the two paths agree.
+            name=f"{coordinator.config_entry.title} {SUBUNIT_NAMES[subunit]}",
         )
 
 
@@ -123,17 +137,28 @@ class HPConsumableEntity(CoordinatorEntity[HPPrinterDataUpdateCoordinator]):
         color = (consumable.color_name if consumable else None) or None
 
         self._attr_unique_id = f"{printer_serial}_{label_code}_{description.key}"
+        device_key = consumable_device_key(noun, color)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{printer_serial}_{label_code}")},
             via_device=(DOMAIN, printer_serial),
             manufacturer=(consumable.brand if consumable else None) or MANUFACTURER,
             model=consumable.part_number if consumable else None,
             serial_number=consumable.serial_number if consumable else None,
-            translation_key=consumable_device_key(noun, color),
+            translation_key=device_key,
             translation_placeholders={
                 "device_name": coordinator.config_entry.title,
                 "label": f"{noun} {color or label_code}",
             },
+            # The stored fallback, matching the translation. See the note in
+            # HPSubunitEntity: a device name is written into the registry when
+            # the device is created, and a translation lookup that misses
+            # leaves the raw key there for the user to read. A colour this
+            # integration has not seen has no entry and keeps the English
+            # label, which is what it showed before any of this existed.
+            name=(
+                f"{coordinator.config_entry.title} "
+                f"{CONSUMABLE_DEVICE_FALLBACK.get(device_key, f'{noun} {color or label_code}')}"
+            ),
         )
 
     @property

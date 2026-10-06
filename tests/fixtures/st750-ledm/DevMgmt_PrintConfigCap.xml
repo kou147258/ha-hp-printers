@@ -1,0 +1,79 @@
+<ns0:PrintConfigCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/printconfigcap/2009/05/06" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/printconfigcap/2007/11/2" xmlns:ns4="http://www.hp.com/schemas/imaging/con/ledm/2007/09/21" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/printconfigcap/2007/11/2 ../schemas/PrintConfigCap.xsd                       http://www.hp.com/schemas/imaging/con/ledm/printconfigcap/2009/05/06 ../schemas/ledm2/PrintConfigCap.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.786</ns2:Revision>
+
+		<ns2:Date>2014-06-19</ns2:Date>
+
+	</ns2:Version>
+
+	<ns3:BitsPerPixel typeof="dd:NonNegativeInteger" min="0" max="32" step="1" elementXPath="prncfgdyn2:PrintConfigDyn/dd:BitsPerPixel" access="readOnly" />
+
+	<ns3:ColorBitsPerPixel typeof="dd:NonNegativeInteger" min="0" step="1" max="32" elementXPath="prncfgdyn2:PrintConfigDyn/dd:ColorBitsPerPixel" access="readOnly" />
+
+	<ns3:DefaultPrintCopies typeof="dd:NonNegativeInteger" min="1" max="99" step="1" elementXPath="prncfgdyn2:PrintConfigDyn/dd:DefaultPrintCopies" access="readWrite" />
+
+	<ns3:DefaultCourierSupport access="readWrite">
+
+		<ns2:DefaultCourier>dark</ns2:DefaultCourier>
+
+		<ns2:DefaultCourier>regular</ns2:DefaultCourier>
+
+	</ns3:DefaultCourierSupport>
+
+	<ns3:DefaultPDLInterpreterOrientationSupport access="readWrite">
+
+		<ns2:DefaultPDLInterpreterOrientation>Landscape</ns2:DefaultPDLInterpreterOrientation>
+
+		<ns2:DefaultPDLInterpreterOrientation>Portrait</ns2:DefaultPDLInterpreterOrientation>
+
+	</ns3:DefaultPDLInterpreterOrientationSupport>
+
+	<ns3:PrintDensitySettingsCap>
+
+		<ns3:SupportedDefaultSettings>
+
+			<ns4:DefaultSetting>FactoryDefault</ns4:DefaultSetting>
+
+			<ns4:DefaultSetting>GroupDefault</ns4:DefaultSetting>
+
+		</ns3:SupportedDefaultSettings>
+
+	</ns3:PrintDensitySettingsCap>
+
+	<ns3:ResolutionSettingSupport access="readOnly">
+
+		<ns2:ResolutionSetting>fast300dpi</ns2:ResolutionSetting>
+
+	</ns3:ResolutionSettingSupport>
+
+	<ns0:BorderlessPrintingSupport access="readOnly">
+
+		<ns2:BorderlessPrinting>false</ns2:BorderlessPrinting>
+
+		<ns2:BorderlessPrinting>true</ns2:BorderlessPrinting>
+
+	</ns0:BorderlessPrintingSupport>
+
+	<ns0:DefaultPrintQualitySettingSupport access="readWrite">
+
+		<ns2:PrintQuality>Best</ns2:PrintQuality>
+
+		<ns2:PrintQuality>Draft</ns2:PrintQuality>
+
+		<ns2:PrintQuality>Normal</ns2:PrintQuality>
+
+		<ns2:PrintQuality>Marvelous</ns2:PrintQuality>
+
+	</ns0:DefaultPrintQualitySettingSupport>
+
+	<ns0:InkSlidersSupport elementXPath="prncfgdyn2:PrintConfigDyn/prncfgdyn2:InkSliders" access="readOnly">
+
+		<ns3:InkSliders>disabled</ns3:InkSliders>
+
+		<ns3:InkSliders>enabled</ns3:InkSliders>
+
+	</ns0:InkSlidersSupport>
+
+</ns0:PrintConfigCap>

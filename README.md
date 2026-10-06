@@ -1,12 +1,18 @@
 # HP Printers for Home Assistant
 
 Local integration for HP printers. Reads the printer over HTTP/HTTPS — no
-cloud, no account, no credentials, no writes.
+cloud, no account, no writes on any polling path.
 
 Newer HP models no longer serve **LEDM**, the XML interface this integration
 originally targeted; they serve a JSON API instead (**CDP**), and report paper
 level over **IPP**. All three are supported, and which one a given printer
 speaks is worked out at setup — there is no protocol setting to fill in.
+
+An optional EWS admin password field is accepted and deliberately unused — see
+[Maintenance buttons](#maintenance-buttons) for why sending it would be
+actively harmful on a CDP printer. Cleaning and printhead alignment appear as
+buttons you press. Those spend ink and paper, so they are never something a
+poll or an automation fires on its own.
 
 ## What you get
 
@@ -86,6 +92,7 @@ everything else works without it.
 | **Host** | Prefer the printer's mDNS name over its IP — HP sets one from the MAC, such as `NPI2E7F3D.local` (you'll find it on the printer's Network Summary page, or in the TLS certificate's common name). It resolves to a MAC-derived IPv6 address that cannot change on a lease renewal, so no DHCP reservation is needed. An IP works too; entries are keyed on serial number, so an address change will not orphan your entities either way. |
 | **Name** | Optional. Drives the device name and every entity ID. Leave blank to use the model name. |
 | **Port / HTTPS** | Under *Advanced settings*. Defaults to port 80. Printers serve a self-signed certificate, which is not verified. |
+| **Admin password** | Under *Advanced settings*, and optional. **Nothing currently uses it**: CDP writes are served with no credential, and an LEDM model has no maintenance interface to protect. It is kept for a firmware that starts requiring one, and it is held in memory and never sent — an EWS password attached to a CDP request turns working responses into 401s. |
 
 Polling defaults to **60 seconds** and is adjustable under *Configure*. Printers
 sleep between jobs and polling wakes them, so slower is gentler on the hardware.
@@ -162,6 +169,7 @@ device page.
 | Accepting jobs | binary_sensor | `on` when the printer is ready for a new job. On a CDP model this is the only "ready for work" signal there is. |
 | Scanner status | sensor (diagnostic) | Scanner subunit state, separate from the printer's own status. |
 | Printhead alignment | sensor (diagnostic) | How the last alignment went. A **failed** alignment is a real fault — the printer is online and prints, but output can be skewed or banded — and no counter here would otherwise reveal it. The failure reason is attached as an attribute. Needs a human at the machine; this integration never triggers one. |
+| Printhead alignment in progress | sensor (diagnostic) | Where an alignment is *now*, in the device's own words, and the other half of the line above: that one is about the last completed run, this one about a run in flight. An alignment is a two-party job — the printer prints a pattern and then waits for it on the scanner glass — so without this the wait is invisible and a printer sitting on `ScanRequested` looks idle. LEDM only, and no options list: the vocabulary is unpublished, and an enum that silently dropped an unlisted state would report "no problem" on a printer stuck mid-alignment. |
 | Paper level | sensor | Remaining paper in the main input tray, as a percentage, read over IPP. Only the main sheet-feed tray is watched: a document feeder is excluded, because "low" on it means nothing. Absent on models that do not describe their tray. |
 | Paper low | binary_sensor | `on` when the tray is below the level the manufacturer defines as low. |
 | Paper present | binary_sensor | `on` when the main input tray holds media. |
@@ -176,6 +184,11 @@ device page.
 | Normal / Better / Draft quality pages | sensor (total_increasing) | Pages by the quality the job asked for. These are **sums across media types**, not the number the device reports for any one of them — `UsageByQuality` repeats each entry once per media type, and taking the first gives you only the plain-paper figure. |
 | Photo pages | sensor (total_increasing) | Photo impressions. |
 | Ink used | sensor (total_increasing) | Millilitres of ink the engine has drawn. The clearest available evidence that pages came from bottled refills. LEDM only. |
+| Ink drops printed | sensor (total_increasing) | Drops the printhead ejected, totalled across every station. |
+| Ink drops not recognised as HP | sensor (total_increasing) | **The firmer answer to "has this printer ever been fed third-party ink".** A clone chip reports the genuine part number, so a third-party cartridge presents as HP on every field the cartridge itself carries — and the printhead's own tally does not agree. Zero is the reassuring reading. |
+| Out-of-ink protection firings | sensor (total_increasing) | Times the head fired its low-ink protection. |
+| Ink drops printed in service | sensor (total_increasing, disabled by default) | Ejected during servicing rather than during printing. |
+| Pen-stall counters | attribute of the non-HP drops sensor | Eight raw carriage counters, keyed by the device's own bank and location names. **There is no total and no unit, because HP publishes none** — the values are large and monotonic, and summing them into a "stall time" would be a number this integration made up. |
 | Non-HP part count | sensor (diagnostic) | Times the device has seen a cartridge it could not authenticate. A record that this happened, not a verdict on any particular cartridge. |
 | Panel button presses | sensor (total_increasing) | Presses on the front panel. A jump between polls usually means someone was at the machine cancelling jobs — usually a paper problem the jam and mispick counters do not show. |
 | Panel cancel presses | sensor (total_increasing) | Presses specifically on cancel. |
@@ -256,9 +269,307 @@ type the printer reports.
 | Previous cartridge drum life | sensor (diagnostic, disabled by default) | Drum wear for the removed cartridge. |
 | Previous cartridge part number | sensor (diagnostic, disabled by default) | Part number of the removed cartridge. |
 | Problem | binary_sensor | `on` when the cartridge state is anything other than the healthy set (`ok`, `newgenuinehp`, `new`, `good`). |
-| Genuine | binary_sensor (diagnostic) | Whether the brand is HP or a clone.
+| Genuine | binary_sensor (diagnostic) | Whether the brand is HP or a clone. |
 | Previously used | binary_sensor (diagnostic) | `on` when the cartridge was already used in another printer. This is HP's **anti-transfer** flag, *not* a claim that the part is not genuine — the same document reports them separately. |
 | Refilled | binary_sensor (diagnostic) | `on` when the cartridge has been refilled. |
+
+## Setup progress, and what a failed alignment usually means
+
+A printer that has never been through first-time setup keeps a checklist and
+marks each step. The CDP model this integration was measured against reports
+four steps completed and **`actionSemiAutoCalibration` still pending** — so
+its *Printhead alignment* reading of `failed` is not a broken printhead. A
+setup step was never finished. Those call for opposite responses, and only
+the checklist says which one you have.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Setup state | sensor (diagnostic, enum) | First-time setup progress. The pending steps are attached as an attribute. |
+| Setup steps outstanding | binary_sensor (diagnostic, problem) | `on` while any step is outstanding. If the alignment result says failed and this is on, complete the setup rather than chasing a hardware fault. |
+
+## Alerts, and how they differ from the event log
+
+The event log is a record of what happened, cleared on reboot. **Active
+alerts** are what the machine is saying right now. A clean event log with a
+live alert is a printer that is fine and is complaining, and no combination of
+the existing counters would show it.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Active alerts | sensor (diagnostic) | How many the device is raising now, with each one's category, severity and priority attached. `0` is suppressed rather than created, since "no alerts" is what a healthy printer looks like. |
+| Colours with a live alert | sensor (diagnostic) | **Which** colour, which the count above does not say. On LEDM the colour sits in a detail block nested inside the alert; on CDP it is a pointer into the supplies document. Either way it is the difference between a complaint you can act on and a category name you cannot. |
+| Most severe active alert | sensor (diagnostic, enum) | The device's own ordering, taken as-is rather than re-ranked. A document with no alerts is not the same as one whose worst alert is `information`. |
+| Carriage status | sensor (diagnostic, enum) | A mechanical state neither the print nor the scan status word covers: a printer can report itself ready with the carriage not ok. |
+| Internet connectivity | sensor (diagnostic, enum) | The printer's own connectivity test. Its timestamp is unusable — the model has no real-time clock. |
+
+Both machines measured currently have six informational alerts (four
+genuine-supplies notices, two used-supply prompts) and no critical or error
+alerts.
+
+## Firmware, and a thing the build date cannot say
+
+`Firmware date` is the build date, and it says nothing about whether an update
+ever worked. The model measured has automatic updates enabled, no update
+currently available, and a history in which every attempt failed.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Last firmware update | sensor (diagnostic, enum) | Whether the last attempt succeeded. |
+| Why the last update failed | sensor (diagnostic, disabled by default) | The reason, which the line above does not carry. `manifestNotFound` means the printer cannot find any firmware to install — a different problem from a failed download, and with a different fix. The number of failed attempts and the length of the history are attached. |
+| Last firmware update failed | binary_sensor (diagnostic, problem) | `on` when it did not. |
+| Automatic firmware updates | binary_sensor (diagnostic, disabled by default) | Whether the printer will fetch and install updates on its own. |
+| Firmware available | sensor (diagnostic, disabled by default) | The version on offer, when there is one. |
+
+## Jobs, and how the pages actually arrived
+
+The usage document counts jobs per subunit and breaks each one into an
+outcome. The split is the point: a single "print jobs" counter reads as "the
+printer printed 7039 things", when 3 completed and 4 failed and the rest are
+something else entirely.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Print jobs | sensor (diagnostic) | Jobs the print engine took. A job can be counted here and still have failed. |
+| Jobs completed / Jobs failed | sensor (diagnostic) | The outcome split. |
+| Jobs cancelled / Jobs skipped | sensor (diagnostic) | The other two outcomes. |
+| Pages printed over the network | sensor (diagnostic) | Wired. |
+| Pages printed over Wi-Fi | sensor (diagnostic) | The split against the wired figure is what shows which path is in use — and which one goes to zero when the radio is the problem. |
+| Web interface opens | sensor (diagnostic, disabled by default) | How often someone has opened the printer's own web page. |
+| Pages printed via the cloud | sensor (diagnostic) | A counter of its own, separate from the network and wireless figures. |
+| Pages printed on a subscription | sensor (diagnostic) | Instant Ink pages, likewise counted separately. |
+
+`JobDuration` and `PagesPerJob` are deliberately **not** exposed. The device
+reports them as buckets (`lessthanTwoMinutes`, `sixToTen`,
+`greaterThanTen`) and averaging a bucket distribution would invent a precision
+the device never offered.
+
+## Security, and what is reachable from the network
+
+Each of these is something switched on in the printer's own settings that lets
+something else on the network reach it. None is a fault — most are on by
+default and the machine works perfectly — but they are the answers to "is this
+thing exposed", and nothing else here would let you see them.
+
+| Entity | Type | Notes |
+|---|---|---|
+| SNMP accepts the public community | binary_sensor (diagnostic, safety) | `on` means any host on the network can read the printer's management data with a credential nobody has to guess. **Both models measured ship with this enabled.** |
+| Bluetooth beaconing | binary_sensor (diagnostic, disabled by default) | The printer broadcasts its presence continuously. |
+| Raw printing on port 9100 | binary_sensor (diagnostic, safety) | No driver, no job structure, no authentication. **Both** printers measured answer on it, and neither redirects HTTP to HTTPS. |
+| Wi-Fi encryption in use | sensor (diagnostic, disabled by default) | The cipher the radio allows, with the band, the authentication mode and the WPA version attached. `aesOrTkip` permits the legacy TKIP option, which is worth knowing whether or not it is in use. **The device also reports the network's name and its pass phrase in clear text; neither is read**, and neither appears in a state attribute or a diagnostics download. |
+| HTTP proxy configured | binary_sensor (diagnostic, safety, disabled by default) | `on` when the printer is told to reach the network through a proxy. |
+| HTTP redirects to HTTPS | binary_sensor (diagnostic, safety) | Off means the printer's own web interface answers plain HTTP, and the admin password crosses the network in the clear every time someone opens it. |
+| Duplexer fitted / Automatic duplex | binary_sensor (diagnostic, disabled by default) | Two different questions, and the machine measured answers them differently: a duplexer installed with 10,216 double-sided sheets printed, and an auto-duplex setting that reads disabled. |
+| Sign-in attempts left | sensor (diagnostic, disabled by default) | Both halves of the budget the device publishes, because one without the other is not a budget: failed web-interface attempts remaining before it locks — a password-guessing budget, and the reason the factory-default admin password is worth changing. |
+| Enabled print services | sensor (diagnostic, disabled by default) | Which protocols it answers on — AirPrint, IPP, WS-Print, and port 9100, the easiest of the lot to abuse. |
+| Network interface errors | sensor (diagnostic) | Error counters split per interface. The split is the point: an aggregate cannot tell a printer working over Wi-Fi from one whose cable is unplugged, because both report a small number. |
+| Web certificate expires | sensor (diagnostic, date, disabled by default) | The self-signed certificate the web interface is reached over is issued for ten years, and nothing warns when it runs out. |
+
+The one worth acting on today is the first, and it is a printer setting rather
+than an integration feature: change the SNMP community string, or turn SNMP
+off, in the printer's own web interface.
+
+## Consumables and configuration
+
+| Entity | Type | Notes |
+|---|---|---|
+| Cartridges used in this slot | sensor (diagnostic) | How many cartridges this slot has held. The **maximum** across slots, since they are refilled independently — three slots holding two each is a machine on its second round, not one that has seen six. |
+| Region reset attempts left | sensor (diagnostic) | Attempts remaining under the device's region-reset scheme before it stops allowing them. |
+| Holo authentication | binary_sensor (diagnostic, disabled by default) | The cartridge authentication scheme in use. |
+| Service ID | sensor (diagnostic, disabled by default) | HP's service identifier. |
+| Model, SKU and region | sensor (diagnostic, disabled by default) | Model name with the SKU and region code appended, e.g. `Smart Tank 750 series:28B72A:0`. The identity document carries only the model half. |
+| Print quality setting | sensor (diagnostic, disabled by default) | A **setting**, not a measurement: what the machine is configured to do, not what came out of it. |
+| Resolution setting | sensor (diagnostic, disabled by default) | Same. Worth having because "the output got worse" is often a resolution somebody changed. |
+| Default copies | sensor (diagnostic, disabled by default) | Same. |
+| Default page orientation | sensor (diagnostic, disabled by default) | Portrait or Landscape, for a job whose driver says nothing. Also a setting. |
+| Paper loaded | sensor (diagnostic) | The size and type actually in each tray, per tray, with the resolution. This is what a user checks before a job goes wrong on the wrong paper. |
+| Current media | sensor (diagnostic, disabled by default) | The device's own vocabulary (`iso_a4_210x297mm`), kept verbatim so it matches what the printer's web page and the loaded paper both call it. |
+| Input trays / Output bins | sensor (diagnostic, disabled by default) | How many of each the machine has — which is what distinguishes a single-tray model without reading the list. |
+| Free memory / Total memory | sensor (diagnostic, disabled by default) | Kibibytes, as the device reports them. |
+| Panel language | sensor (diagnostic, disabled by default) | The control panel's language. |
+| Instant ink programme | sensor (diagnostic, disabled by default) | Enrolment status where the model offers one; empty means never enrolled. |
+
+Two of these — **Panel language** and **Instant ink programme** — come from
+the small CDP layer an LEDM printer serves alongside its XML, because the XML
+side has no equivalent for either. Reporting them absent would be a different
+claim from "the printer has no such setting".
+
+## `*Cap.xml`: the device's own specification
+
+Every LEDM resource has a `Dyn` document carrying values and a `Cap` document
+carrying the schema. A `Cap` document declares each field's type, range, step,
+access mode and the XPath back to its value:
+
+```xml
+<mediacap2:Top typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Top"
+                min="0" max="14" step="1" access="readOnly"></mediacap2:Top>
+```
+
+Nothing here parses them into entities — they are schema, not readings — but
+they are captured, and they are the answer to "what else is there to read".
+Differencing the three sets — what the capability documents **declare**, what
+the values document actually **contains**, and what the parser **asks for** —
+is how the readings below were found, and it is the method to use before
+adding anything else. Run against the Smart Tank 750 it reported 155 declared
+fields, 43 of which this model simply does not implement, and **175 that it
+sends and the parser did not read**.
+
+`ProductUsageCap.xml` alone declares 32 kB of counters. Two of them explain
+questions that had been open:
+
+- `SupplyFillLevel` is declared in the schema and **not sent** by either
+  consumer model. That is the definitive reason no ink level is reported: it
+  is not a parsing gap, the field is not populated. The same is true of
+  `PrimeEventCounter` and `ConsumableLastUsedDate`.
+- `Sides` looks like a printing setting and is in fact a descriptor of a
+  **memory module** — the capability document points it at
+  `DigitalStorageConfig/dd:Sides`. A parser working from field names would
+  have reported a single-sided printer on a machine that has printed ten
+  thousand double-sided sheets.
+
+### A field's name is not its meaning
+
+Three examples from the same document, all of which would have shipped wrong:
+
+| Field | Reads | Actually is |
+|---|---|---|
+| `Duplex` | `disabled` | The auto-duplex **setting**. `DuplexUnit` is the hardware, and reads `Installed` on the same printer. |
+| `WebScan` | `disabled` | The setting. `WebServicesConfig/WSScan`, in the same document, reads `enabled`. |
+| `Sides` | `1` | A memory module's sides. Nothing to do with printing. |
+
+And three fields that were read from the wrong subtree and came back `None`
+without raising — a parser that looks finished and reads nothing.
+`FailedAttemptsRemaining` lives under a `RegionInformation` block inside
+`ProductInformation`; `DeviceLanguage` one level down again under
+`ProductSettings`; `CountryAndRegionName` is a child of `ProductSettings`
+rather than sitting with its neighbours. The capability documents say where
+they are; running against the machine is what confirmed it.
+
+## Maintenance buttons
+
+The printer enumerates its own maintenance operations, and this turns the ones
+it reports into buttons:
+
+| Button | What it runs | Cost |
+|---|---|---|
+| Clean ink paths (light / medium / strong) | Three escalating purge strengths. A smear or banding usually only needs the weakest. | Each level is a longer purge. Level 3 is the expensive one — do not reach for it first. |
+| Clean paper feed | Clears the path that paper travels, not the printhead. | Small. This is the one for repeated misfeeds. |
+| Clean rib smear | Wipes the printhead surface where a smear builds up. | Small. |
+| Align printhead | Re-runs the printhead alignment. **Needs paper in the input tray** — it prints a test pattern to align against. | A page or two of ink. |
+
+Alongside the five cleaning cycles, the printer also offers a set of
+**printable diagnostic reports**, and this turns those into buttons as well:
+print quality, status, full diagnostics, event log, network configuration and
+summary, extended self test, wireless test, and the security-and-privacy
+report. They cost a sheet of paper and no ink, and they are the way to get a
+misbehaving printer to say what is wrong with it without opening a browser.
+
+**Firmware update is deliberately not here.** The endpoints exist and accept
+writes, but on the model measured there is no firmware available to install
+(`availableVersion` is empty), the install path requires a recovery-mode
+reboot, and every entry in the update history is a failure. A button that
+pushes firmware onto a consumer printer whose update path is already failing
+risks a machine that does not come back, and Home Assistant cannot recover
+that. If a firmware is ever offered and the failures are understood, this is
+worth revisiting.
+
+The three ink strengths and the two mechanism-specific cycles are separate
+operations on separate systems. A paper-feed clean does nothing for a smear on
+the printhead, so they are separate buttons rather than one "clean" button
+that hides the choice.
+
+### What these buttons will and will not do
+
+- **They only exist for operations your printer lists.** The list is read
+  from the printer's own service document at setup. A model with no
+  level-3 purge gets no level-3 button, because the alternative is a button
+  that answers "this printer does not offer that".
+- **They need no password, and none is used.** On a CDP model every document
+  is served with no credential at all; sending an admin password with the
+  request turns working responses into 401s. The password is held in memory
+  and never transmitted. You can leave the field blank.
+- **They never fire on their own.** No poll, restart, reload, or repair can
+  reach them. They run when you press them, which is the point: each one
+  spends ink and paper, and that should be a decision rather than a
+  schedule.
+- **A press is not a completion.** The printer acknowledges the request and
+  runs the cycle on its own; a clean takes minutes. The button confirms the
+  request was *accepted*. Watch the printer's own status for when it is done.
+- **The printer's reason for refusing is passed through** — where it gives
+  one. Busy, no paper and a wrong operation all arrive as an error, and the
+  device is the only thing that can tell them apart. Note that on a CDP
+  model a rejected request comes back as a 400 with an *empty* body, so
+  sometimes there is genuinely nothing to say beyond "the printer declined".
+
+Alignment is refused up front if the printer reports its input tray empty. A
+printer that reports no paper level at all is not treated as empty, because
+that would leave the button permanently unpressable on exactly the machines
+where an alignment is most likely to have failed.
+
+### Which printers get buttons
+
+A printer that lists maintenance operations in one of the two places it can
+name them:
+
+| | Where the printer lists them | How a job is started |
+|---|---|---|
+| **CDP printer** | `/cdm/report/v1/reports` and `/cdm/calibration/v1/capabilities` | `PATCH`, JSON body, no credential |
+| **LEDM printer** | `/DevMgmt/InternalPrintCap.xml` and `/Calibration/Capabilities` | `POST`, XML body, admin password |
+
+Both lists are read from the device, so a model offering fewer gets fewer and
+a button is never created for something the printer cannot do.
+
+The LEDM maintenance interface is worth a note, because it is reachable by
+**exactly one path** and is invisible on both of the obvious ones. It is not
+in `DiscoveryTree.xml`, and the web page that uses it lives at
+`/webApps/DevServ/`, which answers 403 even with the correct password. The only
+way in is the manifest — and the only way to find the manifest was to read the
+code the printer ships to its own browser. A client that only probes with GET
+sees a resource that answers 404 with an empty body and concludes the
+interface does not exist.
+
+Its capability document lists nineteen job types on the model measured: three
+cleaning strengths, a rib-smear clean, a cleaning verification page, and a
+dozen reports. It lists no alignment, because alignment on this protocol is
+not an internal print job at all.
+
+### The alignment lives somewhere else entirely
+
+Which is why this took three attempts to find. The LEDM printer's alignment
+button was missing for most of this integration's life, and the reason on
+paper was that the capability document does not mention one. The capability
+document is not supposed to: alignment is a **calibration** resource, with its
+own manifest, its own namespace and its own request.
+
+`/Calibration/CalibrationManifest.xml` *is* listed in `DiscoveryTree.xml`. It
+was missed because 324 candidate paths were built on the pattern
+`/CalibrationManifest.xml/...` — dropping the `/Calibration/` segment that the
+discovery tree spells out — and every one of them answered 404. A 404 with an
+empty body from a maintenance interface looks exactly like a feature that does
+not exist.
+
+That manifest is worth more than the path it gave: it pairs every URI with the
+XML element the body is expected to carry, so the request was built by reading
+the device's own resource map rather than by guessing. Its namespace is the one
+thing here that could not have been inferred — every other schema on this
+printer sits under `.../con/ledm/...`, and this one sits under `cnx`:
+
+```
+POST /Calibration/Session
+<cal:CalibrationState xmlns:cal=".../cnx/markingagentcalibration/2009/04/08"
+                      xmlns:xsi="...">Printing</cal:CalibrationState>
+```
+
+The body carries a **state**, not the routine's name. `Alignment` is what
+`/Calibration/Capabilities` advertises; `Printing` is the state that starts the
+phase which prints the alignment pattern, and the routine is implied by which
+button was pressed. The printer's own code checks the model's alignment mode
+before sending, and only proceeds for `semiAutomatic`, `automatic` and
+`manual` — the model measured is `semiAutomatic`.
+
+Alignment is a two-party job and the second half is the user: the printer
+prints a pattern and then waits for it to be placed on the scanner glass. The
+button reports that the request was **accepted**, never that the alignment
+**finished**, because the printer has not said so.
 
 ## Dashboard
 
@@ -331,28 +642,48 @@ Developed and tested against real hardware, not just fixtures:
 Both consumer models have a refillable ink tank with no level sensor, so
 **neither reports usable ink level**; the tank sensors read a fixed 100. This
 is a hardware fact, not a parsing gap, and no amount of querying will change
-it. Their printheads *are* reported as `inkCartridge` and do carry a real
-percentage — which is life, not ink.
+it — the CDP model states it outright, with
+`isMediaElectronicLevelSensingSupported: false`. Their printheads *are*
+reported as `inkCartridge` and do carry a real percentage — which is life,
+not ink.
+
+The maintenance buttons need a CDP model. An LEDM model does not get them:
+its `DiscoveryTree.xml` lists 24 resources and none of them is a maintenance
+endpoint, and the `MaintenanceManifest.xml` paths that its own web interface
+references all answer 404.
 
 Reports of other models working (or not) are welcome.
 
 ## A note on LEDM and CDP
 
 HP publishes no specification for either. The endpoint map here was derived by
-reading live devices: for LEDM, `/DevMgmt/DiscoveryTree.xml` enumerates the
+reading live devices. For LEDM, `/DevMgmt/DiscoveryTree.xml` enumerates the
 available resources, and each is exposed as a paired `<Resource>Cap.xml` —
 describing types, access modes and legal values — and `<Resource>Dyn.xml`
 carrying current values. The device is, in effect, its own documentation.
 
-CDP has no equivalent discovery document, so its endpoint list was established
-by exhaustively enumerating the `supply` and `ink` namespaces and keeping only
-those that return data on real hardware. That is why the CDP client reads 24
-fixed documents rather than walking a tree: there is nothing to walk.
+CDP has the same thing at `/cdm/servicesDiscovery`: 31 services, 89 links,
+and each link carries the HTTP methods it accepts, so it is the authority on
+both which endpoints exist and how they are called. An earlier version of this
+README said no such document existed and that the endpoint list had been
+recovered by exhausting namespaces by hand. That was wrong, and it was wrong
+in a way that mattered — the same document is where the cleaning and alignment
+operations come from, and the hand-built list was missing 76 of its 89 links.
 
-All access is read-only (`GET`). This integration never writes to your printer.
-That is a deliberate constraint rather than a limitation of the interfaces —
-it means the integration cannot start a print, clear a queue, or run a
-printhead cleaning cycle, and that is the trade it makes.
+**Ask the device rather than guessing a path.** Both protocols publish what
+they have, neither requires authentication, and neither is a moving target:
+a guessed list can only contain what somebody thought to type.
+
+### What is read, and what is not
+
+Every read is a `GET`, and no read requires a credential. The only non-`GET`
+requests this integration can make are the [maintenance buttons](#maintenance-buttons),
+and those are reachable only when a person presses one.
+
+The devices publish considerably more than is used here. 47 of the 90 links
+the CDP model advertises accept `post`, `patch`, `put` or `delete`, including
+factory reset, firmware upload, Wi-Fi reconfiguration, certificate management
+and the password-change endpoint. None of it is touched.
 
 ## Contributing
 

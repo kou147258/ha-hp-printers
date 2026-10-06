@@ -1,0 +1,175 @@
+<ns0:MediaCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/mediacap/2009/05/21" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/mediacap/2007/12/13" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/mediacap/2007/12/13 ../schemas/MediaCap.xsd            http://www.hp.com/schemas/imaging/con/ledm/mediacap/2009/05/21 ../schemas/ledm2/MediaCap.xsd            http://www.hp.com/schemas/imaging/con/ledm/2007/09/21  ../schemas/LEDM.xsd            http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.98</ns2:Revision>
+
+		<ns2:Date>2010-08-04</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:PrintableAreaMargin>
+
+		<ns3:Top typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Top" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Left typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Left" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Bottom typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Bottom" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Right typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Right" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:UnitsSupport access="readOnly">
+
+			<ns3:Units>DPI</ns3:Units>
+
+			<ns3:Units>Hundredths-Millimeter</ns3:Units>
+
+			<ns3:Units>Thousandths-Inch</ns3:Units>
+
+		</ns3:UnitsSupport>
+
+	</ns0:PrintableAreaMargin>
+
+	<ns3:MediaTypeSupport access="readWrite">
+
+		<ns2:MediaType>plain</ns2:MediaType>
+
+		<ns2:MediaType>photoStandard</ns2:MediaType>
+
+		<ns2:MediaType>photoOther</ns2:MediaType>
+
+		<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+		<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+		<ns2:MediaType>lightWeight</ns2:MediaType>
+
+		<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+		<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+		<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+	</ns3:MediaTypeSupport>
+
+	<ns3:MediaSizeNameSupport access="readWrite">
+
+		<ns2:MediaSizeName>na_executive_7.25x10.5in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_letter_8.5x11in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_govt-letter_8x10in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_invoice_5.5x8.5in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_a5_148x210mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_b5_176x250mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jis_b5_182x257mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jpn_oufuku-rot_148x200mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jpn_oufuku_148x200mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jpn_hagaki_100x148mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_a6_105x148mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_index-4x6_4x6in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>om_small-photo_100x150mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_5x7_5x7in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_index-5x8_5x8in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_number-10_4.125x9.5in</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_dl_110x220mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>iso_c6_114x162mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>jpn_chou4_90x205mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>om_photo_89x127mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>custom_photo-2l-size-card_127x178mm</ns2:MediaSizeName>
+
+		<ns2:MediaSizeName>na_foolscap_8.5x13in</ns2:MediaSizeName>
+
+	</ns3:MediaSizeNameSupport>
+
+	<ns0:MinimalizedMargin>
+
+		<ns3:Top typeof="dd:Int" elementXPath="dd:MinimalizedMargin/dd:Top" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Left typeof="dd:Int" elementXPath="dd:MinimalizedMargin/dd:Left" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Bottom typeof="dd:Int" elementXPath="dd:MinimalizedMargin/dd:Bottom" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Right typeof="dd:Int" elementXPath="dd:MinimalizedMargin/dd:Right" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:UnitsSupport access="readOnly">
+
+			<ns3:Units>DPI</ns3:Units>
+
+			<ns3:Units>Hundredths-Millimeter</ns3:Units>
+
+			<ns3:Units>Thousandths-Inch</ns3:Units>
+
+		</ns3:UnitsSupport>
+
+	</ns0:MinimalizedMargin>
+
+	<ns0:AutoDuplexMargin>
+
+		<ns3:Top typeof="dd:Int" elementXPath="dd:AutoDuplexMargin/dd:Top" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Left typeof="dd:Int" elementXPath="dd:AutoDuplexMargin/dd:Left" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Bottom typeof="dd:Int" elementXPath="dd:AutoDuplexMargin/dd:Bottom" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:Right typeof="dd:Int" elementXPath="dd:AutoDuplexMargin/dd:Right" min="0" max="14" step="1" access="readOnly" />
+
+		<ns3:UnitsSupport access="readOnly">
+
+			<ns3:Units>DPI</ns3:Units>
+
+			<ns3:Units>Hundredths-Millimeter</ns3:Units>
+
+			<ns3:Units>Thousandths-Inch</ns3:Units>
+
+		</ns3:UnitsSupport>
+
+	</ns0:AutoDuplexMargin>
+
+	<ns0:OversprayValue>
+
+		<ns3:Top typeof="dd:Int" elementXPath="dd:OversprayValue/dd:Top" min="-30" max="59" step="1" access="readOnly" />
+
+		<ns3:Left typeof="dd:Int" elementXPath="dd:OversprayValue/dd:Left" min="-59" max="59" step="1" access="readOnly" />
+
+		<ns3:Bottom typeof="dd:Int" elementXPath="dd:OversprayValue/dd:Bottom" min="-30" max="59" step="1" access="readOnly" />
+
+		<ns3:Right typeof="dd:Int" elementXPath="dd:OversprayValue/dd:Right" min="-59" max="59" step="1" access="readOnly" />
+
+		<ns3:UnitsSupport access="readOnly">
+
+			<ns3:Units>DPI</ns3:Units>
+
+			<ns3:Units>Hundredths-Millimeter</ns3:Units>
+
+			<ns3:Units>Thousandths-Inch</ns3:Units>
+
+		</ns3:UnitsSupport>
+
+	</ns0:OversprayValue>
+
+</ns0:MediaCap>

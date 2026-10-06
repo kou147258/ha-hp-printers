@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "updates": [
+    {
+      "version": "2.0.0",
+      "updateType": "autoUpdate",
+      "state": "idle",
+      "fromVersion": "",
+      "toVersion": "",
+      "downloadStartTime": "",
+      "downloadCompleteTime": "",
+      "downloadProgressPercent": 0,
+      "lastUpdateResult": "failed",
+      "lastUpdateTimeStamp": "1970-01-02T04:25:46.0Z",
+      "recoveryMode": "false"
+    },
+    {
+      "version": "2.0.0",
+      "updateType": "autoUpdate",
+      "state": "idle",
+      "fromVersion": "",
+      "toVersion": "",
+      "downloadStartTime": "",
+      "downloadCompleteTime": "",
+      "downloadProgressPercent": 0,
+      "lastUpdateResult": "failed",
+      "failureReason": "manifestNotFound",
+      "lastUpdateTimeStamp": "1970-01-02T05:05:03.0Z",
+      "recoveryMode": "false"
+    },
+    {
+      "version": "2.0.0",
+      "updateType": "autoUpdate",
+      "state": "idle",
+      "fromVersion": "",
+      "toVersion": "",
+      "downloadStartTime": "",
+      "downloadCompleteTime": "",
+      "downloadProgressPercent": 0,
+      "lastUpdateResult": "failed",
+      "lastUpdateTimeStamp": "1970-01-02T04:25:45.0Z",
+      "recoveryMode": "false"
+    },
+    {
+      "version": "2.0.0",
+      "updateType": "autoUpdate",
+      "state": "idle",
+      "fromVersion": "",
+      "toVersion": "",
+      "downloadStartTime": "",
+      "downloadCompleteTime": "",
+      "downloadProgressPercent": 0,
+      "lastUpdateResult": "failed",
+      "lastUpdateTimeStamp": "1970-01-09T11:14:21.0Z",
+      "recoveryMode": "false"
+    },
+    {
+      "version": "2.0.0",
+      "updateType": "autoUpdate",
+      "state": "idle",
+      "fromVersion": "",
+      "toVersion": "",
+      "downloadStartTime": "",
+      "downloadCompleteTime": "",
+      "downloadProgressPercent": 0,
+      "lastUpdateResult": "failed",
+      "lastUpdateTimeStamp": "1970-01-02T04:25:49.0Z",
+      "recoveryMode": "false"
+    }
+  ]
+}

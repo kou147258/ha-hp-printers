@@ -1,0 +1,9 @@
+{
+  "printerWidth": 8.5,
+  "colorModesSupported": [
+    "color",
+    "monochrome",
+    "grayscale"
+  ],
+  "version": "2.1.0"
+}

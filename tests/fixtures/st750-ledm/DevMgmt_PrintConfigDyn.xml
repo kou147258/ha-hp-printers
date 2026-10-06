@@ -1,0 +1,39 @@
+<ns0:PrintConfigDyn xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/printconfigdyn/2009/05/06" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/printconfigdyn/2007/11/02" xmlns:ns4="http://www.hp.com/schemas/imaging/con/ledm/2007/09/21" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/printconfigdyn/2007/11/02 ../schemas/PrintConfigDyn.xsd  http://www.hp.com/schemas/imaging/con/ledm/printconfigdyn/2009/05/06 ../schemas/ledm2/PrintConfigDyn.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.786</ns2:Revision>
+
+		<ns2:Date>2014-06-19</ns2:Date>
+
+	</ns2:Version>
+
+	<ns2:BitsPerPixel>8</ns2:BitsPerPixel>
+
+	<ns2:ColorBitsPerPixel>0</ns2:ColorBitsPerPixel>
+
+	<ns2:DefaultPrintCopies>1</ns2:DefaultPrintCopies>
+
+	<ns2:DefaultCourier>regular</ns2:DefaultCourier>
+
+	<ns2:DefaultPDLInterpreterOrientation>Portrait</ns2:DefaultPDLInterpreterOrientation>
+
+	<ns2:ResolutionSetting>fast600dpi</ns2:ResolutionSetting>
+
+	<ns2:BorderlessPrinting>true</ns2:BorderlessPrinting>
+
+	<ns2:PrintQuality>Normal</ns2:PrintQuality>
+
+	<ns3:PrintDensitySettings>
+
+		<ns3:EnabledDefaultSettings>
+
+			<ns4:DefaultSetting>FactoryDefault</ns4:DefaultSetting>
+
+		</ns3:EnabledDefaultSettings>
+
+	</ns3:PrintDensitySettings>
+
+	<ns0:InkSliders>disabled</ns0:InkSliders>
+
+</ns0:PrintConfigDyn>

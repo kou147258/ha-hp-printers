@@ -69,6 +69,148 @@ CDP_EVENTS: Final = "/cdm/diagnostic/v1/systemEvents"
 CDP_SECURITY_CONFIG: Final = "/cdm/security/v1/deviceAdminConfig"
 CDP_CALIBRATION: Final = "/cdm/calibration/v1/calibration/penAlignSemiauto"
 
+# --- write endpoints -------------------------------------------------------
+#
+# These are the only requests this integration ever makes that are not a GET,
+# and none of them are made on a poll: each one is a button the user presses.
+# The paths and the methods come from the device's own service discovery
+# document (/cdm/servicesDiscovery), which lists every link together with the
+# HTTP methods that link accepts. That document is the authority here -- it is
+# how "PATCH this" was established rather than assumed.
+CDP_REPORTS: Final = "/cdm/report/v1/reports"
+CDP_REPORT_PRINT: Final = "/cdm/report/v1/print"
+CDP_CALIBRATION_TRIGGER: Final = "/cdm/calibration/v1/calibration"
+CDP_CALIBRATION_CAPABILITIES: Final = "/cdm/calibration/v1/capabilities"
+
+# --- the device's own setup, alerts, firmware, security ---------------------
+#
+# Each of these was found by reading /cdm/servicesDiscovery and then opening
+# what it listed, not by guessing a path. The list is deliberately not a walk
+# of the discovery tree: a poll that fetched 89 documents every minute to
+# surface six values would be a worse integration than the one it replaced.
+# These are the ones that answer a question a user actually asks.
+CDP_SETUP_STATUS: Final = "/cdm/deviceSetup/v1/status"
+CDP_ALERTS: Final = "/cdm/alert/v1/alerts"
+CDP_FIRMWARE_STATUS: Final = "/cdm/firmwareUpdate/v2/updateStatus"
+CDP_FIRMWARE_CHECK: Final = "/cdm/firmwareUpdate/v2/updateCheck"
+CDP_FIRMWARE_CONFIG: Final = "/cdm/firmwareUpdate/v2/configuration"
+CDP_CERTIFICATE: Final = "/cdm/certificate/v1/certificates/selfSignedCertificate"
+CDP_ADAPTER_STATS: Final = "/cdm/ioConfig/v2/adapterStats"
+CDP_INTERNET_DIAGNOSTICS: Final = "/cdm/network/v1/internetDiagnostics"
+CDP_PRINT_SERVICES: Final = "/cdm/network/v1/printServices"
+CDP_SNMP_CONFIG: Final = "/cdm/network/v1/snmpConfig"
+CDP_BLUETOOTH: Final = "/cdm/ble/v1/configuration"
+CDP_SERVICE_CONFIG: Final = "/cdm/system/v1/serviceConfig"
+CDP_SUPPLY_LIFETIME: Final = "/cdm/supply/v1/lifetimeCounters"
+CDP_SUPPLY_CONFIG_PRIVATE: Final = "/cdm/supply/v1/configPrivate"
+CDP_SUPPLY_REGION_RESET: Final = "/cdm/supply/v1/regionReset"
+CDP_PRINT_SETUP_STATUS: Final = "/cdm/print/v2/setupStatus"
+
+# --- CDP documents that were served and never opened ------------------------
+#
+# Each of these answers 200 on the model measured and was not in the list
+# above, because the list was built from what the integration already needed
+# rather than from what the device offers. They are grouped by what they add.
+#
+# The wireless configuration is the one to read carefully. It carries the
+# network's SSID and its pass phrase in clear text, and neither is read here:
+# an SSID is the user's network name and a pass phrase is a credential, and
+# neither belongs in a state attribute or a diagnostics download. What is read
+# from it is the security posture -- band, authentication and encryption mode.
+CDP_SUPPLY_ALERTS: Final = "/cdm/supply/v1/alerts"
+CDP_FIRMWARE_HISTORY: Final = "/cdm/firmwareUpdate/v2/updateHistory"
+CDP_WIRELESS_CONFIG: Final = "/cdm/ioConfig/v2/wirelessConfig"
+CDP_MEDIA_CONFIG: Final = "/cdm/media/v1/configuration"
+CDP_SYSTEM_CONFIGURATION: Final = "/cdm/system/v1/configuration"
+CDP_PROXY_CONFIG: Final = "/cdm/network/v1/proxyConfig"
+
+# Pause before retrying a static document that came back empty.
+#
+# The CDP models fail the TLS handshake with BAD_SIGNATURE when too many
+# handshakes overlap, and _fetch_optional turns that into an empty document
+# rather than an error -- so on the slow path, where a miss costs six hours,
+# the request is worth repeating once. The pause is long enough for the burst
+# that dropped it to finish. See _fetch_retrying in api_cdp.py.
+CDP_SLOW_RETRY_DELAY_SECONDS: Final = 2.0
+
+
+# An LEDM printer answers a handful of /cdm/ documents alongside its XML, and
+# two of them carry values LEDM itself does not expose: the quiet-print flag
+# and the control panel's language. Fetching them on an LEDM printer is not a
+# fallback -- it is the only place those two values exist.
+CDP_LEDM_QUIET_MODE: Final = "/cdm/print/v1/printModeConfiguration"
+CDP_LEDM_PANEL: Final = "/cdm/controlPanel/v1/configuration"
+CDP_LEDM_INSTANT_INK: Final = "/cdm/consumableSubscription/v1/info"
+
+# --- LEDM documents that were advertised but never opened ------------------
+#
+# The *Cap.xml documents are the device's own specification: each one declares
+# the type, range, step and access mode of every field its Dyn partner
+# carries. They are the systematic way to find what the parser is not reading
+# -- the alternative is guessing field names, which is how the CDP endpoint
+# list was built before /cdm/servicesDiscovery turned up.
+ENDPOINT_PRINT_CONFIG: Final = "/DevMgmt/PrintConfigDyn.xml"
+ENDPOINT_MEDIA_DYN: Final = "/DevMgmt/MediaDyn.xml"
+ENDPOINT_NET_APPS: Final = "/DevMgmt/NetAppsDyn.xml"
+ENDPOINT_SHOP_FOR_SUPPLIES: Final = "/DevMgmt/ShopForSupplies.xml"
+
+# --- the LEDM maintenance interface ---------------------------------------
+#
+# Not in DiscoveryTree.xml, not in the web application's own paths, and the
+# only way it was found: the page the printer ships to its browser reads the
+# capability document from here before it offers a button. The document
+# itself enumerates the 19 job types this model supports, three of which are
+# cleaning cycles and one of which is the printhead clean.
+#
+# GET on the Dyn resource answers 404 with an empty body -- it exists and it
+# only accepts the write. The client's own bundle POSTs here with an XML body
+# whose single element names the job.
+ENDPOINT_INTERNAL_PRINT_CAP: Final = "/DevMgmt/InternalPrintCap.xml"
+ENDPOINT_INTERNAL_PRINT_DYN: Final = "/DevMgmt/InternalPrintDyn.xml"
+ENDPOINT_USAGE_CAP: Final = "/DevMgmt/ProductUsageCap.xml"
+ENDPOINT_CONSUMABLE_CAP: Final = "/DevMgmt/ConsumableConfigCap.xml"
+
+# --- the LEDM calibration interface ----------------------------------------
+#
+# Unlike the internal-print surface, this one *is* in DiscoveryTree.xml -- at
+# "/Calibration/CalibrationManifest.xml", with the manifest owner as a path
+# segment of its own. The printer's own page addresses the same resources as
+# "/Calibration/Session", dropping the manifest name, which is the same
+# shorthand "/DevMgmt/InternalPrintDyn.xml" is.
+#
+# That prefix is the whole reason this interface was written off as absent:
+# 324 candidate paths built on the pattern "/CalibrationManifest.xml/..."
+# every one of them 404, because the real document is one segment deeper. A
+# manifest found in the discovery tree beats a path pattern, and reading it
+# first would have cost one request.
+ENDPOINT_CALIBRATION_CAP: Final = "/Calibration/Capabilities"
+ENDPOINT_CALIBRATION_STATE: Final = "/Calibration/State"
+ENDPOINT_CALIBRATION_SESSION: Final = "/Calibration/Session"
+
+# The namespace the printer declares on its own calibration manifest, read out
+# of the manifest's root element rather than guessed. It is the only
+# namespace on this device outside the ".../con/ledm/..." tree -- it sits
+# under "cnx" -- so it could not have been inferred from the others, and a
+# plausible-looking URI in the wrong namespace is accepted-looking enough to
+# survive review.
+NS_CALIBRATION: Final = (
+    "http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08"
+)
+
+# The element /Calibration/Session accepts, and the state it takes to start an
+# alignment. Both come from the manifest's own resource map, which pairs the
+# URI with the element the body is expected to carry. The routine this starts
+# is advertised in /Calibration/Capabilities under "Alignment"; that token is a
+# button identity, so it lives with the buttons rather than here.
+CALIBRATION_SESSION_ELEMENT: Final = "CalibrationState"
+CALIBRATION_ALIGNMENT_STATE: Final = "Printing"
+
+# The cleaning operations are deliberately NOT named here. The device lists
+# them in /cdm/report/v1/reports with its own identifiers, and button.py is
+# the single place those identifiers are mapped onto buttons. A second table
+# in constants would be a second thing to keep in step with the hardware, and
+# the two would drift exactly the way a hand-written endpoint list drifts.
+
 # Endpoints fetched once at setup rather than on every poll.
 STATIC_ENDPOINTS: Final = (ENDPOINT_PRODUCT_CONFIG,)
 
@@ -139,6 +281,49 @@ KNOWN_COLORS: Final = frozenset(COLOR_NAMES.values())
 SUBUNIT_KEYS: Final = {
     "scanner": "subunit_scanner",
     "copy": "subunit_copier",
+}
+
+# The wording each sub-device translation carries, used as the stored fallback
+# name. Home Assistant writes a device's name into its registry when the device
+# is created, and a translation lookup that misses leaves the raw key there --
+# so the value stored has to be the text a person can read. Kept identical to
+# the translations on purpose: the two paths then agree instead of competing.
+SUBUNIT_NAMES: Final = {
+    "scanner": "扫描仪",
+    "copy": "复印机",
+}
+
+# The same idea for cartridges, keyed by the device key rather than by noun and
+# colour separately, because that is the unit the translation is written in.
+# Generated from translations/zh-Hans.json and asserted against it in
+# tests/test_subdevice_names.py, so the two cannot drift apart silently --
+# which is the only thing that makes a duplicated table acceptable.
+CONSUMABLE_DEVICE_FALLBACK: Final = {
+    "consumable_cartridge_black": "黑色墨盒",
+    "consumable_cartridge_cyan": "青色墨盒",
+    "consumable_cartridge_magenta": "品红色墨盒",
+    "consumable_cartridge_tricolor": "三色墨盒",
+    "consumable_cartridge_yellow": "黄色墨盒",
+    "consumable_drum_black": "黑色硒鼓",
+    "consumable_drum_cyan": "青色硒鼓",
+    "consumable_drum_magenta": "品红色硒鼓",
+    "consumable_drum_tricolor": "三色硒鼓",
+    "consumable_drum_yellow": "黄色硒鼓",
+    "consumable_ink_tank_black": "黑色墨仓",
+    "consumable_ink_tank_cyan": "青色墨仓",
+    "consumable_ink_tank_magenta": "品红色墨仓",
+    "consumable_ink_tank_tricolor": "三色墨仓",
+    "consumable_ink_tank_yellow": "黄色墨仓",
+    "consumable_maintenance_kit_black": "黑色维护套件",
+    "consumable_maintenance_kit_cyan": "青色维护套件",
+    "consumable_maintenance_kit_magenta": "品红色维护套件",
+    "consumable_maintenance_kit_tricolor": "三色维护套件",
+    "consumable_maintenance_kit_yellow": "黄色维护套件",
+    "consumable_printhead_black": "黑色打印头",
+    "consumable_printhead_cyan": "青色打印头",
+    "consumable_printhead_magenta": "品红色打印头",
+    "consumable_printhead_tricolor": "三色打印头",
+    "consumable_printhead_yellow": "黄色打印头",
 }
 
 

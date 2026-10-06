@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "images": [
+    {
+      "imageType": "printerIconSmall",
+      "uri": "/images/printer-small.png"
+    },
+    {
+      "imageType": "printerIconMedium",
+      "uri": "/images/printer.png"
+    },
+    {
+      "imageType": "printerIconLarge",
+      "uri": "/images/printer-large.png"
+    }
+  ]
+}

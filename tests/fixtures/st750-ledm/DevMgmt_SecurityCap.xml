@@ -1,0 +1,109 @@
+<ns0:SecurityCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/securitycap/2008/02/01" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/securitycap/2008/02/01 ../schemas/SecurityCap.xsd">
+
+  <ns2:Version>
+
+    <ns2:Revision>SVN-IPG-LEDM.1142</ns2:Revision>
+
+    <ns2:Date>2017-02-07</ns2:Date>
+
+  </ns2:Version>
+
+  <ns0:Password typeof="String" length="16" access="writeOnly" elementXPath="secdyn:SecurityDyn/secdyn:Password" />
+
+  <ns0:PasswordEncodingSupport access="readOnly">
+
+    <ns0:Encoding>base64</ns0:Encoding>
+
+  </ns0:PasswordEncodingSupport>
+
+  <ns0:EncryptionStrengthSupport access="readOnly">
+
+    <ns0:EncryptionStrength>high</ns0:EncryptionStrength>
+
+    <ns0:EncryptionStrength>medium</ns0:EncryptionStrength>
+
+    <ns0:EncryptionStrength>low</ns0:EncryptionStrength>
+
+  </ns0:EncryptionStrengthSupport>
+
+  <ns0:CipherSuiteSupport>
+
+    <ns0:SslTlsLow>
+
+    </ns0:SslTlsLow>
+
+    <ns0:SslTlsMedium>
+
+    </ns0:SslTlsMedium>
+
+    <ns0:SslTlsHigh>
+
+      <ns0:Name>DHE-RSA-AES256-GCM-SHA384</ns0:Name>
+
+      <ns0:Name>DHE-RSA-AES256-SHA256</ns0:Name>
+
+      <ns0:Name>DHE-RSA-AES256-SHA</ns0:Name>
+
+      <ns0:Name>AES256-GCM-SHA384</ns0:Name>
+
+      <ns0:Name>AES256-SHA256</ns0:Name>
+
+      <ns0:Name>AES256-SHA</ns0:Name>
+
+      <ns0:Name>DHE-RSA-AES128-GCM-SHA256</ns0:Name>
+
+      <ns0:Name>DHE-RSA-AES128-SHA256</ns0:Name>
+
+      <ns0:Name>DHE-RSA-AES128-SHA</ns0:Name>
+
+      <ns0:Name>AES128-GCM-SHA256</ns0:Name>
+
+      <ns0:Name>AES128-SHA256</ns0:Name>
+
+      <ns0:Name>AES128-SHA</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES256-GCM-SHA384</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES256-SHA384</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES256-SHA</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES128-GCM-SHA256</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES128-SHA256</ns0:Name>
+
+      <ns0:Name>ECDHE-RSA-AES128-SHA</ns0:Name>
+
+    </ns0:SslTlsHigh>
+
+  </ns0:CipherSuiteSupport>
+
+    <ns0:AdminLockoutPolicySupport>
+
+    <ns0:LockoutOptionSupport access="readWrite" elementXPath="/secdyn:SecurityDyn/secdyn:AdminLockoutPolicy/secdyn:LockoutOption">
+
+      <ns0:LockoutOption>enabled</ns0:LockoutOption>
+
+      <ns0:LockoutOption>disabled</ns0:LockoutOption>
+
+    </ns0:LockoutOptionSupport>
+
+    <ns0:MaximumAttempts typeof="dd:Int" step="1" access="readWrite" elementXPath="/secdyn:SecurityDyn/secdyn:AdminLockoutPolicy/secdyn:MaximumAttempts" min="3" max="30" />
+
+    <ns0:LockoutInterval typeof="dd:Int" step="1" access="readWrite" elementXPath="/secdyn:SecurityDyn/secdyn:AdminLockoutPolicy/secdyn:LockoutInterval" min="5" max="1800" />
+
+    <ns0:ResetAfterInterval typeof="dd:Int" step="1" access="readWrite" elementXPath="/secdyn:SecurityDyn/secdyn:AdminLockoutPolicy/secdyn:ResetAfterInterval" min="0" max="1800" />
+
+  </ns0:AdminLockoutPolicySupport>
+
+  <ns0:SecurityFeaturesSupport access="readOnly">
+
+    <ns0:SecureBoot>enabled</ns0:SecureBoot>
+
+    <ns0:Whitelisting>enabled</ns0:Whitelisting>
+
+  </ns0:SecurityFeaturesSupport>
+
+  <ns0:CsrfDefenseSupport access="readOnly">enabled</ns0:CsrfDefenseSupport>
+
+</ns0:SecurityCap>

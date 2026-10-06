@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "allowDowngrade": "false",
+  "allowDowngradeIsEditable": "false",
+  "autoUpdateEnabled": "true",
+  "autoUpdateEnabledIsEditable": "true",
+  "userConfirmationEnabled": "false",
+  "userConfirmationEnabledIsEditable": "false",
+  "pjlUpdateEnabled": "false"
+}

@@ -17,11 +17,13 @@
             "name": "高级设置",
             "data": {
               "port": "端口",
-              "ssl": "使用 HTTPS"
+              "ssl": "使用 HTTPS",
+              "password": "管理员密码"
             },
             "data_description": {
               "port": "打印机内置 Web 服务器的端口。保持 80，启用 HTTPS 后会自动切换到 443。",
-              "ssl": "打印机使用自签名证书，不会对其做校验。"
+              "ssl": "打印机使用自签名证书，不会对其做校验。",
+              "password": "可选，当前未被使用：CDP 的写操作不需要任何凭据，而 LEDM 机型根本没有维护接口。保留是为了将来固件开始要求凭据时可用；它只存在内存里，从不发送。"
             }
           }
         }
@@ -37,7 +39,11 @@
             "name": "高级设置",
             "data": {
               "port": "端口",
-              "ssl": "使用 HTTPS"
+              "ssl": "使用 HTTPS",
+              "password": "管理员密码"
+            },
+            "data_description": {
+              "password": "留空表示保持当前密码。"
             }
           }
         }
@@ -170,6 +176,21 @@
     },
     "update_error": {
       "message": "从 {device} 获取数据时出错：{error}"
+    },
+    "maintenance_failed": {
+      "message": "打印机拒绝了这次维护请求：{error}"
+    },
+    "maintenance_already_running": {
+      "message": "这台打印机上已有维护操作正在运行。"
+    },
+    "maintenance_unavailable": {
+      "message": "这台打印机不支持该操作。"
+    },
+    "calibration_unavailable": {
+      "message": "这台打印机不支持该打印头校准方式。"
+    },
+    "calibration_no_paper": {
+      "message": "打印头校准需要纸。进纸器报告是空的，校准没有可打印的测试页。"
     }
   },
   "entity": {
@@ -182,6 +203,10 @@
       },
       "calibration_result": {
         "name": "上次打印头校准结果"
+      },
+      "calibration_state": {
+        "name": "打印头校准进行中",
+        "description": "校准当前进行到哪一步，用打印机自己的说法。校准需要你参与：打印机先打印一张校准图，然后等它放到扫描台上，所以出现 ScanRequested 就是它在等你。"
       },
       "cartridge_brand": {
         "name": "品牌"
@@ -447,6 +472,185 @@
           "trayempty": "纸盒已空",
           "unknown": "未知"
         }
+      },
+      "setup_state": {
+        "name": "开机设置进度",
+        "description": "首次开机设置的进度。这里还有待完成步骤，正是校准报 failed 的原因。"
+      },
+      "active_alert_count": {
+        "name": "当前告警数",
+        "unit_of_measurement": "条",
+        "description": "打印机当前正在报的告警。事件日志是历史，这个是当下。"
+      },
+      "active_alert_worst": {
+        "name": "当前最高告警级别",
+        "description": "按设备自己的排序，最紧急那条告警的级别。"
+      },
+      "firmware_update_result": {
+        "name": "上次固件更新结果",
+        "description": "上次固件更新是否成功。固件日期码不会告诉你这件事。"
+      },
+      "firmware_update_available": {
+        "name": "可用固件版本"
+      },
+      "certificate_expires": {
+        "name": "网页证书到期日",
+        "description": "自签证书签发十年后到期，到期前没有任何提醒。"
+      },
+      "adapter_errors": {
+        "name": "网络接口错误计数",
+        "unit_of_measurement": "次",
+        "description": "按网络接口分别统计的错误计数。分开看才知道哪个口是活的。"
+      },
+      "internet_diagnostics": {
+        "name": "联网诊断结果",
+        "description": "打印机自己做的联网测试。设备没有 RTC，时间戳不可用。"
+      },
+      "carriage_status": {
+        "name": "小车状态"
+      },
+      "cartridge_changes": {
+        "name": "该仓位已用墨盒数",
+        "unit_of_measurement": "支",
+        "description": "这个仓位一共装过几支墨盒。取各仓位最大值，因为它们各自独立更换。"
+      },
+      "region_reset_remaining": {
+        "name": "区域重置剩余次数",
+        "unit_of_measurement": "次",
+        "description": "按设备区域重置方案，在它不再允许之前还剩几次机会。"
+      },
+      "service_id": {
+        "name": "服务 ID"
+      },
+      "print_services": {
+        "name": "已启用的打印服务"
+      },
+      "full_model_string": {
+        "name": "型号 / SKU / 区域"
+      },
+      "print_quality": {
+        "name": "打印质量设置"
+      },
+      "resolution_setting": {
+        "name": "分辨率设置"
+      },
+      "default_copies": {
+        "name": "默认份数",
+        "unit_of_measurement": "份"
+      },
+      "current_media": {
+        "name": "当前纸张"
+      },
+      "panel_language": {
+        "name": "面板语言"
+      },
+      "instant_ink_status": {
+        "name": "即时墨订阅状态"
+      },
+      "print_jobs": {
+        "name": "打印作业数",
+        "unit_of_measurement": "次",
+        "description": "打印引擎接过的作业数。作业被计数不等于打印成功，所以它和「已打印页数」不是一回事。"
+      },
+      "job_failures": {
+        "name": "失败的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_successes": {
+        "name": "完成的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_cancelled": {
+        "name": "取消的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_skipped": {
+        "name": "跳过的作业",
+        "unit_of_measurement": "次"
+      },
+      "network_printed_pages": {
+        "name": "网络打印页数",
+        "unit_of_measurement": "页",
+        "description": "走有线网络送来的页数。和无线那个一对比，才知道实际在用哪条路。"
+      },
+      "wireless_printed_pages": {
+        "name": "无线打印页数",
+        "unit_of_measurement": "页"
+      },
+      "ews_accesses": {
+        "name": "网页界面打开次数",
+        "unit_of_measurement": "次"
+      },
+      "memory_available": {
+        "name": "可用内存",
+        "unit_of_measurement": "kB",
+        "description": "可用内存，单位 KiB，按设备自己报的数值。"
+      },
+      "memory_total": {
+        "name": "总内存",
+        "unit_of_measurement": "kB"
+      },
+      "input_trays": {
+        "name": "进纸器数量",
+        "unit_of_measurement": "个"
+      },
+      "output_bins": {
+        "name": "出纸盒数量",
+        "unit_of_measurement": "个"
+      },
+      "country_region": {
+        "name": "国家 / 地区"
+      },
+      "device_language": {
+        "name": "设备语言"
+      },
+      "default_orientation": {
+        "name": "默认页面方向",
+        "description": "驱动没指定时作业采用的页面方向。这是设置，不是对输出结果的测量。"
+      },
+      "failed_attempts_remaining": {
+        "name": "剩余登录尝试次数",
+        "unit_of_measurement": "次",
+        "description": "网页界面在锁定前还剩几次登录失败机会。出厂默认密码值得改，就是因为这个。"
+      },
+      "successful_attempts_remaining": {
+        "name": "网页管理登录剩余次数",
+        "description": "与「失败次数」成对发布的另一半预算，两个数要一起看。"
+      },
+      "printhead_hp_drops": {
+        "name": "已喷墨滴数（HP 原装）"
+      },
+      "printhead_non_hp_drops": {
+        "name": "已喷墨滴数（未被识别为 HP）",
+        "description": "打印头自己记录的、无法归到 HP 原装墨的滴数。这和墨盒的「品牌」字段不是一回事：仿冒芯片会报出真正的部件号，所以第三方墨盒可以自称原装，而这个计数不会跟着说谎。0 才是放心的读数。"
+      },
+      "printhead_ooi_drops": {
+        "name": "缺墨保护触发次数"
+      },
+      "printhead_service_drops": {
+        "name": "维修期间喷墨滴数"
+      },
+      "cloud_printed_pages": {
+        "name": "云打印页数"
+      },
+      "subscription_printed_pages": {
+        "name": "订阅打印页数（即时墨）"
+      },
+      "wifi_encryption": {
+        "name": "无线加密方式",
+        "description": "打印机无线连接允许的加密方式。设备同时以明文返回网络名称和密码，本集成两者都不读取，这里和诊断下载里都不会出现。"
+      },
+      "firmware_update_failure_reason": {
+        "name": "上次固件更新失败原因",
+        "description": "更新状态只说失败不说原因，而原因才是诊断本身：manifestNotFound 表示打印机根本找不到可安装的固件，这和下载失败是两个不同的问题。"
+      },
+      "supply_alert_colors": {
+        "name": "正在告警的耗材颜色",
+        "description": "告警本身只给类别，颜色藏在它的数据指针里。没有这一项，告警就是一句没有主语的抱怨。"
+      },
+      "media_loaded": {
+        "name": "已装纸张",
+        "description": "每个纸盒当前装载的尺寸与类型，此前本接口完全没读介质文档。"
       }
     },
     "binary_sensor": {
@@ -488,6 +692,139 @@
       },
       "quiet_mode": {
         "name": "静音模式"
+      },
+      "snmp_public": {
+        "name": "SNMP 允许 public 团体字",
+        "description": "打开表示打印机接受内置的 public 团体字，同网段任何主机都能读走它的管理信息。"
+      },
+      "bluetooth_beaconing": {
+        "name": "蓝牙信标广播"
+      },
+      "auto_update_enabled": {
+        "name": "自动固件更新"
+      },
+      "setup_incomplete": {
+        "name": "仍有开机设置未完成",
+        "description": "还有开机设置步骤没做完时为开。"
+      },
+      "firmware_update_failed": {
+        "name": "上次固件更新失败",
+        "description": "最近一次固件更新失败时为开。"
+      },
+      "holo_enabled": {
+        "name": "Holo 防伪认证"
+      },
+      "port_9100_enabled": {
+        "name": "9100 端口原始打印",
+        "description": "打开表示打印机接受 9100 端口的原始打印作业——没有驱动、没有作业结构、没有认证。"
+      },
+      "https_redirection": {
+        "name": "HTTP 重定向到 HTTPS",
+        "description": "关闭表示打印机自己的网页界面用明文 HTTP 应答，管理员密码每次打开都在网上明文过一遍。"
+      },
+      "duplexer_installed": {
+        "name": "装有双面器",
+        "description": "是否装了双面器。这和「自动双面」不是同一个问题——装了双面器的机器也可能把自动双面关着。"
+      },
+      "auto_duplex_enabled": {
+        "name": "自动双面",
+        "description": "自动双面这个设置。装了双面器、关着自动双面、却打过几千张双面页的机器是真实存在的。"
+      },
+      "http_proxy_enabled": {
+        "name": "已配置 HTTP 代理"
+      }
+    },
+    "button": {
+      "clean_ink_light": {
+        "name": "清洁墨路（轻度）"
+      },
+      "clean_ink_medium": {
+        "name": "清洁墨路（中度）"
+      },
+      "clean_ink_strong": {
+        "name": "清洁墨路（强力）"
+      },
+      "clean_paper_feed": {
+        "name": "清洁走纸机构"
+      },
+      "clean_rib_smear": {
+        "name": "清洁色带"
+      },
+      "calibrate_printhead": {
+        "name": "校准打印头（需要放纸）"
+      },
+      "print_quality_report": {
+        "name": "打印打印质量报告",
+        "description": "让打印机自己打一份打印质量诊断。比拍张纸的照片再猜要靠谱得多。"
+      },
+      "status_report": {
+        "name": "打印状态报告",
+        "description": "打印机状态报告：配置、固件、耗材、计数器，打成纸质的。"
+      },
+      "diagnostics_report": {
+        "name": "打印诊断报告",
+        "description": "完整诊断报告。机器不对劲又说不清原因时，该看的就是这份。"
+      },
+      "event_log_report": {
+        "name": "打印事件日志"
+      },
+      "network_config_report": {
+        "name": "打印网络配置报告"
+      },
+      "network_summary_report": {
+        "name": "打印网络摘要页"
+      },
+      "self_test_page": {
+        "name": "打印扩展自检页"
+      },
+      "wireless_test_page": {
+        "name": "打印无线测试页"
+      },
+      "privacy_report": {
+        "name": "打印安全与隐私报告",
+        "description": "安全与隐私报告：打印机能被谁访问、存了什么。"
+      },
+      "ledm_clean_ink_light": {
+        "name": "清洁墨路（轻度）"
+      },
+      "ledm_clean_ink_medium": {
+        "name": "清洁墨路（中度）"
+      },
+      "ledm_clean_ink_strong": {
+        "name": "清洁墨路（强力）"
+      },
+      "ledm_clean_rib_smear": {
+        "name": "清洁色带"
+      },
+      "ledm_clean_verification": {
+        "name": "打印清洁验证页"
+      },
+      "ledm_print_quality_report": {
+        "name": "打印打印质量报告"
+      },
+      "ledm_status_report": {
+        "name": "打印状态报告"
+      },
+      "ledm_diagnostics_report": {
+        "name": "打印诊断报告"
+      },
+      "ledm_event_log_report": {
+        "name": "打印事件日志"
+      },
+      "ledm_network_summary": {
+        "name": "打印网络摘要页"
+      },
+      "ledm_self_test_page": {
+        "name": "打印扩展自检页"
+      },
+      "ledm_wireless_test_page": {
+        "name": "打印无线测试页"
+      },
+      "ledm_privacy_report": {
+        "name": "打印安全与隐私报告"
+      },
+      "ledm_calibrate_printhead": {
+        "name": "校准打印头（会打印一张校准图，需放到扫描台上）"
       }
     }
   }

@@ -29,11 +29,17 @@ import types
 
 import pytest
 
+# Imported rather than parsed: button.py has relative imports, so it cannot be
+# loaded by file path the way const.py can, and a button key with no name fails
+# no count anywhere else.
+from custom_components.hp_printers import button as button_platform
+
 COMPONENT = Path(__file__).resolve().parent.parent / "custom_components" / "hp_printers"
 STRINGS = COMPONENT / "strings.json"
 TRANSLATIONS = COMPONENT / "translations"
 CONST = COMPONENT / "const.py"
 SENSOR = COMPONENT / "sensor.py"
+BUTTON = COMPONENT / "button.py"
 
 # Every other language is discovered from the directory rather than listed, so
 # a translation added later is checked without this file being edited.
@@ -53,6 +59,23 @@ def _flatten(tree: dict, prefix: str = "") -> dict[str, str]:
         else:
             flat[path] = value
     return flat
+
+
+def test_every_button_key_has_a_name() -> None:
+    """A button whose translation_key has no name renders as "None".
+
+    Its own test because the button platform is not a sensor: a missing name
+    there fails no count anywhere, and the card simply shows a control with
+    nothing on it. Read out of the module rather than a list here, so a button
+    added later is checked without editing this file.
+    """
+    used = {d.translation_key for d in button_platform.BUTTONS}
+    defined = set(
+        json.loads(STRINGS.read_text(encoding="utf-8"))["entity"].get("button", {})
+    )
+
+    assert used, "no buttons declared at all"
+    assert used <= defined, f"buttons with no name: {sorted(used - defined)}"
 
 
 def _load(path: Path) -> dict[str, str]:
@@ -159,14 +182,22 @@ def test_translation_is_not_left_in_english(path: Path) -> None:
     """Every value that has words of its own is actually translated.
 
     Copy-paste leaves a value equal to the English source, which passes the
-    key and placeholder checks above and still renders as English. Every
-    string here is prose rather than a name, a code or a format, so a
-    translated value with no CJK in it is always a mistake.
+    key and placeholder checks above and still renders as English.
+
+    Excluded by key rather than by recognising the string: a
+    ``unit_of_measurement`` is an SI symbol that Home Assistant registers in
+    English and that the recorder matches on. "kB" and "pages" have letters, so
+    a has-prose test would demand Chinese characters of them -- and a
+    translation that cannot exist, because "千字节" is not a unit the registry
+    knows and the history would stop being graphable against every other
+    sensor in the system.
     """
     untranslated = {
         key: value
         for key, value in _load(path).items()
-        if _is_prose(value) and not CJK.search(value)
+        if not key.endswith(".unit_of_measurement")
+        and _is_prose(value)
+        and not CJK.search(value)
     }
 
     assert not untranslated, f"left in English: {untranslated}"
@@ -269,7 +300,44 @@ def test_translation_declares_a_unit_for_every_counter() -> None:
     volume_sensors = {
         "marking_agent_used",
     }
-    expected = page_counters | packet_counters | percent_sensors | volume_sensors
+    # Plain counts of things: how many alerts are up, how many cartridges a
+    # slot has held, how many region-reset attempts are left. Not pages,
+    # packets, percentages or millilitres, so they get their own set rather
+    # than being forced into one of the others -- and their presence here is
+    # the point: a unit that is not declared leaves Home Assistant showing a
+    # bare number, which for "3 attempts left" is not obviously a count.
+    count_sensors = {
+        "active_alert_count",
+        "adapter_errors",
+        "cartridge_changes",
+        "default_copies",
+        "region_reset_remaining",
+        # From the LEDM gap analysis. A bare number is not obviously a count
+        # when it reads "3", and "7039" without a unit could be pages, jobs
+        # or both -- which is the whole point of declaring one.
+        "print_jobs",
+        "job_successes",
+        "job_failures",
+        "job_cancelled",
+        "job_skipped",
+        "network_printed_pages",
+        "wireless_printed_pages",
+        "ews_accesses",
+        "input_trays",
+        "output_bins",
+        "failed_attempts_remaining",
+        # Memory is declared in KiB, matching what the device reports rather
+        # than a rounded SI prefix it never used.
+        "memory_available",
+        "memory_total",
+    }
+    expected = (
+        page_counters
+        | packet_counters
+        | percent_sensors
+        | volume_sensors
+        | count_sensors
+    )
 
     entity = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]["sensor"]
     with_unit = {key for key, entry in entity.items() if "unit_of_measurement" in entry}

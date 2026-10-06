@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "installationDate": {
+    "day": 14,
+    "month": 3,
+    "year": 2025
+  },
+  "links": [
+    {
+      "href": "/cdm/system/v1/serviceConfig/constraints",
+      "rel": "constraints",
+      "hints": [
+        {
+          "method": "get"
+        }
+      ]
+    }
+  ],
+  "serialNumber": "SN-ANON-0000",
+  "serviceId": "00000000-0000-0000-0000-000000000000"
+}

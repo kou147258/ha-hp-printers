@@ -31,6 +31,46 @@ ENDPOINTS = (
     "/DevMgmt/IOConfigDyn.xml",
     "/DevMgmt/MediaHandlingDyn.xml",
     "/DevMgmt/DiscoveryTree.xml",
+    # Advertised by DiscoveryTree and never opened until now. The *Cap.xml
+    # pair is the device's own specification: each declares the type, range,
+    # step and access mode of every field its Dyn partner carries, which is
+    # the systematic way to find what the parser is not reading. The
+    # capability documents are half this list by count and most of its bytes.
+    "/DevMgmt/PrintConfigCap.xml",
+    "/DevMgmt/PrintConfigDyn.xml",
+    "/DevMgmt/MediaCap.xml",
+    "/DevMgmt/MediaDyn.xml",
+    "/DevMgmt/MediaHandlingCap.xml",
+    "/DevMgmt/NetAppsCap.xml",
+    "/DevMgmt/NetAppsDyn.xml",
+    "/DevMgmt/ProductConfigCap.xml",
+    "/DevMgmt/ProductStatusCap.xml",
+    "/DevMgmt/ProductUsageCap.xml",
+    "/DevMgmt/ConsumableConfigCap.xml",
+    "/DevMgmt/ProductLogsCap.xml",
+    "/DevMgmt/ProductServiceCap.xml",
+    "/DevMgmt/SecurityCap.xml",
+    # Carries the serial four times, none under a tag named SerialNumber.
+    # Adding it to this list is what put those four on the anonymizer's list
+    # -- see IDENTIFIER_TAGS in anonymize_ledm.py.
+    "/DevMgmt/ShopForSupplies.xml",
+    # The calibration interface, which is advertised in DiscoveryTree.xml at
+    # "/Calibration/CalibrationManifest.xml" -- the manifest owner as a path
+    # segment. Every path guessed from the pattern "/CalibrationManifest.xml"
+    # 404s, which is how this went missing for so long.
+    #
+    # Identity audit, recorded because the rule is to record it: all three
+    # carry no device identity at all. The manifest is a resource map -- URIs,
+    # verbs, element names and schema URIs -- and the other two are the
+    # capability and current-state documents, which name routines and a state
+    # token. No serial, no hostname, no model, no counters, and nothing that
+    # varies between two machines of the same model. Nothing to add to
+    # IDENTIFIER_TAGS, and the anonymizer passes them through untouched, which
+    # is checked rather than assumed: the fixtures assert the absence of the
+    # values actually observed on the machine measured.
+    "/Calibration/CalibrationManifest.xml",
+    "/Calibration/Capabilities",
+    "/Calibration/State",
 )
 
 

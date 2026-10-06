@@ -1,0 +1,91 @@
+<ns0:ShopForSuppliesRequest xmlns:ns0="http://www.hp.com/schemas/imaging/ljs/shopforsuppliesrequest/2007/11/07" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/ljs/shopforsuppliesrequest/2007/11/07 ../schemas/ShopForSupplies.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.29</ns2:Revision>
+
+		<ns2:Date>2010-05-13</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:RequesterID type="x-inkjet-serial-number">SN-ANON-0000</ns0:RequesterID>
+
+	<ns0:LocaleInformationSources>
+
+		<ns0:LocaleInformationSource type="printing-device">
+
+			<ns2:Language>zh-CN</ns2:Language>
+
+			<ns2:TimeStamp>2026-10-06T01:06:30</ns2:TimeStamp>
+
+		</ns0:LocaleInformationSource>
+
+	</ns0:LocaleInformationSources>
+
+	<ns0:Devices>
+
+		<ns0:Device>
+
+			<ns0:GloballyUniqueDeviceModelID type="x-hp-device-model-string-with-sku-with-region-code">Smart Tank 750 series:28B72A:0</ns0:GloballyUniqueDeviceModelID>
+
+			<ns0:GloballyUniqueDeviceID type="">SN-ANON-0000</ns0:GloballyUniqueDeviceID>
+
+			<ns0:Supplies>
+
+				<ns0:Supply>
+
+					<ns2:ConsumableStation>0</ns2:ConsumableStation>
+
+					<ns0:GloballyUniqueSupplyModelID type="x-inkjet-cartridge-series-A.3D" filter="true">00000000000000000000000000000000000000000000000C96A40A2A285E042016A0017AB8060542455C080000001030CB47F1FC7FB0AB67E0A5929127105943</ns0:GloballyUniqueSupplyModelID>
+
+					<ns2:Level>20</ns2:Level>
+
+					<ns2:MeasuredQuantityState>ok</ns2:MeasuredQuantityState>
+
+					<ns0:UniqueSupplyID>0000000000000091b0ab67e0a5929127</ns0:UniqueSupplyID>
+
+				</ns0:Supply>
+
+				<ns0:Supply>
+
+					<ns2:ConsumableStation>1</ns2:ConsumableStation>
+
+					<ns0:GloballyUniqueSupplyModelID type="x-inkjet-cartridge-series-A.3D" filter="true">00000000000000007800000000000065000001019800A0C31FFFF02F15780400450000000E00A05C49260D29A99891680000001000062040000D4C00E70C8B5D</ns0:GloballyUniqueSupplyModelID>
+
+					<ns2:Level>20</ns2:Level>
+
+					<ns2:MeasuredQuantityState>ok</ns2:MeasuredQuantityState>
+
+					<ns0:UniqueSupplyID>000000000000002e24930729a9989168</ns0:UniqueSupplyID>
+
+				</ns0:Supply>
+
+			</ns0:Supplies>
+
+			<ns0:RewardsRegistrationStatus>
+
+				<ns2:OptedIn>false</ns2:OptedIn>
+
+				<ns2:AutoSendData>false</ns2:AutoSendData>
+
+				<ns2:PromptAutoSendData>false</ns2:PromptAutoSendData>
+
+			</ns0:RewardsRegistrationStatus>
+
+		</ns0:Device>
+
+	</ns0:Devices>
+
+	<ns0:DeviceInfoSets>
+
+		<ns0:DeviceInfoSet type="String">
+
+			<ns0:DeviceInfoDeviceID type="x-inkjet-serial-number">SN-ANON-0000</ns0:DeviceInfoDeviceID>
+
+			<ns0:DeviceInfoData>MFG:HP;MDL:Smart Tank 750 series;CMD:PCL3GUI,PCL3,PJL,Automatic,JPEG,AppleRaster,PWGRaster,PCLM,DW-PCL,802.11,802.3,DESKJET,DYN;CLS:PRINTER;DES:28B72A;CID:HPIJCCAV1;LEDMDIS:USB#FF#04#01,USB#FF#CC#00;MCT:MF;MCL:FL;MCV:4.2;SN:SN-ANON-0000;S:0000;Z:05000009000008000001000001000001000001,12000,17000000000000000000000000000000000000,180;</ns0:DeviceInfoData>
+
+		</ns0:DeviceInfoSet>
+
+	</ns0:DeviceInfoSets>
+
+</ns0:ShopForSuppliesRequest>

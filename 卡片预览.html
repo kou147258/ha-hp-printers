@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HP 打印机卡片预览</title><style>
+:root{--bg:#111417;--card:#1c1f24;--line:#2a2f37;--ink:#e8eaed;--dim:#9aa0a6;
+--ok:#4caf50;--warn:#ffb300;--bad:#f44336;--acc:#2196f3}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;background:var(--bg);color:var(--ink);
+font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:19px;font-weight:500;margin:0 0 4px}
+.sub{color:var(--dim);font-size:12.5px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+margin-bottom:20px;overflow:hidden}
+.head{display:flex;gap:16px;padding:16px;border-bottom:1px solid var(--line)}
+.photo{width:190px;flex:0 0 190px;display:flex;align-items:center;justify-content:center;
+background:linear-gradient(160deg,#232830,#181b20);border-radius:10px;padding:8px}
+.photo img{max-width:100%;max-height:170px;object-fit:contain;
+filter:drop-shadow(0 5px 14px rgba(0,0,0,.55))}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.who h2{font-size:17px;font-weight:500;margin:0 0 2px}
+.who .ip{color:var(--dim);font-size:12px;margin-bottom:9px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:500}
+.on{background:rgba(76,175,80,.16);color:var(--ok)}
+.off{background:rgba(154,160,166,.14);color:var(--dim)}
+.warn{background:rgba(255,179,0,.16);color:var(--warn)}
+.bad{background:rgba(244,67,54,.16);color:var(--bad)}
+.acc{background:rgba(33,150,243,.16);color:var(--acc)}
+.sect{padding:13px 16px;border-bottom:1px solid var(--line)}
+.sect:last-child{border-bottom:0}
+.sect h4{font-size:12px;font-weight:500;color:var(--dim);margin:0 0 9px;
+text-transform:uppercase;letter-spacing:.05em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
+.item{background:rgba(255,255,255,.028);border:1px solid var(--line);
+border-radius:9px;padding:8px 11px}
+.item .k{color:var(--dim);font-size:11.5px;margin-bottom:2px}
+.item .v{font-size:16px;font-weight:500}
+.item .v small{font-size:11.5px;color:var(--dim);font-weight:400}
+.inks{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+.ink{background:rgba(255,255,255,.028);border:1px solid var(--line);
+border-radius:9px;padding:8px 10px}
+.ink .n{font-size:12px;color:var(--dim)}
+.bar{height:5px;border-radius:3px;background:#2a2f37;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.bar i.low{background:var(--bad)}
+.ink .p{font-size:11px;color:var(--dim);margin-top:5px}
+.btns{display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12.5px;
+color:var(--dim);background:rgba(255,255,255,.03)}
+.btn.main{border-color:rgba(33,150,243,.4);color:var(--acc)}
+.note{color:var(--dim);font-size:12px;margin:16px 0 0;line-height:1.7}
+.note code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;
+font-size:11.5px}
+</style></head><body>
+<div class="wrap">
+<h1>HP 打印机 · 单机卡片预览</h1>
+<div class="sub">用集成本身跑出来的<b>实时</b>数据，按 <code>examples/cards/printer_card.yaml</code>
+的布局呈现。照片直接取打印机自己的渲染图，所以打开时需要能访问这两个地址。</div>
+<div class="card"><div class="head"><div class="photo"><img src="http://192.168.9.20/images/printer-large.png" alt="printer"></div><div class="who"><h2>办公室 750</h2><div class="ip">192.168.9.20 · Smart Tank 750 series</div><div class="pills"><span class="pill off">inpowersave</span><span class="pill on">纸 在</span><span class="pill bad">固件故障</span><span class="pill warn">SNMP public</span><span class="pill warn">EWS 明文</span><span class="pill acc">校准 CalibrationRequired</span></div></div></div><div class="sect"><h4>概况</h4><div class="grid"><div class="item"><div class="k">黑白页</div><div class="v">31,223</div></div><div class="item"><div class="k">彩色页</div><div class="v">13,155</div></div><div class="item"><div class="k">卡纸</div><div class="v">50</div></div><div class="item"><div class="k">误取</div><div class="v">326</div></div><div class="item"><div class="k">扫描</div><div class="v">888</div></div><div class="item"><div class="k">复印</div><div class="v">750</div></div></div></div><div class="sect"><h4>墨</h4><div class="inks"><div class="ink"><div class="n">tricolor</div><div class="bar"><i class="" style="width:20.0%"></i></div><div class="p">20% · 3YP17A</div></div><div class="ink"><div class="n">black</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">cyan</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">magenta</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">yellow</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div></div></div><div class="sect"><h4>关注</h4><div class="grid"><div class="item"><div class="k">非 HP 墨滴</div><div class="v">0</div></div><div class="item"><div class="k">累计墨滴</div><div class="v">446,926,878</div></div><div class="item"><div class="k">区域</div><div class="v">china</div></div></div></div><div class="sect"><h4>维护操作</h4><div class="btns"><div class="btn main">清洁 轻</div><div class="btn main">清洁 中</div><div class="btn main">清洁 重</div><div class="btn main">校准打印头</div><div class="btn">打印质量报告</div><div class="btn">状态报告</div></div></div></div><div class="card"><div class="head"><div class="photo"><img src="http://192.168.9.12/images/printer-large.png" alt="printer"></div><div class="who"><h2>客厅 580</h2><div class="ip">192.168.9.12 · Smart Tank 580-590 series</div><div class="pills"><span class="pill on">ready</span><span class="pill acc">纸 iso_a4_210x297mm / stationery</span><span class="pill off">Wi-Fi aesOrTkip</span><span class="pill warn">告警颜色 C, CMY, K, M, Y</span></div></div></div><div class="sect"><h4>概况</h4><div class="grid"><div class="item"><div class="k">黑白页</div><div class="v">647</div></div><div class="item"><div class="k">彩色页</div><div class="v">722</div></div><div class="item"><div class="k">卡纸</div><div class="v">3</div></div><div class="item"><div class="k">误取</div><div class="v">15</div></div><div class="item"><div class="k">扫描</div><div class="v">94</div></div><div class="item"><div class="k">复印</div><div class="v">110</div></div></div></div><div class="sect"><h4>墨</h4><div class="inks"><div class="ink"><div class="n">tricolor</div><div class="bar"><i class="" style="width:0%"></i></div><div class="p">- · M0H50A</div></div><div class="ink"><div class="n">black</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">cyan</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">magenta</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div><div class="ink"><div class="n">yellow</div><div class="bar"><i class="" style="width:100%"></i></div><div class="p">100%</div></div></div></div><div class="sect"><h4>关注</h4><div class="grid"><div class="item"><div class="k">固件失败原因</div><div class="v"><span class="pill bad">manifestNotFound</span></div></div><div class="item"><div class="k">上次校准</div><div class="v">failed</div></div><div class="item"><div class="k">区域</div><div class="v">CN</div></div></div></div><div class="sect"><h4>维护操作</h4><div class="btns"><div class="btn main">清洁 轻</div><div class="btn main">清洁 中</div><div class="btn main">清洁 重</div><div class="btn main">校准打印头</div><div class="btn">打印质量报告</div><div class="btn">状态报告</div></div></div></div>
+<p class="note">
+在 Home Assistant 里加这张卡：<b>设置 → 仪表盘 → 编辑 → 添加卡片 → 自定义</b>，
+把 <code>printer_card.yaml</code> 的内容粘进去，只改两处标了
+<code>&lt;&lt;&lt; 改这里</code> 的行：<b>打印机地址</b>和<b>设备名</b>。<br>
+需要先装 card-mod（和配套仪表盘同一个依赖）。
+</p>
+</div></body></html>

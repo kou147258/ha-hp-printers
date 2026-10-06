@@ -47,9 +47,29 @@ import re
 
 from defusedxml import ElementTree as DefusedET
 
+
+def _local_name(tag: str) -> str:
+    """Return the local name of an XML tag (strip the namespace)."""
+    return tag.rpartition("}")[2]
+
+
+def _scrub_devtype(value: str) -> str:
+    """Blank the identity fields inside a DEVTYPE blob, keeping the rest.
+
+    ``DeviceInfoData`` is a semicolon-delimited key/value string rather than a
+    single identifier, and it repeats the serial as ``SN:`` and then carries a
+    serialised ``S:`` block that is opaque but device-derived. Replacing the
+    whole value would throw away the printable-language list, which is real
+    data; replacing only ``SN:`` would leave the second copy of the same
+    identity in place, which is the failure this function exists to prevent.
+    """
+    scrubbed = re.sub(r"(^|;)SN:[^;]*", r"\1SN:SN-ANON-0000", value)
+    return re.sub(r"(^|;)S:[^;]*", r"\1S:0000", scrubbed)
+
+
 # Tags whose text content is an identifier and must be replaced. The keys are
 # element local names; values are replacement strings or callables.
-IDENTIFIER_TAGS: dict[str, str | None] = {
+IDENTIFIER_TAGS: dict[str, str | Callable[[str], str] | None] = {
     # Device identifiers
     "SerialNumber": "SN-ANON-0000",
     "UUID": "00000000-0000-0000-0000-000000000000",
@@ -76,6 +96,16 @@ IDENTIFIER_TAGS: dict[str, str | None] = {
     "DomainName": "local",
     "BOOTP_DHCPv4SuppliedDomainName": "local",
     "WINSServerName": "NOT_SET",
+    # ShopForSupplies carries the serial four times, none of it under a tag
+    # named SerialNumber -- which is exactly why a capture of it survived
+    # review once. The first three are typed wrappers around the same value;
+    # DeviceInfoData is a semicolon-delimited DEVTYPE blob that embeds both
+    # ``SN:`` and a serialised ``S:`` block, so it needs a field-level rewrite
+    # rather than a whole-value replacement.
+    "RequesterID": "SN-ANON-0000",
+    "GloballyUniqueDeviceID": "SN-ANON-0000",
+    "DeviceInfoDeviceID": "SN-ANON-0000",
+    "DeviceInfoData": _scrub_devtype,
     # Not an identifier, but the IPv4 text pattern below would otherwise
     # rewrite a netmask into an address, which reads as a parser bug.
     "SubnetMask": "255.255.255.0",
@@ -131,8 +161,19 @@ def _local_name(tag: str) -> str:
     return tag.rpartition("}")[2]
 
 
-def _identifier_value(local: str, configured: str | None) -> str | None:
-    """Resolve the configured value or fall back to a stable placeholder."""
+def _identifier_value(
+    local: str, configured: str | Callable[[str], str] | None, original: str
+) -> str | None:
+    """Resolve the replacement for one identifier value.
+
+    A callable configured value is handed the original text and returns the
+    replacement, which is what a field that embeds an identifier among other
+    data needs. Without this branch the callable would be returned *as* the
+    replacement, ``child.text`` would end up holding a function object, and
+    the identifier would survive intact.
+    """
+    if callable(configured):
+        return configured(original)
     if configured:
         return configured
     return f"ANON-{local.upper()}-0000"
@@ -156,7 +197,7 @@ def _walk_and_scrub(
         if local in IDENTIFIER_TAGS and child.text:
             original = child.text.strip()
             if original:
-                replacement = _identifier_value(local, IDENTIFIER_TAGS[local])
+                replacement = _identifier_value(local, IDENTIFIER_TAGS[local], original)
                 if replacement and replacement != original:
                     replacements.append((local, original, replacement))
                 if replacement:
@@ -257,10 +298,17 @@ def main() -> None:
         # device *not* answering, and it has nothing to anonymize -- copying it
         # through is the faithful thing to do. Aborting the whole run on one
         # such file would lose the replacements made for every file before it.
+        #
+        # Only a *parse* failure earns that pass. Anything else is a bug in
+        # this script, and the distinction matters more than it looks: the
+        # earlier version caught every exception here, so a broken regex in a
+        # scrubber reported itself as "not XML" and copied a document
+        # containing the printer's serial number straight through. A failure
+        # that is not a parse error now stops the run.
         try:
             replacements = anonymize_file(path, output / path.name)
-        except Exception as exc:  # noqa: BLE001 - deliberately broad, see above
-            print(f"{path.name}: not XML ({type(exc).__name__}), copied as-is")  # noqa: T201
+        except DefusedET.ParseError as exc:
+            print(f"{path.name}: not XML ({exc}), copied as-is")  # noqa: T201
             output.joinpath(path.name).write_bytes(path.read_bytes())
             continue
         print(f"{path.name}: {len(replacements)} replacement(s)")  # noqa: T201

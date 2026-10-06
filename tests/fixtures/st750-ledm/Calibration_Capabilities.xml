@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--    THIS DATA SUBJECT TO DISCLAIMER(S)INCLUDED WITH THE PRODUCT OF ORIGIN.-->
+<cal:Capabilities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cal="http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/cnx/markingagentcalibration/2009/04/08 ../schemas/MarkingAgentCalibration.xsd">
+	<cal:ScanCalibration>false</cal:ScanCalibration>
+	<cal:CalibrationJobTypeSupport>
+		<cal:CalibrationJobType>Alignment</cal:CalibrationJobType>
+		<cal:CalibrationJobType>Alignment</cal:CalibrationJobType>
+	</cal:CalibrationJobTypeSupport>
+</cal:Capabilities>

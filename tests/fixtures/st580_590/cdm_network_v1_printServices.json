@@ -1,0 +1,16 @@
+{
+  "airPrint": {
+    "enabled": "true"
+  },
+  "ipp": {
+    "ipp": "true",
+    "ippSecure": "true"
+  },
+  "port9100": {
+    "enabled": "true"
+  },
+  "version": "1.0.0",
+  "wsPrint": {
+    "enabled": "true"
+  }
+}

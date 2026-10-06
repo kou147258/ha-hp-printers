@@ -40,12 +40,36 @@ _LOGGER = logging.getLogger(__name__)
 type HPPrinterClient = LEDMClient | CDPClient
 
 
+def _construct(
+    factory: type[LEDMClient] | type[CDPClient],
+    session: ClientSession,
+    host: str,
+    port: int,
+    use_ssl: bool,
+    *,
+    ssl_context: ssl.SSLContext | None,
+    password: str | None,
+) -> LEDMClient | CDPClient:
+    """Build a client, passing the password to whichever one takes it.
+
+    Both clients take the password, for opposite reasons. CDP's write path
+    is the unauthenticated one and ignores it entirely -- sending one turns
+    working reads into 401s. LEDM's internal-print jobs require it. Handing it
+    to only one would be the way to get a signature wrong, so it goes to both.
+    """
+    if factory is CDPClient:
+        return factory(session, host, port, use_ssl, ssl_context, password=password)
+    return factory(session, host, port, use_ssl, ssl_context, password=password)
+
+
 async def async_build_client(
     session: ClientSession,
     host: str,
     port: int,
     use_ssl: bool,
     ssl_context: ssl.SSLContext | None = None,
+    *,
+    password: str | None = None,
 ) -> tuple[HPPrinterClient, ProductInfo]:
     """Return the client this printer speaks, plus its identity.
 
@@ -54,13 +78,26 @@ async def async_build_client(
     served neither interface. The two are kept apart because the config flow
     shows a different message for each, and "cannot connect" for a printer
     that is plainly online is the more misleading of the two.
+
+    ``password`` is the EWS admin password, used only by the maintenance
+    buttons. It is passed to whichever client wins the probe, and to neither
+    of the failed attempts: a probe that never validates has no business
+    holding a credential.
     """
     ledm_error: HPPrinterError | None = None
     cdp_error: HPPrinterError | None = None
 
     for factory in (LEDMClient, CDPClient):
-        client = factory(session, host, port, use_ssl, ssl_context)
         protocol = "LEDM" if factory is LEDMClient else "CDP"
+        client = _construct(
+            factory,
+            session,
+            host,
+            port,
+            use_ssl,
+            ssl_context=ssl_context,
+            password=password,
+        )
         try:
             info = await client.async_validate()
         except HPPrinterError as error:
