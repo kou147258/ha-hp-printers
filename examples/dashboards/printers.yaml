@@ -100,7 +100,11 @@ views:
               - integration: hp_printers
                 domain: sensor
                 entity:
-                  translation_key: paper_level
+                  translation_key:
+                    - paper_level
+                    # 实际装载的纸（尺寸 / 类型，按纸盒列）。这条以前完全没有：
+                    # CDP 的介质文档一直没被打开，而 LEDM 的有。
+                    - media_loaded
               - integration: hp_printers
                 domain: binary_sensor
                 entity:
@@ -163,6 +167,13 @@ views:
                     - panel_button_presses
                     - panel_cancel_presses
                     - marking_agent_used
+                    # 打印头喷出的总滴数（各工位相加）。
+                    - printhead_hp_drops
+                    # 维修期间喷的滴数。
+                    - printhead_service_drops
+                    # 网络 / 无线之外的另外两条打印去向，设备各记一个计数器。
+                    - cloud_printed_pages
+                    - subscription_printed_pages
             sort:
               method: label
 
@@ -188,6 +199,16 @@ views:
                     - last_event_page
                     - power_cycles
                     - non_hp_flag_count
+                    # 校准「进行到哪」和「上次结果」是两个问题：
+                    # 机器可以正卡在 ScanRequested 等你把校准图放到扫描台上，
+                    # 而上次结果仍然是 unknown / passed。
+                    - calibration_state
+                    # 上次更新为什么失败——状态行只说失败，不说原因，
+                    # 而原因才是诊断。manifestNotFound 是「根本找不到固件」。
+                    - firmware_update_failure_reason
+                    # 打印头自己记的账：非 HP 墨滴数。克隆芯片会报真部件号，
+                    # 所以「墨盒自称原装」和「打印头的账」是两回事，后者更硬。
+                    - printhead_non_hp_drops
             sort:
               method: label
 
@@ -228,6 +249,10 @@ views:
                     - snmp_public
                     - bluetooth_beaconing
                     - auto_update_enabled
+                    # 9100 原始打印：没有驱动、没有作业结构、没有认证。
+                    - port_9100_enabled
+                    # 关掉重定向意味着 EWS 走明文 HTTP，密码每次过网都是裸的。
+                    - https_redirection
             sort:
               method: label
           - type: custom:auto-entities
@@ -239,6 +264,13 @@ views:
                     - print_services
                     - adapter_errors
                     - certificate_expires
+                    # 无线加密方式。**该设备同时以明文返回网络名和密码，
+                    # 集成两者都不读**，这里和诊断下载里都不会出现。
+                    - wifi_encryption
+                    # 登录预算的另一半：成功次数。不读它的话，
+                    # 「失败 3 次」和「还剩 3 次」看起来一模一样。
+                    - successful_attempts_remaining
+                    - http_proxy_enabled
             sort:
               method: label
 
@@ -286,6 +318,11 @@ views:
                   translation_key:
                     - active_alert_count
                     - active_alert_worst
+                    # **告警说的是哪个颜色。** 类别名本身没法行动，
+                    # 颜色藏在告警的嵌套 detail 块（LEDM）或指向耗材文档的
+                    # 指针（CDP）里。实测一台机器同时为 Black / Magenta /
+                    # Yellow 各报一条，没有这一项就只能看到「genuineHP」。
+                    - supply_alert_colors
                     - carriage_status
                     - internet_diagnostics
 
