@@ -312,6 +312,27 @@ currently available, and a history in which every attempt failed.
 | Automatic firmware updates | binary_sensor (diagnostic, disabled by default) | Whether the printer will fetch and install updates on its own. |
 | Firmware available | sensor (diagnostic, disabled by default) | The version on offer, when there is one. |
 
+## Jobs, and how the pages actually arrived
+
+The usage document counts jobs per subunit and breaks each one into an
+outcome. The split is the point: a single "print jobs" counter reads as "the
+printer printed 7039 things", when 3 completed and 4 failed and the rest are
+something else entirely.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Print jobs | sensor (diagnostic) | Jobs the print engine took. A job can be counted here and still have failed. |
+| Jobs completed / Jobs failed | sensor (diagnostic) | The outcome split. |
+| Jobs cancelled / Jobs skipped | sensor (diagnostic) | The other two outcomes. |
+| Pages printed over the network | sensor (diagnostic) | Wired. |
+| Pages printed over Wi-Fi | sensor (diagnostic) | The split against the wired figure is what shows which path is in use — and which one goes to zero when the radio is the problem. |
+| Web interface opens | sensor (diagnostic, disabled by default) | How often someone has opened the printer's own web page. |
+
+`JobDuration` and `PagesPerJob` are deliberately **not** exposed. The device
+reports them as buckets (`lessthanTwoMinutes`, `sixToTen`,
+`greaterThanTen`) and averaging a bucket distribution would invent a precision
+the device never offered.
+
 ## Security, and what is reachable from the network
 
 Each of these is something switched on in the printer's own settings that lets
@@ -323,6 +344,10 @@ thing exposed", and nothing else here would let you see them.
 |---|---|---|
 | SNMP accepts the public community | binary_sensor (diagnostic, safety) | `on` means any host on the network can read the printer's management data with a credential nobody has to guess. **Both models measured ship with this enabled.** |
 | Bluetooth beaconing | binary_sensor (diagnostic, disabled by default) | The printer broadcasts its presence continuously. |
+| Raw printing on port 9100 | binary_sensor (diagnostic, safety) | No driver, no job structure, no authentication. **Both** printers measured answer on it, and neither redirects HTTP to HTTPS. |
+| HTTP redirects to HTTPS | binary_sensor (diagnostic, safety) | Off means the printer's own web interface answers plain HTTP, and the admin password crosses the network in the clear every time someone opens it. |
+| Duplexer fitted / Automatic duplex | binary_sensor (diagnostic, disabled by default) | Two different questions, and the machine measured answers them differently: a duplexer installed with 10,216 double-sided sheets printed, and an auto-duplex setting that reads disabled. |
+| Sign-in attempts left | sensor (diagnostic, disabled by default) | Failed web-interface attempts remaining before it locks — a password-guessing budget, and the reason the factory-default admin password is worth changing. |
 | Enabled print services | sensor (diagnostic, disabled by default) | Which protocols it answers on — AirPrint, IPP, WS-Print, and port 9100, the easiest of the lot to abuse. |
 | Network interface errors | sensor (diagnostic) | Error counters split per interface. The split is the point: an aggregate cannot tell a printer working over Wi-Fi from one whose cable is unplugged, because both report a small number. |
 | Web certificate expires | sensor (diagnostic, date, disabled by default) | The self-signed certificate the web interface is reached over is issued for ten years, and nothing warns when it runs out. |
@@ -343,7 +368,10 @@ off, in the printer's own web interface.
 | Print quality setting | sensor (diagnostic, disabled by default) | A **setting**, not a measurement: what the machine is configured to do, not what came out of it. |
 | Resolution setting | sensor (diagnostic, disabled by default) | Same. Worth having because "the output got worse" is often a resolution somebody changed. |
 | Default copies | sensor (diagnostic, disabled by default) | Same. |
+| Default page orientation | sensor (diagnostic, disabled by default) | Portrait or Landscape, for a job whose driver says nothing. Also a setting. |
 | Current media | sensor (diagnostic, disabled by default) | The device's own vocabulary (`iso_a4_210x297mm`), kept verbatim so it matches what the printer's web page and the loaded paper both call it. |
+| Input trays / Output bins | sensor (diagnostic, disabled by default) | How many of each the machine has — which is what distinguishes a single-tray model without reading the list. |
+| Free memory / Total memory | sensor (diagnostic, disabled by default) | Kibibytes, as the device reports them. |
 | Panel language | sensor (diagnostic, disabled by default) | The control panel's language. |
 | Instant ink programme | sensor (diagnostic, disabled by default) | Enrolment status where the model offers one; empty means never enrolled. |
 
@@ -365,10 +393,43 @@ access mode and the XPath back to its value:
 
 Nothing here parses them into entities — they are schema, not readings — but
 they are captured, and they are the answer to "what else is there to read".
-`ProductUsageCap.xml` alone declares 32 kB of counters, and the read side
-touches a fraction of them. **That gap is where a future addition should
-start**, rather than by inferring a field name and checking whether it happens
-to exist.
+Differencing the three sets — what the capability documents **declare**, what
+the values document actually **contains**, and what the parser **asks for** —
+is how the readings below were found, and it is the method to use before
+adding anything else. Run against the Smart Tank 750 it reported 155 declared
+fields, 43 of which this model simply does not implement, and **175 that it
+sends and the parser did not read**.
+
+`ProductUsageCap.xml` alone declares 32 kB of counters. Two of them explain
+questions that had been open:
+
+- `SupplyFillLevel` is declared in the schema and **not sent** by either
+  consumer model. That is the definitive reason no ink level is reported: it
+  is not a parsing gap, the field is not populated. The same is true of
+  `PrimeEventCounter` and `ConsumableLastUsedDate`.
+- `Sides` looks like a printing setting and is in fact a descriptor of a
+  **memory module** — the capability document points it at
+  `DigitalStorageConfig/dd:Sides`. A parser working from field names would
+  have reported a single-sided printer on a machine that has printed ten
+  thousand double-sided sheets.
+
+### A field's name is not its meaning
+
+Three examples from the same document, all of which would have shipped wrong:
+
+| Field | Reads | Actually is |
+|---|---|---|
+| `Duplex` | `disabled` | The auto-duplex **setting**. `DuplexUnit` is the hardware, and reads `Installed` on the same printer. |
+| `WebScan` | `disabled` | The setting. `WebServicesConfig/WSScan`, in the same document, reads `enabled`. |
+| `Sides` | `1` | A memory module's sides. Nothing to do with printing. |
+
+And three fields that were read from the wrong subtree and came back `None`
+without raising — a parser that looks finished and reads nothing.
+`FailedAttemptsRemaining` lives under a `RegionInformation` block inside
+`ProductInformation`; `DeviceLanguage` one level down again under
+`ProductSettings`; `CountryAndRegionName` is a child of `ProductSettings`
+rather than sitting with its neighbours. The capability documents say where
+they are; running against the machine is what confirmed it.
 
 ## Maintenance buttons
 

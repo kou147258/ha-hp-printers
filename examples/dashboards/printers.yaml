@@ -300,6 +300,61 @@ views:
               - integration: hp_printers
                 domain: button
 
+      # ============================================================== 作业
+      # 接过的作业数 ≠ 打印成功。3 成功 / 4 失败 对 7039 个作业，
+      # 单看总数读起来像「打印了 7039 次」，拆分才有健康含义。
+      - type: entities
+        title: 作业
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - print_jobs
+                    - job_successes
+                    - job_failures
+                    - job_cancelled
+                    - job_skipped
+                    - network_printed_pages
+                    - wireless_printed_pages
+            sort:
+              method: label
+
+      # ============================================================== 硬件
+      - type: entities
+        title: 硬件
+        show_header_toggle: false
+        collapsed: true
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - input_trays
+                    - output_bins
+                    - memory_total
+                    - memory_available
+                    - country_region
+                    - device_language
+                    - default_orientation
+            sort:
+              method: label
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key:
+                    # 装了双面器 和 自动双面开着 是两个问题。
+                    # 装了双面器、关着自动双面、却打过上万张双面页的机器真实存在。
+                    - duplexer_installed
+                    - auto_duplex_enabled
+
       # ============================================================== 排障
       - type: entities
         title: 诊断
