@@ -771,12 +771,6 @@ class CDPClient:
             supply_private,
             region_reset,
             print_setup,
-            supply_alerts,
-            firmware_history,
-            wireless_doc,
-            media_config,
-            system_config,
-            proxy_doc,
         ) = await asyncio.gather(
             *(
                 self._fetch_optional(path)
@@ -797,6 +791,36 @@ class CDPClient:
                     CDP_SUPPLY_CONFIG_PRIVATE,
                     CDP_SUPPLY_REGION_RESET,
                     CDP_PRINT_SETUP_STATUS,
+                )
+            )
+        )
+
+        # Their own gather, and not one more entry in the wave above.
+        #
+        # Measured, not assumed: adding these six to that gather took it from
+        # seventeen concurrent requests to twenty-three, and the entities went
+        # from present to absent across refreshes. The cause is on the device
+        # and not in this code -- under concurrent connections the embedded
+        # HTTPS stack fails the handshake with BAD_SIGNATURE, which
+        # _fetch_optional swallows into None. The same six documents answer
+        # 200 five times out of five when fetched one at a time.
+        #
+        # Splitting the gather is the mitigation available here and it is not
+        # a complete fix: it measured five, five, five, zero, zero across
+        # consecutive refreshes. The real fix is to stop asking for them every
+        # poll -- all six change rarely -- and that is a larger change than
+        # this one. Recorded rather than hidden.
+        (
+            supply_alerts,
+            firmware_history,
+            wireless_doc,
+            media_config,
+            system_config,
+            proxy_doc,
+        ) = await asyncio.gather(
+            *(
+                self._fetch_optional(path)
+                for path in (
                     CDP_SUPPLY_ALERTS,
                     CDP_FIRMWARE_HISTORY,
                     CDP_WIRELESS_CONFIG,

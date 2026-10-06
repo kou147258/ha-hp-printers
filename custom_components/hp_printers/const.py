@@ -124,6 +124,7 @@ CDP_MEDIA_CONFIG: Final = "/cdm/media/v1/configuration"
 CDP_SYSTEM_CONFIGURATION: Final = "/cdm/system/v1/configuration"
 CDP_PROXY_CONFIG: Final = "/cdm/network/v1/proxyConfig"
 
+
 # An LEDM printer answers a handful of /cdm/ documents alongside its XML, and
 # two of them carry values LEDM itself does not expose: the quiet-print flag
 # and the control panel's language. Fetching them on an LEDM printer is not a
