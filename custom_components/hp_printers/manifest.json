@@ -2,20 +2,20 @@
   "domain": "hp_printers",
   "name": "HP Printers",
   "codeowners": [
-    "@aljopro"
+    "@kou147258"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/aljopro/ha-hp-printers",
+  "documentation": "https://github.com/kou147258/ha-hp-printers-cn",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/aljopro/ha-hp-printers/issues",
+  "issue_tracker": "https://github.com/kou147258/ha-hp-printers-cn/issues",
   "loggers": [
     "custom_components.hp_printers"
   ],
   "requirements": [
     "defusedxml>=0.7.1"
   ],
-  "version": "2026.10.0",
+  "version": "2026.10.1",
   "zeroconf": [
     {
       "type": "_ipp._tcp.local.",
