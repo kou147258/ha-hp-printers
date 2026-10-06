@@ -702,7 +702,22 @@ class CDPClient:
         per document; a poll that runs every minute cannot, which is why this
         is here and not in _fetch_optional.
         """
-        document = await self._fetch_retrying(CDP_IDENTITY)
+        # The identity document is fetched first and on its own, and not
+        # through the retrying helper, for two reasons.
+        #
+        # It is what makes the machine a CDP device: the protocol probe
+        # treats a failure here as "not this protocol" and moves on to the
+        # LEDM client, which is the only reason an LEDM printer is identified
+        # correctly. Returning an empty document instead turned that clean
+        # rejection into an AttributeError, and the LEDM model then failed to
+        # set up at all.
+        #
+        # And it is not gathered with the optional documents, because a
+        # required fetch that raises would leave its siblings in the retry
+        # sleep as lingering tasks. There is also nothing to overlap it with:
+        # there is no point starting the extras before knowing the device
+        # speaks this protocol at all.
+        document = await self._fetch(CDP_IDENTITY)
         security = await self._fetch_retrying(CDP_SECURITY_CONFIG)
         wireless_doc = await self._fetch_retrying(CDP_WIRELESS_CONFIG)
         media_config = await self._fetch_retrying(CDP_MEDIA_CONFIG)
@@ -766,6 +781,12 @@ class CDPClient:
         date lives here too, which LEDM's ProductConfigDyn does not carry for
         this model.
         """
+        if document is None:
+            # Nothing in the parser tolerates a missing document, and an
+            # AttributeError three frames below a successful-looking call is
+            # the least useful thing this function could do. The caller is
+            # expected to raise before getting here; this is the backstop.
+            raise HPPrinterParseError("CDP identity document missing")
         model = document.get("makeAndModel")
         model_name = model.get("name") if isinstance(model, dict) else None
         model_family = model.get("family") if isinstance(model, dict) else None

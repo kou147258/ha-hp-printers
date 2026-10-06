@@ -43,7 +43,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: HPPrinterConfigEntry) ->
             entry.data.get(CONF_PORT, DEFAULT_PORT),
             entry.data.get(CONF_SSL, DEFAULT_SSL),
             printer_ssl_context(),
-            entry.data.get(CONF_PASSWORD),
+            # Keyword, not positional. The parameter is keyword-only so that
+            # adding a connection option later cannot silently be read as the
+            # password, and this call site passed it in sixth position -- which
+            # every test missed, because the tests call the function directly
+            # and the setup path is the only place that spells the call out.
+            password=entry.data.get(CONF_PASSWORD),
         )
     except HPPrinterError as error:
         raise ConfigEntryNotReady(

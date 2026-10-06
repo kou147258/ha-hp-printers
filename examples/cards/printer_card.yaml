@@ -1,0 +1,203 @@
+# HP 打印机 单机卡片（Lovelace）
+#
+# ---------------------------------------------------------------------------
+# 这张卡是给「一台打印机」的。两台就放两张，各自改下面标了 <<< 改这里 >>> 的两行。
+#
+# 改法有两种，二选一：
+#
+#   A. 手动加（推荐，第一次配置时用）
+#      设置 → 仪表盘 → 编辑 → 添加卡片 → 自定义 → 复制下面的 YAML
+#      卡片编辑器里可以直接看到效果，改完保存。
+#
+#   B. YAML 模式
+#      仪表盘右上角「⋮」→ 编辑 → 视图右上角「⋮」→ 选 YAML 模式，
+#      把下面整段粘进去。
+#
+# 需要的前端依赖：card-mod（装法见 HP安装与测试说明.md 第二节）。
+# 和配套仪表盘用的是同一个依赖，不会多装东西。
+#
+# ---------------------------------------------------------------------------
+# 怎么找到「设备名」
+#   设置 → 设备与服务 → HP Printers → 设备名（就是你添加集成时填的名字）
+#   或者实体属性页右上角那个设备图标旁边的名字。
+#   卡片按**设备名**过滤，不是按实体 id，所以你在集成里给打印机改名之后，
+#   只需要回来改这一处；实体 id 变了、主机 IP 变了都不影响。
+# ---------------------------------------------------------------------------
+
+type: vertical-stack
+cards:
+  # ======================================================================
+  # 1. 整机图 + 状态
+  #
+  #    图片有两个来源，二选一：
+  #      * 打印机自己的渲染图（推荐，永远和机器对得上，改固件也不会失效）
+  #        http://<打印机地址>/images/printer-large.png
+  #      * 你自己上传到 www/ 的图，改成 /local/你的文件名.png
+  #
+  #    HA 必须能直连打印机的 http 端口（80）。Docker + bridge 网络时解析不到
+  #    打印机 IP，要改 host 网络或加 extra_hosts。
+  # ======================================================================
+  - type: picture-entity
+    image: http://192.168.9.20/images/printer-large.png   # <<< 改这里：打印机地址
+    entity: sensor.office_750_status                        # <<< 改这里：状态实体 id
+    name: 办公室 750
+    show_name: true
+    show_state: true
+    state_color: true
+    theme: paperless
+    styles: |
+      ha-card {
+        --ha-card-border-radius: 14px;
+        border: 1px solid var(--divider-color, #2a2f37);
+      }
+      img {
+        max-height: 210px;
+        object-fit: contain;
+      }
+
+  # ======================================================================
+  # 2. 一眼看懂的几个数
+  #
+  #    页数用「黑白 + 彩色」而不是总数：LEDM 的 printer_total_pages 是引擎
+  #    一辈子转过的页（含卡纸、重试、复印、扫描、校准），CDP 的是黑白+彩色，
+  #    两者口径不同。黑白/彩色这两个在两种协议下可以相加，做长期统计用它。
+  # ======================================================================
+  - type: entities
+    title: 概况
+    show_header_toggle: false
+    entities:
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key:
+                - printer_mono_pages
+                - printer_color_pages
+                - calibration_state
+        sort:
+          method: label
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key:
+                - paper_level
+                - media_loaded
+                - setup_state
+        sort:
+          method: label
+    styles: |
+      ha-card {
+        --ha-card-border-radius: 14px;
+        --ha-card-border-width: 1px;
+      }
+
+  # ======================================================================
+  # 3. 墨
+  #
+  #    耗材是独立子设备（每支一个），所以要单独一张卡。
+  #
+  #    注意口径：墨槽机型（inkTank）返回的 100 是设备的**占位值**，不是测量值
+  #    ——墨槽没有液位传感器。要做低墨告警，先看 `consumable_type` 是不是
+  #    inkCartridge。
+  # ======================================================================
+  - type: entities
+    title: 墨
+    show_header_toggle: true
+    entities:
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key: cartridge_level
+        sort:
+          method: label
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key:
+                - cartridge_brand
+                - cartridge_part_number
+        sort:
+          method: label
+    styles: |
+      ha-card {
+        --ha-card-border-radius: 14px;
+      }
+
+  # ======================================================================
+  # 4. 当下该管的事
+  #
+  #    告警的颜色、卡纸/误取、固件失败原因、校准进度、网络暴露。
+  #    这一张是「有异常时先看这里」的那张。
+  # ======================================================================
+  - type: entities
+    title: 关注
+    show_header_toggle: true
+    entities:
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key:
+                - active_alert_count
+                - active_alert_worst
+                - supply_alert_colors
+                - printer_jams
+                - printer_mispicks
+                - firmware_update_failure_reason
+        sort:
+          method: label
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: binary_sensor
+            device: <<< 改这里：设备名 >>>
+            entity:
+              translation_key:
+                - firmware_fault
+                - paper_low
+                - setup_incomplete
+        sort:
+          method: label
+    styles: |
+      ha-card {
+        --ha-card-border-radius: 14px;
+      }
+
+  # ======================================================================
+  # 5. 维护操作
+  #
+  #    点一下才会跑。每一次都烧墨和纸，所以只能是人点的，没有自动化。
+  #    需要在集成配置里填 EWS 管理员密码才能用（所有读操作都不需要）。
+  #
+  #    ⚠ `.12` 那台的「校准打印头」按下去会失败：它的首次设置清单里
+  #    第 5 步 SemiAutoCalibration 从来没完成过，得先在打印机上自己走完
+  #    （放纸 → 打印校准图 → 图放到扫描玻璃上 → 确认）。
+  # ======================================================================
+  - type: entities
+    title: 维护操作
+    show_header_toggle: true
+    entities:
+      - type: custom:auto-entities
+        filter:
+          - integration: hp_printers
+            domain: button
+            device: <<< 改这里：设备名 >>>
+        sort:
+          method: label
+    styles: |
+      ha-card {
+        --ha-card-border-radius: 14px;
+      }
