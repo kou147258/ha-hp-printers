@@ -3,7 +3,7 @@
 from datetime import timedelta
 import logging
 
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SSL, Platform
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_SSL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -26,19 +26,24 @@ from .helpers import printer_ssl_context
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: HPPrinterConfigEntry) -> bool:
     """Set up HP Printers from a config entry."""
     try:
         # The protocol is discovered rather than configured: see client.py.
+        # The admin password rides along for the maintenance buttons; it is
+        # never used for a read, because every read on both protocols is
+        # unauthenticated and gating them on a password would make a working
+        # integration fail on a printer whose password was changed.
         client, product_info = await async_build_client(
             async_get_clientsession(hass, verify_ssl=False),
             entry.data[CONF_HOST],
             entry.data.get(CONF_PORT, DEFAULT_PORT),
             entry.data.get(CONF_SSL, DEFAULT_SSL),
             printer_ssl_context(),
+            entry.data.get(CONF_PASSWORD),
         )
     except HPPrinterError as error:
         raise ConfigEntryNotReady(

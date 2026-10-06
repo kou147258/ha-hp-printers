@@ -17,11 +17,13 @@
             "name": "Advanced settings",
             "data": {
               "port": "Port",
-              "ssl": "Use HTTPS"
+              "ssl": "Use HTTPS",
+              "password": "Admin password"
             },
             "data_description": {
               "port": "The embedded web server port. Leave at 80 and it will follow to 443 automatically if you turn on HTTPS.",
-              "ssl": "Printers use a self-signed certificate, which is not verified."
+              "ssl": "Printers use a self-signed certificate, which is not verified.",
+              "password": "Optional. Only used by the cleaning and printhead-alignment buttons, which spend ink and paper. Leave it blank and those buttons are simply not created; every sensor keeps working without it."
             }
           }
         }
@@ -37,7 +39,11 @@
             "name": "Advanced settings",
             "data": {
               "port": "Port",
-              "ssl": "Use HTTPS"
+              "ssl": "Use HTTPS",
+              "password": "Admin password"
+            },
+            "data_description": {
+              "password": "Leave blank to keep the current password."
             }
           }
         }
@@ -170,6 +176,21 @@
     },
     "update_error": {
       "message": "Error fetching data from {device}: {error}"
+    },
+    "maintenance_failed": {
+      "message": "The printer refused the maintenance request: {error}"
+    },
+    "maintenance_already_running": {
+      "message": "A maintenance operation is already running on this printer."
+    },
+    "maintenance_unavailable": {
+      "message": "This printer does not offer that operation."
+    },
+    "calibration_unavailable": {
+      "message": "This printer does not offer that printhead alignment."
+    },
+    "calibration_no_paper": {
+      "message": "Printhead alignment needs paper. The input tray reports empty, so nothing would be printed to align against."
     }
   },
   "entity": {
@@ -488,6 +509,26 @@
       },
       "quiet_mode": {
         "name": "Quiet mode"
+      }
+    },
+    "button": {
+      "clean_ink_light": {
+        "name": "Clean ink paths (light)"
+      },
+      "clean_ink_medium": {
+        "name": "Clean ink paths (medium)"
+      },
+      "clean_ink_strong": {
+        "name": "Clean ink paths (strong)"
+      },
+      "clean_paper_feed": {
+        "name": "Clean paper feed"
+      },
+      "clean_rib_smear": {
+        "name": "Clean rib smear"
+      },
+      "calibrate_printhead": {
+        "name": "Align printhead (needs paper)"
       }
     }
   }

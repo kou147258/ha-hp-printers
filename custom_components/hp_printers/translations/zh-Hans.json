@@ -17,11 +17,13 @@
             "name": "高级设置",
             "data": {
               "port": "端口",
-              "ssl": "使用 HTTPS"
+              "ssl": "使用 HTTPS",
+              "password": "管理员密码"
             },
             "data_description": {
               "port": "打印机内置 Web 服务器的端口。保持 80，启用 HTTPS 后会自动切换到 443。",
-              "ssl": "打印机使用自签名证书，不会对其做校验。"
+              "ssl": "打印机使用自签名证书，不会对其做校验。",
+              "password": "可选。仅供清洁和打印头校准按钮使用，这些操作会消耗墨水和纸张。留空则不创建这些按钮，所有传感器照常工作。"
             }
           }
         }
@@ -37,7 +39,11 @@
             "name": "高级设置",
             "data": {
               "port": "端口",
-              "ssl": "使用 HTTPS"
+              "ssl": "使用 HTTPS",
+              "password": "管理员密码"
+            },
+            "data_description": {
+              "password": "留空表示保持当前密码。"
             }
           }
         }
@@ -170,6 +176,21 @@
     },
     "update_error": {
       "message": "从 {device} 获取数据时出错：{error}"
+    },
+    "maintenance_failed": {
+      "message": "打印机拒绝了这次维护请求：{error}"
+    },
+    "maintenance_already_running": {
+      "message": "这台打印机上已有维护操作正在运行。"
+    },
+    "maintenance_unavailable": {
+      "message": "这台打印机不支持该操作。"
+    },
+    "calibration_unavailable": {
+      "message": "这台打印机不支持该打印头校准方式。"
+    },
+    "calibration_no_paper": {
+      "message": "打印头校准需要纸。进纸器报告是空的，校准没有可打印的测试页。"
     }
   },
   "entity": {
@@ -488,6 +509,26 @@
       },
       "quiet_mode": {
         "name": "静音模式"
+      }
+    },
+    "button": {
+      "clean_ink_light": {
+        "name": "清洁墨路（轻度）"
+      },
+      "clean_ink_medium": {
+        "name": "清洁墨路（中度）"
+      },
+      "clean_ink_strong": {
+        "name": "清洁墨路（强力）"
+      },
+      "clean_paper_feed": {
+        "name": "清洁走纸机构"
+      },
+      "clean_rib_smear": {
+        "name": "清洁色带"
+      },
+      "calibrate_printhead": {
+        "name": "校准打印头（需要放纸）"
       }
     }
   }

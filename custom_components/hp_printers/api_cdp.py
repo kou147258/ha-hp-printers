@@ -17,6 +17,7 @@ entities, config flow -- has to know which protocol a printer speaks.
 """
 
 import asyncio
+import base64
 from dataclasses import replace
 from datetime import datetime
 import json
@@ -31,16 +32,21 @@ from .api import (
     HPPrinterError,
     HPPrinterNotSupportedError,
     HPPrinterParseError,
+    HPPrinterWriteError,
     _percent,
 )
 from .const import (
     CDP_CALIBRATION,
+    CDP_CALIBRATION_CAPABILITIES,
+    CDP_CALIBRATION_TRIGGER,
     CDP_DEVICE_SERVICE_COUNTERS,
     CDP_DEVICE_USAGE,
     CDP_EVENTS,
     CDP_IDENTITY,
     CDP_PRINT_CONFIG,
     CDP_PRINT_STATUS,
+    CDP_REPORT_PRINT,
+    CDP_REPORTS,
     CDP_SCAN_STATUS,
     CDP_SECURITY_CONFIG,
     CDP_SUPPLIES,
@@ -185,7 +191,11 @@ def _status(value: str | None) -> str | None:
 
 
 class CDPClient:
-    """Read-only client for a printer's CDP REST endpoints."""
+    """Client for a printer's CDP REST endpoints.
+
+    Reads are the integration's normal path. Writes exist too, behind a
+    button, and the two are kept visibly apart on purpose.
+    """
 
     def __init__(
         self,
@@ -194,6 +204,8 @@ class CDPClient:
         port: int,
         use_ssl: bool,
         ssl_context: ssl.SSLContext | None = None,
+        *,
+        password: str | None = None,
     ) -> None:
         """Initialize the client.
 
@@ -201,12 +213,17 @@ class CDPClient:
         on the models measured so far only legacy static-RSA cipher suites, so
         verification is disabled *and* the cipher list has to be permissive --
         a plain no-verify context still fails at handshake time.
+
+        ``password`` is the EWS admin password and is used only by the write
+        methods. It is held in memory for the life of the config entry and
+        never written to a log, a diagnostics dump, or a fixture.
         """
         self._session = session
         self._host = host
         self._port = port
         self._ssl = use_ssl
         self._ssl_context: ssl.SSLContext | bool = ssl_context or False
+        self._password = password or ""
 
     @property
     def host(self) -> str:
@@ -257,6 +274,157 @@ class CDPClient:
         except HPPrinterError as error:
             _LOGGER.debug("Optional CDP endpoint %s unavailable: %s", endpoint, error)
             return None
+
+    # ------------------------------------------------------------------
+    # Writes.
+    #
+    # Everything below is reachable only from a button the user pressed.
+    # Nothing here is called from the coordinator, so no write can be caused
+    # by a poll, a restart, or a reload. That is the property that makes
+    # having them at all defensible: the cost in ink and paper is incurred
+    # because a person asked for it, at a moment they chose.
+    # ------------------------------------------------------------------
+
+    @property
+    def can_write(self) -> bool:
+        """Return whether a write could be attempted at all.
+
+        The password is not optional for a write, so without one the buttons
+        are not created rather than created and left to fail. A button that
+        cannot work is worse than no button: it looks like the feature is
+        there and silently does nothing.
+        """
+        return bool(self._password)
+
+    def _auth_header(self) -> dict[str, str]:
+        """Return the Authorization header the EWS expects.
+
+        HTTP Basic, user ``admin``. This is not a guess: the EWS application
+        bundle served by the printer contains
+        ``setAjaxAuthUserIdPw("admin", ...)`` and attaches
+        ``"Basic " + base64(...)`` to its own requests, and an
+        unauthenticated GET of a gated page comes back 403 with no
+        application body -- i.e. a missing Basic header, not an
+        application-level refusal.
+        """
+        token = base64.b64encode(f"admin:{self._password}".encode()).decode()
+        return {"Authorization": f"Basic {token}", "Content-Type": "application/json"}
+
+    async def _patch(self, endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
+        """PATCH one CDP document.
+
+        Split from :meth:`_fetch` deliberately. The read path and the write
+        path have different failure modes and different callers: a read that
+        fails should degrade a sensor, and a write that fails has to be
+        reported to the person who pressed the button. Sharing one helper
+        would mean every write inherited the reads' "carry on quietly"
+        contract.
+        """
+        if not self._password:
+            raise HPPrinterWriteError(
+                "No EWS admin password configured, so the printer refused the request"
+            )
+        url = f"{self.base_url}{endpoint}"
+        payload = json.dumps(body)
+        # The log line is the audit trail for a request that spends ink and
+        # paper. It records the operation, never the credential.
+        _LOGGER.warning("User-requested write: PATCH %s body=%s", endpoint, payload)
+        try:
+            async with self._session.patch(
+                url,
+                data=payload.encode(),
+                timeout=REQUEST_TIMEOUT,
+                ssl=self._ssl_context,
+                headers=self._auth_header(),
+            ) as response:
+                status = response.status
+                raw = await response.text()
+        except TimeoutError as err:
+            raise HPPrinterWriteError(
+                f"Timeout writing {endpoint}; the printer may still be running it"
+            ) from err
+        except ClientError as err:
+            raise HPPrinterWriteError(f"Error writing {endpoint}: {err}") from err
+
+        if status in (401, 403):
+            raise HPPrinterWriteError(
+                f"Printer rejected the admin password (HTTP {status})"
+            )
+        if status == 404:
+            raise HPPrinterWriteError(
+                f"This printer does not offer {endpoint} (HTTP 404)"
+            )
+        if status >= 400:
+            # The body is the only place the reason appears, and it is the
+            # difference between "wrong password" and "busy" and "no paper".
+            detail = raw.strip()[:200] if raw.strip() else "no detail"
+            raise HPPrinterWriteError(
+                f"Printer refused {endpoint}: HTTP {status} {detail}"
+            )
+
+        try:
+            document = json.loads(raw) if raw.strip() else {}
+        except ValueError:
+            # A successful write is allowed to answer with an empty or
+            # non-JSON body; that is not a failure of the write.
+            return {}
+        return document if isinstance(document, dict) else {}
+
+    async def async_get_reports(self) -> dict[str, bool]:
+        """Return ``{reportId: printable}`` for the reports this model offers.
+
+        Read from the device rather than from :data:`CLEANING_REPORTS` so the
+        buttons match the hardware. A model with no printhead clean has no
+        ``cleaningPage`` to offer, and offering the button anyway produces an
+        error the user has to decode.
+        """
+        document = await self._fetch_optional(CDP_REPORTS)
+        if document is None:
+            return {}
+        found: dict[str, bool] = {}
+        for report in document.get("reports", []) or []:
+            if not isinstance(report, dict):
+                continue
+            report_id = _text(report, "reportId")
+            if report_id is None:
+                continue
+            found[report_id] = _bool(report, "printable") or False
+        return found
+
+    async def async_get_calibration_capabilities(self) -> dict[str, Any]:
+        """Return what this model can calibrate, and what it needs.
+
+        ``requiresMedia`` matters more than it looks: the alignment routine
+        prints a test pattern, so firing it at an empty tray wastes the cycle
+        and can leave the machine mid-alignment. The button is refused when
+        the device says it needs media rather than being left to fail.
+        """
+        return await self._fetch_optional(CDP_CALIBRATION_CAPABILITIES) or {}
+
+    async def async_run_report(self, report_id: str) -> dict[str, Any]:
+        """Start one report the device lists under /cdm/report/v1/reports.
+
+        The body is the device's own identifier, taken from the ``reports``
+        document, which is also where the link that advertises ``PATCH`` on
+        this resource lives. The resource's ``GET`` returns
+        ``{"version": ..., "state": "idle"}``, and ``state`` is progress to
+        read back -- not a field to set.
+        """
+        return await self._patch(CDP_REPORT_PRINT, {"reportId": report_id})
+
+    async def async_run_calibration(self, calibration_type: str) -> dict[str, Any]:
+        """Start one alignment routine by the type the device advertises.
+
+        Unlike the reports, this body's shape is not readable from the
+        device: ``GET /cdm/calibration/v1/calibration`` answers 400, so there
+        is no representation to copy the request from. The type string comes
+        from ``availableCalibrations`` in the capabilities document, and the
+        member name follows the same convention every other CDP document
+        uses for naming the thing being acted on.
+        """
+        return await self._patch(
+            CDP_CALIBRATION_TRIGGER, {"calibrationType": calibration_type}
+        )
 
     async def async_get_product_info(self) -> ProductInfo:
         """Read static device information.

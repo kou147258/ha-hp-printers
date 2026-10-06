@@ -8,7 +8,7 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
     OptionsFlowWithReload,
 )
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT, CONF_SSL
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PASSWORD, CONF_PORT, CONF_SSL
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import section
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -18,6 +18,8 @@ from homeassistant.helpers.selector import (
     NumberSelectorConfig,
     NumberSelectorMode,
     TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
 )
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 import voluptuous as vol
@@ -41,6 +43,13 @@ SECTION_ADVANCED = "advanced_settings"
 
 # Name and host are the only things most people need. Port and TLS are real
 # but rarely changed, so they live behind a collapsed section.
+#
+# The admin password is in the same section and is optional. It is used by
+# exactly one thing -- the maintenance buttons -- and is never needed for a
+# read, because both protocols serve every document this integration reads
+# without authentication. Making it optional is what keeps the integration
+# working on a printer whose password was changed or never set, instead of
+# failing setup over a credential that only three buttons need.
 _ADVANCED = section(
     vol.Schema(
         {
@@ -48,6 +57,11 @@ _ADVANCED = section(
                 NumberSelectorConfig(min=1, max=65535, mode=NumberSelectorMode.BOX)
             ),
             vol.Required(CONF_SSL, default=DEFAULT_SSL): BooleanSelector(),
+            vol.Optional(CONF_PASSWORD): TextSelector(
+                TextSelectorConfig(
+                    type=TextSelectorType.PASSWORD, autocomplete="current-password"
+                )
+            ),
         }
     ),
     {"collapsed": True},
@@ -197,10 +211,12 @@ class HPPrintersConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle reauthentication.
 
-        The integration reads LEDM without credentials, so the only reason HA
-        raises a reauth is the entry being moved to a different printer or
-        having stale connection data. Either way, the user should reconfigure
-        the host rather than re-enter a password.
+        Every read this integration makes is unauthenticated, and the one
+        credential it holds -- the EWS admin password -- gates only the
+        maintenance buttons. A rejected password therefore must not raise a
+        reauth here: it would block the sensors, which are working fine, and
+        ask for a credential that is not what is broken. Reconfigure is the
+        right destination, since that is where the password is entered.
         """
         return self.async_abort(reason="reconfigure_to_resolve")
 
@@ -213,6 +229,17 @@ class HPPrintersConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             data = _flatten(user_input)
+            # The password field is deliberately never pre-filled -- HA does
+            # not send a stored credential back to a form, and echoing one
+            # would put it in the browser DOM. So a blank field on reconfigure
+            # means "leave it alone", not "clear it": writing the empty
+            # string would silently disable the maintenance buttons on a
+            # printer that is configured correctly.
+            if not data.get(CONF_PASSWORD):
+                if (previous := entry.data.get(CONF_PASSWORD)) is not None:
+                    data[CONF_PASSWORD] = previous
+                else:
+                    data.pop(CONF_PASSWORD, None)
             errors, serial, _model = await self._async_probe(data)
 
             if not errors and serial:
@@ -227,6 +254,8 @@ class HPPrintersConfigFlow(ConfigFlow, domain=DOMAIN):
             SECTION_ADVANCED: {
                 CONF_PORT: entry.data.get(CONF_PORT, DEFAULT_PORT),
                 CONF_SSL: entry.data.get(CONF_SSL, DEFAULT_SSL),
+                # No suggested value for the password: it is intentionally
+                # left blank so the stored one is preserved rather than shown.
             },
         }
         return self.async_show_form(

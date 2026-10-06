@@ -67,6 +67,19 @@ class HPPrinterNotSupportedError(HPPrinterError):
     """
 
 
+class HPPrinterWriteError(HPPrinterError):
+    """Raised when the printer refuses a write request.
+
+    Separate from the read-side errors on purpose. A write that the device
+    rejects is not a connectivity problem and not a parse problem, and
+    reporting it as either would tell the user the wrong thing to do: a
+    connectivity error invites them to check the network, a parse error
+    invites them to file a bug, and neither is what happened. The common
+    causes are a wrong admin password, a maintenance cycle already running,
+    and a model that does not offer the operation at all.
+    """
+
+
 def _localname(tag: str) -> str:
     """Strip the XML namespace from a tag."""
     return tag.rpartition("}")[2]

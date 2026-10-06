@@ -69,6 +69,25 @@ CDP_EVENTS: Final = "/cdm/diagnostic/v1/systemEvents"
 CDP_SECURITY_CONFIG: Final = "/cdm/security/v1/deviceAdminConfig"
 CDP_CALIBRATION: Final = "/cdm/calibration/v1/calibration/penAlignSemiauto"
 
+# --- write endpoints -------------------------------------------------------
+#
+# These are the only requests this integration ever makes that are not a GET,
+# and none of them are made on a poll: each one is a button the user presses.
+# The paths and the methods come from the device's own service discovery
+# document (/cdm/servicesDiscovery), which lists every link together with the
+# HTTP methods that link accepts. That document is the authority here -- it is
+# how "PATCH this" was established rather than assumed.
+CDP_REPORTS: Final = "/cdm/report/v1/reports"
+CDP_REPORT_PRINT: Final = "/cdm/report/v1/print"
+CDP_CALIBRATION_TRIGGER: Final = "/cdm/calibration/v1/calibration"
+CDP_CALIBRATION_CAPABILITIES: Final = "/cdm/calibration/v1/capabilities"
+
+# The cleaning operations are deliberately NOT named here. The device lists
+# them in /cdm/report/v1/reports with its own identifiers, and button.py is
+# the single place those identifiers are mapped onto buttons. A second table
+# in constants would be a second thing to keep in step with the hardware, and
+# the two would drift exactly the way a hand-written endpoint list drifts.
+
 # Endpoints fetched once at setup rather than on every poll.
 STATIC_ENDPOINTS: Final = (ENDPOINT_PRODUCT_CONFIG,)
 
