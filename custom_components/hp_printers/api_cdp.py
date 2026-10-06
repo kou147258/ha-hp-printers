@@ -450,26 +450,63 @@ class CDPClient:
     async def async_run_report(self, report_id: str) -> dict[str, Any]:
         """Start one report the device lists under /cdm/report/v1/reports.
 
-        The body is the device's own identifier, taken from the ``reports``
-        document, which is also where the link that advertises ``PATCH`` on
-        this resource lives. The resource's ``GET`` returns
-        ``{"version": ..., "state": "idle"}``, and ``state`` is progress to
-        read back -- not a field to set.
+        The body is three fields, not one, and the first version of this sent
+        only ``reportId``. The printer's own web application builds it like
+        this -- start from a state, look the report up in the reports
+        document, and carry across both its identifier and its version:
+
+            var r = {state: "processing"};
+            for (report of reports) if (report.reportId == job) {
+                r.version = report.version; r.reportId = job;
+            }
+            PATCH /cdm/report/v1/print  {state, version, reportId}
+
+        A request carrying only the identifier is rejected, and the device
+        answers that with a 400 and an empty body, so the failure would look
+        like a broken feature rather than a wrong request.
         """
-        return await self._patch(CDP_REPORT_PRINT, {"reportId": report_id})
+        document = await self._fetch_optional(CDP_REPORTS)
+        version: str | None = None
+        for report in (document or {}).get("reports", []) or []:
+            if isinstance(report, dict) and report.get("reportId") == report_id:
+                version = _text(report, "version")
+                break
+        if version is None:
+            # Said here rather than left to a 400 with an empty body: the
+            # device is perfectly capable of listing the report and then
+            # refusing it, and "this printer does not offer that" is the
+            # answer the user can act on.
+            raise HPPrinterWriteError(
+                f"This printer does not list a report called {report_id}"
+            )
+        return await self._patch(
+            CDP_REPORT_PRINT,
+            {"state": "processing", "version": version, "reportId": report_id},
+        )
 
     async def async_run_calibration(self, calibration_type: str) -> dict[str, Any]:
         """Start one alignment routine by the type the device advertises.
 
-        Unlike the reports, this body's shape is not readable from the
-        device: ``GET /cdm/calibration/v1/calibration`` answers 400, so there
-        is no representation to copy the request from. The type string comes
-        from ``availableCalibrations`` in the capabilities document, and the
-        member name follows the same convention every other CDP document
-        uses for naming the thing being acted on.
+        Two things the first version of this got wrong, both read out of the
+        printer's own web application rather than guessed:
+
+        - the **member** path, ``/calibration/<type>``, not the collection
+          ``/calibration``;
+        - a second field, ``operationType: "calibration"``, alongside the
+          type itself.
+
+            var v = {calibrationType: "penAlignSemiauto",
+                     operationType: "calibration"};
+            PATCH /cdm/calibration/v1/calibration/penAlignSemiauto  v
+
+        Neither omission raised anything: the collection answers 400 to a GET,
+        and it answers 400 to a body it will not accept, both with an empty
+        body. The only source that could say what the request looks like is
+        the code the printer ships to its own browser.
         """
         return await self._patch(
-            CDP_CALIBRATION_TRIGGER, {"calibrationType": calibration_type}
+            f"{CDP_CALIBRATION_TRIGGER}/{calibration_type}",
+            {"calibrationType": calibration_type, "operationType": "calibration"},
         )
 
     async def async_get_product_info(self) -> ProductInfo:

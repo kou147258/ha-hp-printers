@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "reports": [
+    {
+      "version": "1.0.0",
+      "reportId": "alignmentPage",
+      "localizedName": "Alignment Page",
+      "category": "service",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "cleaningPage",
+      "localizedName": "Cleaning Page",
+      "category": "service",
+      "printable": "false"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "cleaningPageLevel2",
+      "localizedName": "Cleaning Page Level 2",
+      "category": "service",
+      "printable": "false"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "cleaningPageLevel3",
+      "localizedName": "Cleaning Page Level 3",
+      "category": "service",
+      "printable": "false"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "cleaningVerificationPage",
+      "localizedName": "Cleaning Verification Page",
+      "category": "service",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "configurationReport",
+      "localizedName": "Printer Status Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "diagnosticsReport",
+      "localizedName": "Diagnostics Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "eventLog",
+      "localizedName": "Event Log Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "extendedConfigurationPage",
+      "localizedName": "Extended Self Test Page",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "networkConfigurationReport",
+      "localizedName": "Network Configuration Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "networkSummaryPage",
+      "localizedName": "Network Summary Page",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "printQualityTestReport",
+      "localizedName": "PQ Diagnostics Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "paperFeedCleaningPage",
+      "localizedName": "Paper Feed Cleaning Page",
+      "category": "service",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "ribSmearCleaningPage",
+      "localizedName": "Rib Smear Cleaning Page",
+      "category": "service",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "webServicesInformationPage",
+      "localizedName": "Web Services Info Page",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "webAccessSummaryReport",
+      "localizedName": "Web Access Summary Report",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "wirelessNetworkPage",
+      "localizedName": "Wireless Test Page",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "wifiDirectGuide",
+      "localizedName": "WiFi Direct Guide",
+      "category": "status",
+      "printable": "true"
+    },
+    {
+      "version": "1.0.0",
+      "reportId": "privacyLog",
+      "localizedName": "Security and Privacy Report",
+      "category": "status",
+      "printable": "true"
+    }
+  ],
+  "links": [
+    {
+      "href": "/cdm/report/v1/print",
+      "rel": "print",
+      "hints": [
+        {
+          "method": "get"
+        },
+        {
+          "method": "patch"
+        }
+      ]
+    }
+  ]
+}

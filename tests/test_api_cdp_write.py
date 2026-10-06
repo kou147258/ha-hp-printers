@@ -11,6 +11,7 @@ the least useful one in the file.
 """
 
 import json
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 from aiohttp import ClientError
@@ -18,10 +19,8 @@ import pytest
 
 from custom_components.hp_printers.api import HPPrinterWriteError
 from custom_components.hp_printers.api_cdp import CDPClient
-from custom_components.hp_printers.const import (
-    CDP_CALIBRATION_TRIGGER,
-    CDP_REPORT_PRINT,
-)
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 # Not a real credential and not a guess at one: it only has to round-trip
 # through base64 and come back out the other side.
@@ -75,37 +74,37 @@ def _session(
     return session
 
 
-def _client(session: MagicMock, password: str | None = TEST_PASSWORD) -> CDPClient:
-    return CDPClient(session, "printer.local", 443, True, password=password)
+def _reports_document() -> dict:
+    """The printer's real reports document, from the anonymized capture."""
+    return json.loads(
+        (FIXTURES / "st580_590" / "cdm_report_v1_reports.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+
+def _client(
+    session: MagicMock,
+    password: str | None = TEST_PASSWORD,
+    *,
+    stub_reports: bool = True,
+) -> CDPClient:
+    """Build a client whose optional fetches answer the real reports capture.
+
+    A report run reads the reports document first -- the version has to come
+    from the device -- so the default client answers it. Tests that exercise
+    the optional fetches themselves pass ``stub_reports=False`` so their own
+    session is what answers.
+    """
+    client = CDPClient(session, "printer.local", 443, True, password=password)
+    if stub_reports:
+        client._fetch_optional = AsyncMock(  # noqa: SLF001
+            return_value=_reports_document()
+        )
+    return client
 
 
 # --------------------------------------------------------------- the basics
-
-
-async def test_report_request_names_the_device_s_own_identifier() -> None:
-    """The body is the reportId the device listed, not a name we invented."""
-    session = _session()
-    client = _client(session)
-
-    await client.async_run_report("cleaningPage")
-
-    url = session.patch.call_args.args[0]
-    body = session.patch.call_args.kwargs["data"].decode()
-    assert url.endswith(CDP_REPORT_PRINT)
-    assert '"reportId":"cleaningPage"' in body.replace(" ", "")
-
-
-async def test_calibration_request_names_the_advertised_type() -> None:
-    """The type string comes from availableCalibrations, not from a guess."""
-    session = _session()
-    client = _client(session)
-
-    await client.async_run_calibration("penAlignSemiauto")
-
-    url = session.patch.call_args.args[0]
-    body = session.patch.call_args.kwargs["data"].decode()
-    assert url.endswith(CDP_CALIBRATION_TRIGGER)
-    assert '"calibrationType":"penAlignSemiauto"' in body.replace(" ", "")
 
 
 async def test_a_write_sends_no_credential_at_all() -> None:
@@ -130,6 +129,93 @@ async def test_a_write_sends_no_credential_at_all() -> None:
 
 
 # --------------------------------------------------- refusing to write at all
+
+
+async def test_a_report_request_carries_state_and_version_as_well_as_the_id() -> None:
+    """Three fields, not one.
+
+    The printer's own web application starts from a state, looks the report up
+    in the reports document, and carries across its version as well as its
+    identifier. A body with only the identifier is rejected, and the device
+    answers that with a 400 and an empty body -- so the failure reads as a
+    broken feature rather than a wrong request.
+    """
+    reports = json.loads(
+        (FIXTURES / "st580_590" / "cdm_report_v1_reports.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    session = _session()
+    client = _client(session)
+    client._fetch_optional = AsyncMock(return_value=reports)  # noqa: SLF001
+
+    await client.async_run_report("cleaningPage")
+
+    body = json.loads(session.patch.call_args.kwargs["data"].decode())
+    assert body == {
+        "state": "processing",
+        "version": "1.0.0",
+        "reportId": "cleaningPage",
+    }
+
+
+async def test_the_report_version_comes_from_the_device_not_from_us() -> None:
+    """A hardcoded "1.0.0" would be right until the firmware bumps it.
+
+    The reports document carries a version per report for a reason: the
+    request echoes it back. Reading it is the difference between working
+    across a firmware update and not.
+    """
+    reports = {
+        "reports": [
+            {"reportId": "cleaningPage", "version": "2.3.1", "printable": "false"}
+        ]
+    }
+    session = _session()
+    client = _client(session)
+    client._fetch_optional = AsyncMock(return_value=reports)  # noqa: SLF001
+
+    await client.async_run_report("cleaningPage")
+
+    body = json.loads(session.patch.call_args.kwargs["data"].decode())
+    assert body["version"] == "2.3.1"
+
+
+async def test_a_report_the_device_does_not_list_is_refused_with_a_reason() -> None:
+    """Said here rather than left to a 400 with an empty body.
+
+    A device can list a report and still refuse it, and "this printer does
+    not offer that" is the answer the user can act on.
+    """
+    session = _session()
+    client = _client(session)
+    client._fetch_optional = AsyncMock(return_value={"reports": []})  # noqa: SLF001
+
+    with pytest.raises(HPPrinterWriteError, match="does not list a report"):
+        await client.async_run_report("cleaningPageLevel3")
+    session.patch.assert_not_called()
+
+
+async def test_calibration_patches_the_member_path_with_both_fields() -> None:
+    """The member, not the collection -- and a second field beside the type.
+
+    Both errors are invisible: the collection answers 400 to a GET, and it
+    answers 400 to a body it will not accept, both with an empty body. The
+    only source that can say what the request looks like is the code the
+    printer ships to its own browser.
+    """
+    session = _session()
+    client = _client(session)
+
+    await client.async_run_calibration("penAlignSemiauto")
+
+    url = session.patch.call_args.args[0]
+    body = json.loads(session.patch.call_args.kwargs["data"].decode())
+    assert url.endswith("/cdm/calibration/v1/calibration/penAlignSemiauto")
+    assert body == {
+        "calibrationType": "penAlignSemiauto",
+        "operationType": "calibration",
+    }
 
 
 async def test_a_write_needs_no_password_and_still_sends_the_request() -> None:
@@ -260,7 +346,7 @@ async def test_reports_are_read_from_the_device_not_from_a_constant() -> None:
     session = MagicMock()
     session.get = MagicMock(return_value=get_context)
 
-    client = _client(session)
+    client = _client(session, stub_reports=False)
     reports = await client.async_get_reports()
 
     assert "cleaningPage" in reports
@@ -280,7 +366,7 @@ async def test_a_printer_with_no_reports_document_reports_nothing() -> None:
     session = MagicMock()
     session.get = MagicMock(return_value=get_context)
 
-    client = _client(session)
+    client = _client(session, stub_reports=False)
     assert await client.async_get_reports() == {}
 
 
@@ -310,7 +396,7 @@ async def test_a_malformed_report_entry_is_skipped_not_guessed_at() -> None:
     session = MagicMock()
     session.get = MagicMock(return_value=get_context)
 
-    client = _client(session)
+    client = _client(session, stub_reports=False)
     reports = await client.async_get_reports()
 
     assert list(reports) == ["cleaningPage"]
@@ -327,7 +413,7 @@ async def test_requires_media_is_read_as_the_device_phrases_it() -> None:
     session = MagicMock()
     session.get = MagicMock(return_value=get_context)
 
-    client = _client(session)
+    client = _client(session, stub_reports=False)
     capabilities = await client.async_get_calibration_capabilities()
 
     assert str(capabilities["requiresMedia"]).lower() == "true"

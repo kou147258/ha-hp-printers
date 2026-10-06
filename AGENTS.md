@@ -222,18 +222,23 @@ Two rules the anonymizer has already been bitten by:
   JavaScript bundle references all answer 404. Do not infer a write path from
   the EWS bundle: that bundle is shared across HP's whole product line and
   contains code for features the hardware does not have.
-- **The CDP request shape comes from the device, not from a guess.**
-  `/cdm/servicesDiscovery` is the CDP equivalent of LEDM's
-  `DiscoveryTree.xml`: 31 services, 90 links, each with the HTTP methods that
-  link accepts, and it answers without authentication. It is the authority on
-  which endpoints exist and how they are called. Anything added to
-  `const.py`'s CDP list should be checkable against it.
-- `GET /cdm/calibration/v1/calibration` answers **400**, so the calibration
-  request body cannot be read back from the device the way the report body
-  can. The report body is the `reportId` the device itself publishes in
-  `/cdm/report/v1/reports`; the calibration body is the `calibrationType`
-  from `availableCalibrations`, which follows the same convention but has
-  not been confirmed against a live write. Treat that one as unverified.
+- **The write request shapes come from the printer's own web application,
+  not from the discovery document.** `/cdm/servicesDiscovery` names the
+  endpoints and the methods and says nothing about the body — and the device
+  answers every malformed body with a 400 and an **empty** body, so probing
+  cannot recover it. The body is written down in the JavaScript the printer
+  ships to its own browser (`/framework/Unified.js`, unauthenticated, ~650 kB),
+  which is the only place either request exists:
+
+  - report: `PATCH /cdm/report/v1/print` with
+    `{state: "processing", version: <from the reports document>, reportId: <id>}`
+    — the version is echoed from the device, so it is read, never hardcoded.
+  - calibration: `PATCH /cdm/calibration/v1/calibration/<type>` with
+    `{calibrationType: <type>, operationType: "calibration"}` — the **member**
+    path, not the collection, plus a second field beside the type.
+
+  Both were wrong in the first version, in ways that raised nothing. Read the
+  bundle before changing either.
 - **HP LEDM is self-describing but undocumented; only create entities for values the device actually reports, otherwise the setup omits them.**
 - **Ask the device what it advertises instead of guessing paths.** LEDM
   publishes every resource in `DiscoveryTree.xml`; CDP publishes 89 links in
