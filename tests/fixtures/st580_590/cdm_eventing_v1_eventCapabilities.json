@@ -1,0 +1,85 @@
+{
+  "connectionTimeoutRange": {
+    "default": 30,
+    "maximum": 300,
+    "minimum": 1
+  },
+  "consecutiveRetriesRange": {
+    "default": 3,
+    "maximum": 5,
+    "minimum": 1
+  },
+  "eventCategoryCharacteristics": [
+    {
+      "eventCategory": "supply",
+      "eventDetailType": "com.hp.cdm.service.eventing.resource.eventDetail.type.supply.version.1",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "job",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.job.version.1",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "fwUpdate",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.fwUpdate.version.2",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "wifiNetwork",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.wifiNetwork.version.3",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "wifiSetup",
+      "eventDetailType": "com.hp.cdm.service.eventing.resource.eventDetail.type.wifiSetup.version.1",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "lifetimeCounterSnapshot",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.lifetimeCounterSnapshot.version.1",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "engineStats",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.engineStats.platform.hpInk.version.1",
+      "bufferDepth": 6
+    },
+    {
+      "eventCategory": "errorSystemEvents",
+      "eventDetailType": "com.hp.cdm.domain.telemetry.type.eventDetail.category.errorSystemEvents.version.1",
+      "bufferDepth": 6
+    }
+  ],
+  "maximumPersistedSubscriptionCount": 12,
+  "requestTimeoutRange": {
+    "default": 30,
+    "maximum": 300,
+    "minimum": 1
+  },
+  "retryIntervalRange": {
+    "default": 30,
+    "maximum": 300,
+    "minimum": 1
+  },
+  "supportedEventAuthenticationMethods": [
+    "none",
+    "basicAuth",
+    "deviceServiceBasicAuth"
+  ],
+  "supportedEventProtocols": [
+    "http",
+    "https"
+  ],
+  "supportedTrustedServices": [
+    {
+      "serviceName": "svc_wpp_telemetry_enc",
+      "serviceNameType": "com.hp.cdm.platform.avatar.serviceName"
+    },
+    {
+      "serviceName": "svc_sage_telemetry_enc",
+      "serviceNameType": "com.hp.cdm.platform.avatar.serviceName"
+    }
+  ],
+  "version": "1.4.0"
+}

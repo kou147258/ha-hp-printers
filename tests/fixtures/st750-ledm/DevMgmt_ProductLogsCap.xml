@@ -1,0 +1,27 @@
+<ns0:ProductLogsCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productlogscap/2008/01/16" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/productlogscap/2008/01/16 ../schemas/ProductLogsCap.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.29</ns2:Revision>
+
+		<ns2:Date>2010-05-13</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:EventLogCap>
+
+		<ns0:EventLogMaxSize>15</ns0:EventLogMaxSize>
+
+		<ns0:SequenceNumber elementXPath="pldyn:EventLog/pldyn:Event/dd:SequenceNumber" typeof="dd:Integer" min="0" max="10" step="1" />
+
+		<ns0:EventOccurrences elementXPath="pldyn:EventLog/pldyn:Event/dd:EventOccurrences" typeof="dd:Integer" min="0" max="10" step="1" />
+
+		<ns0:EventCode elementXPath="pldyn:ProductLogsDyn/pldyn:EventLog/pldyn:Event/dd:EventCode" typeof="dd:String" length="9" />
+
+		<ns0:EventDetail elementXPath="pldyn:ProductLogsDyn/pldyn:EventLog/pldyn:Event/dd:EventDetail" typeof="dd:String" length="255" />
+
+	</ns0:EventLogCap>
+
+	<ns0:ErrorLogCap elementXPath="pldyn:ErrorLog" typeof="dd:String" length="1000" access="readOnly" />
+
+</ns0:ProductLogsCap>

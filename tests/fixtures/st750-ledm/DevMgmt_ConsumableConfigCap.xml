@@ -1,0 +1,663 @@
+<ns0:ConsumableConfigCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/consumableconfigcap/2007/11/19" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/consumableconfigdyn/2007/11/19" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/consumableconfigcap/2007/11/19 ../schemas/ConsumableConfigCap.xsd http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.290</ns2:Revision>
+
+		<ns2:Date>2010-06-02</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:ProductConsumableInfoCap>
+
+		<ns0:NumOfUserReplaceableConsumables typeof="dd:Int" max="50" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ProductConsumableInfo/dd:NumOfUserReplaceableConsumables" min="0" access="readOnly" />
+
+		<ns0:NumOfNonUserReplaceableConsumables typeof="dd:Int" max="50" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ProductConsumableInfo/dd:NumOfNonUserReplaceableConsumables" min="0" access="readOnly" />
+
+		<ns0:AlignmentModeSupport access="readOnly">
+
+			<ns2:AlignmentMode>semiAutomatic</ns2:AlignmentMode>
+
+		</ns0:AlignmentModeSupport>
+
+		<ns0:ConsumableSlotDirectionSupport access="readOnly">
+
+			<ns2:ConsumableSlotDirection>leftToRight</ns2:ConsumableSlotDirection>
+
+		</ns0:ConsumableSlotDirectionSupport>
+
+		<ns0:IK typeof="xs:Integer" max="1000" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ProductConsumableInfo/dd:IK" min="0" access="readOnly" />
+
+		<ns0:SingleCartridgeModeSupport access="readOnly">
+
+			<ns3:SingleCartridgeMode>disabled</ns3:SingleCartridgeMode>
+
+			<ns3:SingleCartridgeMode>enabled</ns3:SingleCartridgeMode>
+
+		</ns0:SingleCartridgeModeSupport>
+
+		<ns0:AntiTheftModeSupport access="readWrite">
+
+			<ns2:AntiTheftMode>disabled</ns2:AntiTheftMode>
+
+			<ns2:AntiTheftMode>enabled</ns2:AntiTheftMode>
+
+		</ns0:AntiTheftModeSupport>
+
+		<ns0:RewardsRegistrationStatus>
+
+			<ns0:OptedIn typeof="xs:boolean" deselected="false" elementXPath="ccdyn:ProductConsumableInfo/ccdyn:RewardsRegistrationStatus/dd:OptedIn" selected="true" access="readWrite" />
+
+			<ns0:AutoSendData typeof="xs:boolean" deselected="false" elementXPath="ccdyn:ProductConsumableInfo/ccdyn:RewardsRegistrationStatus/dd:AutoSendData" selected="true" access="readWrite" />
+
+			<ns0:PromptAutoSendData typeof="xs:boolean" deselected="false" elementXPath="ccdyn:ProductConsumableInfo/ccdyn:RewardsRegistrationStatus/dd:PromptAutoSendData" selected="true" access="readWrite" />
+
+		</ns0:RewardsRegistrationStatus>
+
+	</ns0:ProductConsumableInfoCap>
+
+	<ns0:ConsumableInfoCap>
+
+		<ns0:Capacity typeof="xs:integer" max="100" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:Capacity" min="0" access="readOnly" />
+
+		<ns0:ConsumableSubBrandSupport access="readOnly">
+
+			<ns0:ConsumableSubBrand>generic</ns0:ConsumableSubBrand>
+
+		</ns0:ConsumableSubBrandSupport>
+
+		<ns0:ConsumableSegmentClassSupport access="readOnly">
+
+			<ns0:ConsumableSegmentClass>class0</ns0:ConsumableSegmentClass>
+
+			<ns0:ConsumableSegmentClass>class1</ns0:ConsumableSegmentClass>
+
+			<ns0:ConsumableSegmentClass>class2</ns0:ConsumableSegmentClass>
+
+			<ns0:ConsumableSegmentClass>class3</ns0:ConsumableSegmentClass>
+
+		</ns0:ConsumableSegmentClassSupport>
+
+		<ns0:ConsumableAcceptibilityUpgradabilitySupport access="readOnly">
+
+			<ns2:ConsumableAcceptibilityUpgradability>notSupported</ns2:ConsumableAcceptibilityUpgradability>
+
+		</ns0:ConsumableAcceptibilityUpgradabilitySupport>
+
+		<ns0:ConsumableContentTypeSupport access="readOnly">
+
+			<ns2:ConsumableContentType>markingAgent</ns2:ConsumableContentType>
+
+		</ns0:ConsumableContentTypeSupport>
+
+		<ns0:ConsumableFamilyName typeof="dd:String" length="23" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ConsumableFamilyName" access="readOnly" />
+
+		<ns0:ConsumableID typeof="dd2:ConsumableID" length="32" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd2:ConsumableID" access="readOnly" />
+
+		<ns0:ConsumableKeyingDescriptorSupport access="readOnly">
+
+			<ns2:ConsumableKeyingDescriptor>smaller</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>small</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>medium</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>large</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>large1</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>large2</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>large3</ns2:ConsumableKeyingDescriptor>
+
+			<ns2:ConsumableKeyingDescriptor>large4</ns2:ConsumableKeyingDescriptor>
+
+		</ns0:ConsumableKeyingDescriptorSupport>
+
+		<ns0:ConsumableLabelCodeSupport access="readOnly">
+
+			<ns2:ConsumableLabelCode>CMY</ns2:ConsumableLabelCode>
+
+			<ns2:ConsumableLabelCode>K</ns2:ConsumableLabelCode>
+
+			<ns2:ConsumableLabelCode>C</ns2:ConsumableLabelCode>
+
+			<ns2:ConsumableLabelCode>M</ns2:ConsumableLabelCode>
+
+			<ns2:ConsumableLabelCode>Y</ns2:ConsumableLabelCode>
+
+			<ns2:ConsumableLabelCode>K</ns2:ConsumableLabelCode>
+
+		</ns0:ConsumableLabelCodeSupport>
+
+		<ns0:ConsumableLastUsedDate access="readOnly" step="1" max="2030-01-01" min="2007-08-13" elementXPath="/ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ConsumableLastUsedDate" typeof="dd:Date" />
+
+		<ns0:ConsumableLevelMessagingStyleSupport access="readOnly">
+
+			<ns2:ConsumableLevelMessagingStyle>dropCount</ns2:ConsumableLevelMessagingStyle>
+
+			<ns2:ConsumableLevelMessagingStyle>Eureka</ns2:ConsumableLevelMessagingStyle>
+
+		</ns0:ConsumableLevelMessagingStyleSupport>
+
+		<ns0:ConsumableLifeStateSupport>
+
+			<ns0:ConsumableStateSupport access="readOnly">
+
+				<ns2:ConsumableState>ok</ns2:ConsumableState>
+
+				<ns2:ConsumableState>missing</ns2:ConsumableState>
+
+				<ns2:ConsumableState>shaidFailure</ns2:ConsumableState>
+
+				<ns2:ConsumableState>sehoAtInsertion</ns2:ConsumableState>
+
+				<ns2:ConsumableState>empty</ns2:ConsumableState>
+
+				<ns2:ConsumableState>failed</ns2:ConsumableState>
+
+				<ns2:ConsumableState>sharedAddressError</ns2:ConsumableState>
+
+				<ns2:ConsumableState>incompatibleConsumable</ns2:ConsumableState>
+
+				<ns2:ConsumableState>safeStopMode</ns2:ConsumableState>
+
+				<ns2:ConsumableState>unauthorized</ns2:ConsumableState>
+
+				<ns2:ConsumableState>inWrongSlot</ns2:ConsumableState>
+
+				<ns2:ConsumableState>antiTheftEnabledSupply</ns2:ConsumableState>
+
+				<ns2:ConsumableState>trialConsumableRejected</ns2:ConsumableState>
+
+				<ns2:ConsumableState>used</ns2:ConsumableState>
+
+				<ns2:ConsumableState>upgradableSupply</ns2:ConsumableState>
+
+				<ns2:ConsumableState>supplyUpgradeSuccess</ns2:ConsumableState>
+
+				<ns2:ConsumableState>supplyUpgradeFailed</ns2:ConsumableState>
+
+				<ns2:ConsumableState>nonHP</ns2:ConsumableState>
+
+				<ns2:ConsumableState>newGenuineHP</ns2:ConsumableState>
+
+				<ns2:ConsumableState>refilledBlack</ns2:ConsumableState>
+
+				<ns2:ConsumableState>refilledColor</ns2:ConsumableState>
+
+				<ns2:ConsumableState>subscriptionConsumableTemporaryUsageAllowed</ns2:ConsumableState>
+
+				<ns2:ConsumableState>consumableForAnotherPrinter</ns2:ConsumableState>
+
+				<ns2:ConsumableState>veryLow</ns2:ConsumableState>
+
+				<ns2:ConsumableState>low</ns2:ConsumableState>
+
+			</ns0:ConsumableStateSupport>
+
+			<ns0:MeasuredQuantityStateSupport access="readOnly">
+
+				<ns2:MeasuredQuantityState>ok</ns2:MeasuredQuantityState>
+
+				<ns2:MeasuredQuantityState>unknown</ns2:MeasuredQuantityState>
+
+				<ns2:MeasuredQuantityState>veryLow</ns2:MeasuredQuantityState>
+
+				<ns2:MeasuredQuantityState>low</ns2:MeasuredQuantityState>
+
+			</ns0:MeasuredQuantityStateSupport>
+
+			<ns0:BrandSupport access="readOnly">
+
+				<ns2:Brand>approvedOEM</ns2:Brand>
+
+				<ns2:Brand>HP</ns2:Brand>
+
+				<ns2:Brand>nonApprovedOEM</ns2:Brand>
+
+				<ns2:Brand>unknown</ns2:Brand>
+
+			</ns0:BrandSupport>
+
+			<ns0:ConsumableStateActionSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>continue</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:ConsumableStateActionSupport>
+
+			<ns0:IsRefilledSupport access="readOnly">
+
+				<ns2:IsRefilled>false</ns2:IsRefilled>
+
+				<ns2:IsRefilled>true</ns2:IsRefilled>
+
+			</ns0:IsRefilledSupport>
+
+			<ns0:IsSETUPSupport access="readOnly">
+
+				<ns0:IsSETUP>false</ns0:IsSETUP>
+
+				<ns0:IsSETUP>true</ns0:IsSETUP>
+
+			</ns0:IsSETUPSupport>
+
+			<ns0:IsTrial typeof="dd:boolean" deselected="false" elementXPath="/ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ConsumableLifeState/dd:IsTrue" selected="true" access="readOnly" />
+
+		</ns0:ConsumableLifeStateSupport>
+
+		<ns0:ConsumableStateAvailableActionsSupport access="readOnly">
+
+			<ns0:ConsumableStateSupport access="readOnly">
+
+				<ns2:ConsumableState>used</ns2:ConsumableState>
+
+				<ns2:ConsumableState>upgradableSupply</ns2:ConsumableState>
+
+				<ns2:ConsumableState>supplyUpgradeSuccess</ns2:ConsumableState>
+
+				<ns2:ConsumableState>supplyUpgradeFailed</ns2:ConsumableState>
+
+				<ns2:ConsumableState>nonHP</ns2:ConsumableState>
+
+				<ns2:ConsumableState>newGenuineHP</ns2:ConsumableState>
+
+				<ns2:ConsumableState>refilledBlack</ns2:ConsumableState>
+
+				<ns2:ConsumableState>refilledColor</ns2:ConsumableState>
+
+				<ns2:ConsumableState>subscriptionConsumableTemporaryUsageAllowed</ns2:ConsumableState>
+
+				<ns2:ConsumableState>consumableForAnotherPrinter</ns2:ConsumableState>
+
+				<ns2:ConsumableState>veryLow</ns2:ConsumableState>
+
+				<ns2:ConsumableState>low</ns2:ConsumableState>
+
+			</ns0:ConsumableStateSupport>
+
+			<ns0:SupportedActionsSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>continue</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:SupportedActionsSupport>
+
+			<ns0:DefaultActionSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>continue</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:DefaultActionSupport>
+
+			<ns0:SelectedActionSupport access="writeOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>continue</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:SelectedActionSupport>
+
+		</ns0:ConsumableStateAvailableActionsSupport>
+
+		<ns0:ConsumableLowUseAlgorithmSupport access="readOnly">
+
+			<ns3:ConsumableLowUseAlgorithm>everyday0</ns3:ConsumableLowUseAlgorithm>
+
+			<ns3:ConsumableLowUseAlgorithm>everyday1</ns3:ConsumableLowUseAlgorithm>
+
+			<ns3:ConsumableLowUseAlgorithm>everyday2</ns3:ConsumableLowUseAlgorithm>
+
+			<ns3:ConsumableLowUseAlgorithm>everyday3</ns3:ConsumableLowUseAlgorithm>
+
+		</ns0:ConsumableLowUseAlgorithmSupport>
+
+		<ns0:ConsumablePercentageLevelRemaining typeof="dd:Percent" max="100" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ConsumablePercentageLevelRemaining" min="0" access="readOnly" />
+
+		<ns0:ConsumableReplaceabilityTypeSupport access="readOnly">
+
+			<ns2:ConsumableReplaceabilityType>userReplaceable</ns2:ConsumableReplaceabilityType>
+
+		</ns0:ConsumableReplaceabilityTypeSupport>
+
+		<ns0:ConsumableSelectibilityNumber typeof="dd:String" length="7" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ConsumableSelectibilityNumber" access="readOnly" />
+
+		<ns0:ConsumableStationSupport access="readOnly">
+
+			<ns2:ConsumableStation>0</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>1</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>2</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>3</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>4</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>5</ns2:ConsumableStation>
+
+		</ns0:ConsumableStationSupport>
+
+		<ns0:ConsumableTypeEnumSupport access="readOnly">
+
+			<ns2:ConsumableTypeEnum>inkCartridge</ns2:ConsumableTypeEnum>
+
+		</ns0:ConsumableTypeEnumSupport>
+
+		<ns0:Installation typeof="dd:Date" max="2030-01-01" step="1" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:Installation/dd:Date" min="2007-08-13" />
+
+		<ns0:ManufacturerCap>
+
+			<ns0:Name typeof="dd:String" length="16" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:Manufacturer/dd:Name" access="readOnly" />
+
+			<ns0:Date typeof="dd:Date" max="2030-01-01" step="1" elementXPath="dd:Manufacturer/dd:Date" min="2007-08-13" access="readOnly" />
+
+		</ns0:ManufacturerCap>
+
+		<ns0:ProductNumber typeof="xs:string" length="7" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:ProductNumber" access="readOnly" />
+
+		<ns0:SerialNumber typeof="xs:NMTOKEN" length="13" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:SerialNumber" access="readOnly" />
+
+		<ns0:RegionalCartridgeCap>
+
+			<ns0:RegionIdentifier elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:RegionalCartridge/dd:RegionIdentifier" access="readOnly" typeof="dd:Int" min="0" max="31" step="1" />
+
+		</ns0:RegionalCartridgeCap>
+
+		<ns0:ConsumableManufacturingSignature typeof="xs:string" length="385" elementXPath="ccdyn:ConsumableInfo/ccdyn:ConsumableManufacturingSignature" access="readOnly" />
+
+		<ns0:ConsumableIconSupport access="readOnly">
+
+			<ns0:ShapeSupport>
+
+				<ns2:Shape>CMYTriDots</ns2:Shape>
+
+				<ns2:Shape>SmallCircle</ns2:Shape>
+
+				<ns2:Shape>Circle</ns2:Shape>
+
+			</ns0:ShapeSupport>
+
+			<ns0:RotationSupport>
+
+				<ns2:Rotation>rotateZero</ns2:Rotation>
+
+			</ns0:RotationSupport>
+
+			<ns0:FillColorSupport>
+
+				<ns2:FillColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:FillColor>
+
+				<ns2:FillColor>
+
+					<ns2:Red>0</ns2:Red>
+
+					<ns2:Green>0</ns2:Green>
+
+					<ns2:Blue>0</ns2:Blue>
+
+				</ns2:FillColor>
+
+				<ns2:FillColor>
+
+					<ns2:Red>0</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:FillColor>
+
+				<ns2:FillColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>0</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:FillColor>
+
+				<ns2:FillColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>0</ns2:Blue>
+
+				</ns2:FillColor>
+
+			</ns0:FillColorSupport>
+
+			<ns0:OutlineColorSupport>
+
+				<ns2:OutlineColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:OutlineColor>
+
+				<ns2:OutlineColor>
+
+					<ns2:Red>0</ns2:Red>
+
+					<ns2:Green>0</ns2:Green>
+
+					<ns2:Blue>0</ns2:Blue>
+
+				</ns2:OutlineColor>
+
+				<ns2:OutlineColor>
+
+					<ns2:Red>0</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:OutlineColor>
+
+				<ns2:OutlineColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>0</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:OutlineColor>
+
+				<ns2:OutlineColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>0</ns2:Blue>
+
+				</ns2:OutlineColor>
+
+			</ns0:OutlineColorSupport>
+
+			<ns0:BackGroundColorSupport>
+
+				<ns2:BackGroundColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:BackGroundColor>
+
+			</ns0:BackGroundColorSupport>
+
+			<ns0:RGBTextColorSupport>
+
+				<ns2:RGBTextColor>
+
+					<ns2:Red>0</ns2:Red>
+
+					<ns2:Green>0</ns2:Green>
+
+					<ns2:Blue>0</ns2:Blue>
+
+				</ns2:RGBTextColor>
+
+				<ns2:RGBTextColor>
+
+					<ns2:Red>255</ns2:Red>
+
+					<ns2:Green>255</ns2:Green>
+
+					<ns2:Blue>255</ns2:Blue>
+
+				</ns2:RGBTextColor>
+
+			</ns0:RGBTextColorSupport>
+
+			<ns0:LabelSupport>
+
+				<ns0:Label>CMY</ns0:Label>
+
+				<ns0:Label>K</ns0:Label>
+
+				<ns0:Label>C</ns0:Label>
+
+				<ns0:Label>M</ns0:Label>
+
+				<ns0:Label>Y</ns0:Label>
+
+			</ns0:LabelSupport>
+
+		</ns0:ConsumableIconSupport>
+
+		<ns0:SupportMessageSupport access="readOnly">
+
+			<ns0:SupportMessageTypeSupport access="readOnly">
+
+				<ns2:SupportMessageType>limitedInAvailability</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>selectabilityNumberChange</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageA</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageB</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageC</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageD</ns2:SupportMessageType>
+
+			</ns0:SupportMessageTypeSupport>
+
+			<ns0:Value typeof="dd:Int" access="readOnly" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:SupportMessage/dd:Value" max="5000" min="0" step="1" />
+
+			<ns0:ActionSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:ActionSupport>
+
+		</ns0:SupportMessageSupport>
+
+		<ns0:SupportMessageAvailableActionsSupport>
+
+			<ns0:SupportMessageTypeSupport access="readOnly">
+
+				<ns2:SupportMessageType>limitedInAvailability</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>selectabilityNumberChange</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageA</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageB</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageC</ns2:SupportMessageType>
+
+				<ns2:SupportMessageType>serviceMessageD</ns2:SupportMessageType>
+
+			</ns0:SupportMessageTypeSupport>
+
+			<ns0:SupportedActionsSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:SupportedActionsSupport>
+
+			<ns0:DefaultActionSupport access="readOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:DefaultActionSupport>
+
+			<ns0:SelectedActionSupport access="writeOnly">
+
+				<ns2:ConsumableStateAction>acknowledge</ns2:ConsumableStateAction>
+
+				<ns2:ConsumableStateAction>none</ns2:ConsumableStateAction>
+
+			</ns0:SelectedActionSupport>
+
+		</ns0:SupportMessageAvailableActionsSupport>
+
+		<ns0:WarrantySupport>
+
+			<ns0:ExpirationDate typeof="dd:Date" elementXPath="ccdyn:ConsumableConfigDyn/ccdyn:ConsumableInfo/dd:Warranty/dd:ExpirationDate" length="25" access="readOnly" />
+
+		</ns0:WarrantySupport>
+
+		<ns0:ConsumableUniqueID typeof="xs:hexBinary" length="32" elementXPath="ccdyn:ConsumableInfo/ccdyn:ConsumableUniqueID" access="readOnly" />
+
+		<ns0:ConsumableRawData typeof="xs:hexBinary" length="256" elementXPath="ccdyn:ConsumableInfo/ccdyn:ConsumableRawData" access="readOnly" />
+
+		<ns0:CISS typeof="xs:boolean" deselected="false" elementXPath="ccdyn:ConsumableInfo/ccdyn:CISS" selected="true" access="readOnly" />
+
+		<ns0:BrandDisplayString typeof="dd:String" length="32" elementXPath="ccdyn:ConsumableInfo/ccdyn:BrandDisplayString" access="readOnly" />
+
+		<ns0:SupplyModelTypeSupport access="readOnly">
+
+			<ns0:SupplyModelType>unknown</ns0:SupplyModelType>
+
+			<ns0:SupplyModelType>starter</ns0:SupplyModelType>
+
+			<ns0:SupplyModelType>trade</ns0:SupplyModelType>
+
+			<ns0:SupplyModelType>other</ns0:SupplyModelType>
+
+		</ns0:SupplyModelTypeSupport>
+
+	</ns0:ConsumableInfoCap>
+
+</ns0:ConsumableConfigCap>

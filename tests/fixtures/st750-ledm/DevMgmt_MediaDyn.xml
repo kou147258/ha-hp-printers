@@ -1,0 +1,71 @@
+<ns0:MediaDyn xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/mediadyn/2009/05/21" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/mediadyn/2007/11/28 ../schemas/MediaDyn.xsd                                      http://www.hp.com/schemas/imaging/con/ledm/mediadyn/2009/05/21 ../schemas/ledm2/MediaDyn.xsd              http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.98</ns2:Revision>
+
+		<ns2:Date>2010-08-04</ns2:Date>
+
+	</ns2:Version>
+
+	<ns2:PrintableAreaMargin>
+
+		<ns2:Top>35</ns2:Top>
+
+		<ns2:Left>35</ns2:Left>
+
+		<ns2:Bottom>35</ns2:Bottom>
+
+		<ns2:Right>35</ns2:Right>
+
+		<ns2:Units>DPI</ns2:Units>
+
+	</ns2:PrintableAreaMargin>
+
+	<ns2:MediaType>lightWeight</ns2:MediaType>
+
+	<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+	<ns2:MinimalizedMargin>
+
+		<ns2:Top>24</ns2:Top>
+
+		<ns2:Left>24</ns2:Left>
+
+		<ns2:Bottom>24</ns2:Bottom>
+
+		<ns2:Right>24</ns2:Right>
+
+		<ns2:Units>DPI</ns2:Units>
+
+	</ns2:MinimalizedMargin>
+
+	<ns2:AutoDuplexMargin>
+
+		<ns2:Top>35</ns2:Top>
+
+		<ns2:Left>35</ns2:Left>
+
+		<ns2:Bottom>35</ns2:Bottom>
+
+		<ns2:Right>35</ns2:Right>
+
+		<ns2:Units>DPI</ns2:Units>
+
+	</ns2:AutoDuplexMargin>
+
+	<ns2:OversprayValue>
+
+		<ns2:Top>-16</ns2:Top>
+
+		<ns2:Left>-32</ns2:Left>
+
+		<ns2:Bottom>-30</ns2:Bottom>
+
+		<ns2:Right>-32</ns2:Right>
+
+		<ns2:Units>DPI</ns2:Units>
+
+	</ns2:OversprayValue>
+
+</ns0:MediaDyn>

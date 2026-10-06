@@ -1,0 +1,781 @@
+<ns0:ProductConfigCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productconfigcap/2009/03/16" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/productconfigcap/2007/11/05" xmlns:ns4="http://www.hp.com/schemas/imaging/con/ledm/productconfigdyn/2007/11/05" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/productconfigcap/2007/11/05 ../schemas/ProductConfigCap.xsd                         http://www.hp.com/schemas/imaging/con/ledm/productconfigcap/2009/03/16 ../schemas/ledm2/ProductConfigCap.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.690</ns2:Revision>
+
+		<ns2:Date>2011-03-30</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:ProductInformationCap>
+
+		<ns3:WritingSystems access="readOnly">TIJ2.5Gen3</ns3:WritingSystems>
+
+		<ns3:PrintEnginePPM access="readOnly">15</ns3:PrintEnginePPM>
+
+		<ns3:MaxColorPrintQuality access="readOnly">4800dpi</ns3:MaxColorPrintQuality>
+
+		<ns3:MaxMonoPrintQuality access="readOnly">4800dpi</ns3:MaxMonoPrintQuality>
+
+		<ns0:ColorPrinting access="readOnly">enabled</ns0:ColorPrinting>
+
+		<ns3:PersonalitySupport access="readOnly">
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>PCL3GUI</ns2:DocumentFormat>
+
+				<ns2:Description>pcl3gui</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20010402</ns2:Revision>
+
+					<ns2:Date>2001-04-02</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>PCL3</ns2:DocumentFormat>
+
+				<ns2:Description>pcl3</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20010402</ns2:Revision>
+
+					<ns2:Date>2001-04-02</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>PJL</ns2:DocumentFormat>
+
+				<ns2:Description>pjl</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20020726</ns2:Revision>
+
+					<ns2:Date>2002-07-26</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>application/octet-stream</ns2:DocumentFormat>
+
+				<ns2:Description>auto</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20011219</ns2:Revision>
+
+					<ns2:Date>2001-12-19</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>image/jpeg</ns2:DocumentFormat>
+
+				<ns2:Description>jpeg file format</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20100908</ns2:Revision>
+
+					<ns2:Date>2010-09-08</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>AirPrint</ns2:DocumentFormat>
+
+				<ns2:Description>Aiprint Language</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20100826</ns2:Revision>
+
+					<ns2:Date>2010-08-26</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>image/pwg-raster</ns2:DocumentFormat>
+
+				<ns2:Description>pwg raster format</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20120420</ns2:Revision>
+
+					<ns2:Date>2012-04-20</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+			<ns2:Interpreter>
+
+				<ns2:DocumentFormat>PCLM</ns2:DocumentFormat>
+
+				<ns2:Description>pcl mobile</ns2:Description>
+
+				<ns2:Version>
+
+					<ns2:Revision> 20100920</ns2:Revision>
+
+					<ns2:Date>2010-09-20</ns2:Date>
+
+				</ns2:Version>
+
+			</ns2:Interpreter>
+
+		</ns3:PersonalitySupport>
+
+		<ns3:Version elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:Version/dd:Date" typeof="dd:String" length="11" access="readOnly" />
+
+		<ns3:MakeAndModel elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:MakeAndModel" typeof="dd:String" length="128" access="readOnly" />
+
+		<ns3:MakeAndModelBase elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:MakeAndModelBase" typeof="dd:String" length="128" access="readOnly" />
+
+		<ns3:MakeAndModelFamily elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:MakeAndModelFamily" typeof="dd:String" length="128" access="readOnly" />
+
+		<ns0:SKUIdentifier elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:SKUIdentifier" typeof="dd:String" length="4" access="readOnly" />
+
+		<ns3:UUID elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:UUID" typeof="dd:String" length="36" access="readOnly" />
+
+		<ns3:SerialNumber elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:SerialNumber" typeof="dd:String" length="15" access="readOnly" />
+
+		<ns3:ProductNumber elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:ProductNumber" typeof="dd:String" length="6" access="readOnly" />
+
+		<ns3:ServiceID elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:ServiceID" typeof="dd:String" length="5" access="readOnly" />
+
+		<ns3:AvailableLanguageSupport access="readOnly" />
+
+		<ns0:PasswordStatusSupport access="readOnly">
+
+			<ns2:PasswordStatus>notSet</ns2:PasswordStatus>
+
+			<ns2:PasswordStatus>set</ns2:PasswordStatus>
+
+		</ns0:PasswordStatusSupport>
+
+		<ns0:RegionInformationSupport access="readOnly">
+
+			<ns3:RegionIdentifier elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:RegionInformation/dd:RegionIdentifier" access="readOnly" typeof="dd:Int" min="0" max="31" step="1" />
+
+			<ns3:SuccessfulAttemptsRemaining elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:RegionInformation/dd:SuccessfulAttemptsRemaining" typeof="xs:integer" min="0" max="3" step="1" />
+
+			<ns3:FailedAttemptsRemaining elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:RegionInformation/dd:FailedAttemptsRemaining" typeof="xs:integer" min="0" max="50" step="1" />
+
+			<ns0:RegionSetupCode elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:RegionInformation/dd:RegionSetupCode" access="readOnly" typeof="dd:Int" min="0" max="30" step="1" />
+
+		</ns0:RegionInformationSupport>
+
+		<ns3:FirmwareDownloadID elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:FirmwareDownloadID" typeof="dd:String" length="256" access="readOnly" />
+
+		<ns3:ProductDerivativeNumber elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:ProductDerivativeNumber" typeof="xs:integer" access="readOnly" min="0" max="9999999" step="1" />
+
+		<ns0:ProductDerivativeFlavorStatusSupport access="readOnly">
+
+			<ns2:ProductDerivativeFlavorStatus>unknown</ns2:ProductDerivativeFlavorStatus>
+
+			<ns2:ProductDerivativeFlavorStatus>valid</ns2:ProductDerivativeFlavorStatus>
+
+			<ns2:ProductDerivativeFlavorStatus>invalid</ns2:ProductDerivativeFlavorStatus>
+
+		</ns0:ProductDerivativeFlavorStatusSupport>
+
+		<ns3:MakeAndModelAppend elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:MakeAndModelAppend" typeof="dd:String" length="10" access="readOnly" />
+
+		<ns3:DuplexUnitSupport access="readOnly">
+
+			<ns2:DuplexUnit>Installed</ns2:DuplexUnit>
+
+			<ns2:DuplexUnit>NotInstalled</ns2:DuplexUnit>
+
+		</ns3:DuplexUnitSupport>
+
+		<ns3:ProductNumberAppendString elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/dd:ProductNumberAppendString" typeof="dd:String" length="256" access="readOnly" />
+
+		<ns0:WOOBESeriesID elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:WOOBESeriesID" typeof="dd:String" length="20" access="readOnly" />
+
+		<ns0:Manufacturer>
+
+			<ns3:Name typeof="dd:String" length="16" elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:Manufacturer/dd:Name" access="readOnly" />
+
+			<ns3:Date typeof="dd:Date" length="10" elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:Manufacturer/dd:Date" access="readOnly" />
+
+		</ns0:Manufacturer>
+
+		<ns0:DigitalEcosystemType typeof="String" length="14" elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:DigitalEcosystemType" access="readOnly" />
+
+		<ns0:MCID typeof="String" length="32" elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:MCID" access="readOnly" />
+
+		<ns0:RTPMode access="readOnly" typeof="xs:integer" elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:ProductInformation/prdcfgdyn:RTPMode" step="1" max="3" min="0" />
+
+		<ns0:RTPStatusSupport access="readOnly">
+
+			<ns0:RTPStatus>active</ns0:RTPStatus>
+
+			<ns0:RTPStatus>inactive</ns0:RTPStatus>
+
+			<ns0:RTPStatus>unavailable</ns0:RTPStatus>
+
+		</ns0:RTPStatusSupport>
+
+	</ns0:ProductInformationCap>
+
+	<ns0:ProductSettingsCap>
+
+		<ns3:PowerSaveTimerSupport access="readWrite">
+
+			<ns2:PowerSaveTimeout>5minutes</ns2:PowerSaveTimeout>
+
+			<ns2:PowerSaveTimeout>10minutes</ns2:PowerSaveTimeout>
+
+			<ns2:PowerSaveTimeout>15minutes</ns2:PowerSaveTimeout>
+
+		</ns3:PowerSaveTimerSupport>
+
+		<ns3:AutoOffTimeSupport access="readWrite">
+
+			<ns2:AutoOffTime>never</ns2:AutoOffTime>
+
+			<ns2:AutoOffTime>15_minutes</ns2:AutoOffTime>
+
+			<ns2:AutoOffTime>2hours</ns2:AutoOffTime>
+
+		</ns3:AutoOffTimeSupport>
+
+		<ns0:DeepSleepEnergyUsageModeSupport access="readWrite">
+
+			<ns0:EnergyUsageMode>fasterFirstPage</ns0:EnergyUsageMode>
+
+			<ns0:EnergyUsageMode>saveMostEnergy</ns0:EnergyUsageMode>
+
+		</ns0:DeepSleepEnergyUsageModeSupport>
+
+		<ns3:DuplexBindingOptionSupport access="readWrite">
+
+			<ns2:DuplexBindingOption>shortEdge</ns2:DuplexBindingOption>
+
+			<ns2:DuplexBindingOption>longEdge</ns2:DuplexBindingOption>
+
+		</ns3:DuplexBindingOptionSupport>
+
+		<ns3:ProductLanguageSupport>
+
+			<ns3:DeviceLanguageSupport access="readWrite" />
+
+			<ns3:PreferredLanguageSupport access="readOnly" />
+
+		</ns3:ProductLanguageSupport>
+
+		<ns3:LanguageSupport>
+
+			<ns2:Language>en</ns2:Language>
+
+			<ns2:Language>zh-CN</ns2:Language>
+
+			<ns2:Language>zh-TW</ns2:Language>
+
+			<ns2:Language>ja</ns2:Language>
+
+			<ns2:Language>fr</ns2:Language>
+
+			<ns2:Language>de</ns2:Language>
+
+			<ns2:Language>es</ns2:Language>
+
+			<ns2:Language>it</ns2:Language>
+
+			<ns2:Language>pt</ns2:Language>
+
+			<ns2:Language>nl</ns2:Language>
+
+			<ns2:Language>da</ns2:Language>
+
+			<ns2:Language>sv</ns2:Language>
+
+			<ns2:Language>no</ns2:Language>
+
+			<ns2:Language>fi</ns2:Language>
+
+			<ns2:Language>ar</ns2:Language>
+
+			<ns2:Language>ru</ns2:Language>
+
+			<ns2:Language>tr</ns2:Language>
+
+			<ns2:Language>pl</ns2:Language>
+
+			<ns2:Language>el</ns2:Language>
+
+			<ns2:Language>cs</ns2:Language>
+
+			<ns2:Language>hu</ns2:Language>
+
+			<ns2:Language>sk</ns2:Language>
+
+			<ns2:Language>ro</ns2:Language>
+
+			<ns2:Language>sl</ns2:Language>
+
+			<ns2:Language>bg</ns2:Language>
+
+			<ns2:Language>hr</ns2:Language>
+
+		</ns3:LanguageSupport>
+
+		<ns3:CountryAndRegionName access="readWrite" />
+
+		<ns3:CountryAndRegionNameSupport>
+
+			<ns4:CountryAndRegionName>china</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>hongKongSAR</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>angola</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>argentina</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>australia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>austria</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>belarus</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>belgium</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>brazil</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>bulgaria</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>canada</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>chile</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>colombia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>costaRica</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>croatia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>czechRepublic</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>denmark</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>ecuador</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>egypt</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>estonia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>finland</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>france</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>germany</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>greece</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>guatemala</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>hungary</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>iceland</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>india</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>indonesia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>ireland</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>israel</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>italy</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>japan</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>jordan</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>kazakhstan</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>kuwait</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>latvia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>lebanon</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>lithuania</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>malaysia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>mexico</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>morocco</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>mozambique</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>netherlandsThe</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>newZealand</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>norway</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>pakistan</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>panama</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>paraguay</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>peru</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>philippines</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>poland</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>portugal</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>qatar</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>romania</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>russia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>saudiArabia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>singapore</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>slovakia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>slovenia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>southAfrica</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>spain</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>sweden</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>switzerland</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>taiwan</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>thailand</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>tunisia</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>turkey</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>unitedArabEmirates</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>unitedKingdom</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>ukraine</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>uruguay</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>unitedStates</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>venezuela</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>vietnam</ns4:CountryAndRegionName>
+
+			<ns4:CountryAndRegionName>yemen</ns4:CountryAndRegionName>
+
+		</ns3:CountryAndRegionNameSupport>
+
+		<ns0:TimeStamp elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/dd:TimeStamp" typeof="dd:String" length="25" access="readWrite" />
+
+		<ns3:TimeFormatSupport access="readWrite">
+
+			<ns2:TimeFormat>HR12</ns2:TimeFormat>
+
+			<ns2:TimeFormat>HR24</ns2:TimeFormat>
+
+		</ns3:TimeFormatSupport>
+
+		<ns3:DateFormatSupport access="readWrite">
+
+			<ns2:DateFormat>MMMDDYYYY</ns2:DateFormat>
+
+			<ns2:DateFormat>DDMMMYYYY</ns2:DateFormat>
+
+			<ns2:DateFormat>YYYYMMMDD</ns2:DateFormat>
+
+		</ns3:DateFormatSupport>
+
+		<ns0:QuietPrintModeSupport access="readWrite">
+
+			<ns2:QuietPrintMode>disabled</ns2:QuietPrintMode>
+
+			<ns2:QuietPrintMode>enabled</ns2:QuietPrintMode>
+
+		</ns0:QuietPrintModeSupport>
+
+		<ns0:QuietPrintModeSchedule>
+
+			<ns0:StateSupport access="readWrite">
+
+				<ns3:State>disabled</ns3:State>
+
+				<ns3:State>enabled</ns3:State>
+
+			</ns0:StateSupport>
+
+			<ns0:TimeSettings>
+
+				<ns0:TimeSetting>
+
+					<ns0:StartTime typeof="String" length="14" elementXPath="/prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn2:QuietPrintModeSchedule/prdcfgdyn:TimeSettings/prdcfgdyn:TimeSetting/prdcfgdyn:StartTime" access="readWrite" />
+
+					<ns0:StopTime typeof="String" length="14" elementXPath="/prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn2:QuietPrintModeSchedule/prdcfgdyn:TimeSettings/prdcfgdyn:TimeSetting/prdcfgdyn:StopTime" access="readWrite" />
+
+				</ns0:TimeSetting>
+
+			</ns0:TimeSettings>
+
+			<ns0:IsActive typeof="xs:Boolean" selected="true" deselected="false" elementXPath="/prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn2:QuietPrintModeSchedule/prdcfgdyn:IsActive" access="readOnly" />
+
+		</ns0:QuietPrintModeSchedule>
+
+		<ns0:DuplexSupport access="readWrite">
+
+			<ns2:Duplex>disabled</ns2:Duplex>
+
+			<ns2:Duplex>enabled</ns2:Duplex>
+
+		</ns0:DuplexSupport>
+
+		<ns3:EWS>
+
+			<ns3:EnableDisable>
+
+				<ns2:EnableDisable>disabled</ns2:EnableDisable>
+
+				<ns2:EnableDisable>enabled</ns2:EnableDisable>
+
+			</ns3:EnableDisable>
+
+			<ns3:ResourceURI elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn:EWS/dd:ResourceURI" length="128" typeof="dd:String" access="readOnly" />
+
+			<ns3:LanguageConfigurationSupport>
+
+				<ns3:LanguageSourceSupport access="readWrite">
+
+					<ns3:LanguageSource>browser</ns3:LanguageSource>
+
+					<ns3:LanguageSource>device</ns3:LanguageSource>
+
+					<ns3:LanguageSource>user</ns3:LanguageSource>
+
+				</ns3:LanguageSourceSupport>
+
+				<ns3:LanguageSupport access="readWrite">
+
+					<ns2:Language>en</ns2:Language>
+
+					<ns2:Language>zh-CN</ns2:Language>
+
+					<ns2:Language>zh-TW</ns2:Language>
+
+					<ns2:Language>ja</ns2:Language>
+
+					<ns2:Language>fr</ns2:Language>
+
+					<ns2:Language>de</ns2:Language>
+
+					<ns2:Language>es</ns2:Language>
+
+					<ns2:Language>it</ns2:Language>
+
+					<ns2:Language>pt</ns2:Language>
+
+					<ns2:Language>nl</ns2:Language>
+
+					<ns2:Language>da</ns2:Language>
+
+					<ns2:Language>sv</ns2:Language>
+
+					<ns2:Language>no</ns2:Language>
+
+					<ns2:Language>fi</ns2:Language>
+
+					<ns2:Language>ar</ns2:Language>
+
+					<ns2:Language>ru</ns2:Language>
+
+					<ns2:Language>tr</ns2:Language>
+
+					<ns2:Language>pl</ns2:Language>
+
+					<ns2:Language>el</ns2:Language>
+
+					<ns2:Language>cs</ns2:Language>
+
+					<ns2:Language>hu</ns2:Language>
+
+					<ns2:Language>sk</ns2:Language>
+
+					<ns2:Language>ro</ns2:Language>
+
+					<ns2:Language>sl</ns2:Language>
+
+					<ns2:Language>bg</ns2:Language>
+
+					<ns2:Language>hr</ns2:Language>
+
+				</ns3:LanguageSupport>
+
+			</ns3:LanguageConfigurationSupport>
+
+		</ns3:EWS>
+
+		<ns0:SleepFeatureSupport access="readWrite">
+
+			<ns2:PowerSave>off</ns2:PowerSave>
+
+			<ns2:PowerSave>on</ns2:PowerSave>
+
+		</ns0:SleepFeatureSupport>
+
+		<ns0:OobePhaseSupport access="readOnly">
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setLanguage</ns2:OobePhase>
+
+			<ns2:OobePhase>setCountryRegion</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>countrySelectionDone</ns2:OobePhase>
+
+			<ns2:OobePhase>countrySelectionDone</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setupNotStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>setupStarted</ns2:OobePhase>
+
+			<ns2:OobePhase>installDuplexer</ns2:OobePhase>
+
+			<ns2:OobePhase>startAlign</ns2:OobePhase>
+
+			<ns2:OobePhase>startAlign</ns2:OobePhase>
+
+			<ns2:OobePhase>startAlign</ns2:OobePhase>
+
+		</ns0:OobePhaseSupport>
+
+		<ns3:DeviceInformationSupport access="readWrite">
+
+			<ns3:Description elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/dd:Description" typeof="dd:string" length="127" />
+
+			<ns3:ResourceURI elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/dd:ResourceURI" typeof="dd:string" length="127" />
+
+			<ns3:DeviceLocation elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/dd:DeviceLocation" typeof="dd:string" length="32" />
+
+			<ns3:GeoLocationSupport>
+
+				<ns3:GeoCoordinatesSupport>
+
+					<ns3:Latitude elementXPath="prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/prdcfgdyn:GeoLocation/dd:GeoCoordinates/dd:Latitude" min="-90" step="0.000001" typeof="xs:double" max="90" access="readWrite" />
+
+					<ns3:Longitude elementXPath="prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/prdcfgdyn:GeoLocation/dd:GeoCoordinates/dd:Longitude" min="-180" step="0.000001" typeof="xs:double" max="180" access="readWrite" />
+
+					<ns3:Accuracy elementXPath="prdcfgdyn2:ProductSettings/prdcfgdyn:DeviceInformation/prdcfgdyn:GeoLocation/dd:GeoCoordinates/dd:Accuracy" min="0" step="0.01" typeof="xs:double" max="10" access="readWrite" />
+
+				</ns3:GeoCoordinatesSupport>
+
+			</ns3:GeoLocationSupport>
+
+		</ns3:DeviceInformationSupport>
+
+		<ns0:ControlPanelSupport>
+
+			<ns0:DisplaySupport access="readOnly">
+
+				<ns0:DisplayType>LED</ns0:DisplayType>
+
+			</ns0:DisplaySupport>
+
+			<ns0:DetachableSupport access="readOnly">
+
+				<ns2:Boolean>false</ns2:Boolean>
+
+			</ns0:DetachableSupport>
+
+		</ns0:ControlPanelSupport>
+
+		<ns0:UIFactoryDefaultsResetSupport access="readWrite">
+
+			<ns0:UIFactoryDefaultsReset>disabled</ns0:UIFactoryDefaultsReset>
+
+			<ns0:UIFactoryDefaultsReset>enabled</ns0:UIFactoryDefaultsReset>
+
+		</ns0:UIFactoryDefaultsResetSupport>
+
+	</ns0:ProductSettingsCap>
+
+	<ns3:MemoryCap>
+
+		<ns3:AvailableMemory elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:Memory/prdcfgdyn:AvailableMemory" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns3:TotalMemory elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:Memory/prdcfgdyn:TotalMemory" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns3:MemorySlotSupport>
+
+			<ns3:DigitalStorageTypeEnumSupport access="readOnly">
+
+				<ns2:DigitalStorageTypeEnum>DIMM</ns2:DigitalStorageTypeEnum>
+
+				<ns2:DigitalStorageTypeEnum>ram</ns2:DigitalStorageTypeEnum>
+
+				<ns2:DigitalStorageTypeEnum>rom</ns2:DigitalStorageTypeEnum>
+
+			</ns3:DigitalStorageTypeEnumSupport>
+
+			<ns3:MaxCapacity elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:Memory/dd:MemorySlot/dd:DigitalStorageConfig/dd:Capacity/dd:MaxCapacity" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns3:UnitSupport access="readOnly">
+
+				<ns3:Unit>kilobyte</ns3:Unit>
+
+			</ns3:UnitSupport>
+
+			<ns3:Sides elementXPath="prdcfgdyn2:ProductConfigDyn/prdcfgdyn:Memory/dd:MemorySlot/dd:DigitalStorageConfig/dd:Sides" typeof="dd:Integer" min="0" max="2" step="1" access="readOnly" />
+
+		</ns3:MemorySlotSupport>
+
+	</ns3:MemoryCap>
+
+</ns0:ProductConfigCap>

@@ -1,7 +1,0 @@
-{
-  "calibrationStatus": "notComplete",
-  "calibrationType": "penAlignSemiauto",
-  "failureReason": "calibrationError",
-  "lastResult": "failed",
-  "state": "idle"
-}

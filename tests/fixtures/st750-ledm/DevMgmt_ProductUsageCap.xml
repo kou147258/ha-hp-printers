@@ -1,0 +1,755 @@
+<ns0:ProductUsageCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productusagecap/2007/12/11" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/productusagedyn/2007/12/11" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/productusagecap/2007/12/11 ../schemas/ProductUsageCap.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.130</ns2:Revision>
+
+		<ns2:Date>2010-08-31</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:PrinterSubunitCap>
+
+		<ns0:TotalImpressions elementXPath="pudyn:PrinterSubunit/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MonochromeImpressions elementXPath="pudyn:PrinterSubunit/dd:MonochromeImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ColorImpressions elementXPath="pudyn:PrinterSubunit/dd:ColorImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:A4EquivalentImpressionsCap>
+
+			<ns0:TotalImpressions elementXPath="dd:A4EquivalentImpressions/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:MonochromeImpressions elementXPath="dd:A4EquivalentImpressions/dd:MonochromeImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:ColorImpressions elementXPath="dd:A4EquivalentImpressions/dd:ColorImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		</ns0:A4EquivalentImpressionsCap>
+
+		<ns0:SimplexSheets elementXPath="pudyn:PrinterSubunit/dd:SimplexSheets" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:DuplexSheets elementXPath="pudyn:PrinterSubunit/dd:DuplexSheets" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:JamEvents elementXPath="pudyn:PrinterSubunit/dd:JamEvents" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MispickEvents elementXPath="pudyn:PrinterSubunit/dd:MispickEvents" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:DraftImpressions elementXPath="pudyn:PrinterSubunit/dd:DraftImpressions/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:TotalFrontPanelCancelPresses elementXPath="pudyn:PrinterSubunit/dd:TotalFrontPanelCancelPresses" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:TotalQuickFormsButtonPresses elementXPath="pudyn:PrinterSubunit/dd:TotalQuickFormsButtonPresses" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:UsageByMarkingAgentSupport>
+
+			<ns0:CumulativeMarkingAgentUsedSupport>
+
+				<ns0:ValueFloat elementXPath="pudyn:UsageByMarkingAgent/dd2:CumulativeMarkingAgentUsed/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+				<ns0:UnitSupport access="readOnly">
+
+					<ns2:Unit>microliters</ns2:Unit>
+
+					<ns2:Unit>milliliters</ns2:Unit>
+
+					<ns2:Unit>nanoliters</ns2:Unit>
+
+					<ns2:Unit>picoliters</ns2:Unit>
+
+				</ns0:UnitSupport>
+
+			</ns0:CumulativeMarkingAgentUsedSupport>
+
+			<ns0:CumulativeHPMarkingAgentUsedSupport>
+
+				<ns0:ValueFloat elementXPath="pudyn:UsageByMarkingAgent/dd2:CumulativeHPMarkingAgentUsed/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+				<ns0:UnitSupport access="readOnly">
+
+					<ns2:Unit>microliters</ns2:Unit>
+
+					<ns2:Unit>milliliters</ns2:Unit>
+
+					<ns2:Unit>nanoliters</ns2:Unit>
+
+					<ns2:Unit>picoliters</ns2:Unit>
+
+				</ns0:UnitSupport>
+
+			</ns0:CumulativeHPMarkingAgentUsedSupport>
+
+			<ns0:CumulativeHPMarkingAgentInsertedSupport>
+
+				<ns0:ValueFloat elementXPath="pudyn:UsageByMarkingAgent/dd:CumulativeHPMarkingAgentInserted/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+				<ns0:UnitSupport access="readOnly">
+
+					<ns2:Unit>microliters</ns2:Unit>
+
+					<ns2:Unit>milliliters</ns2:Unit>
+
+					<ns2:Unit>nanoliters</ns2:Unit>
+
+					<ns2:Unit>picoliters</ns2:Unit>
+
+				</ns0:UnitSupport>
+
+			</ns0:CumulativeHPMarkingAgentInsertedSupport>
+
+		</ns0:UsageByMarkingAgentSupport>
+
+		<ns0:UsageByMediaSupport>
+
+			<ns0:TotalImpressions elementXPath="pudyn:UsageByMedia/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:MonochromeImpressions elementXPath="pudyn:UsageByMedia/dd:MonochromeImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:ColorImpressions elementXPath="pudyn:UsageByMedia/dd:ColorImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:MediaSizeNameSupport access="readOnly">
+
+				<ns2:MediaSizeName>na_executive_7.25x10.5in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_letter_8.5x11in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_govt-letter_8x10in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_invoice_5.5x8.5in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_a5_148x210mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_b5_176x250mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jis_b5_182x257mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jpn_oufuku-rot_148x200mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jpn_oufuku_148x200mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jpn_hagaki_100x148mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_a6_105x148mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_index-4x6_4x6in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>om_small-photo_100x150mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_5x7_5x7in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_index-5x8_5x8in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_number-10_4.125x9.5in</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_dl_110x220mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>iso_c6_114x162mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>jpn_chou4_90x205mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>om_photo_89x127mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>custom_photo-2l-size-card_127x178mm</ns2:MediaSizeName>
+
+				<ns2:MediaSizeName>na_foolscap_8.5x13in</ns2:MediaSizeName>
+
+			</ns0:MediaSizeNameSupport>
+
+		</ns0:UsageByMediaSupport>
+
+		<ns0:UsageByMediaTypeSupport>
+
+			<ns0:TotalImpressions elementXPath="pudyn:UsageByMediaType/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:UsageByJobSizeSupport>
+
+				<ns0:TotalImpressions elementXPath="pudyn:UsageByMediaType/pudyn:UsageByJobSize/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+				<ns2:PagesPerJob>one</ns2:PagesPerJob>
+
+				<ns2:PagesPerJob>two</ns2:PagesPerJob>
+
+				<ns2:PagesPerJob>threeToFive</ns2:PagesPerJob>
+
+				<ns2:PagesPerJob>sixToTen</ns2:PagesPerJob>
+
+				<ns2:PagesPerJob>greaterThanTen</ns2:PagesPerJob>
+
+			</ns0:UsageByJobSizeSupport>
+
+			<ns0:UsageByQuality>
+
+				<ns0:NormalImpressions elementXPath="pudyn:UsageByMediaType/dd:UsageByQuality/dd:NormalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+				<ns0:DraftImpressions elementXPath="pudyn:UsageByMediaType/dd:UsageByQuality/dd:DraftImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+				<ns0:BetterImpressions elementXPath="pudyn:UsageByMediaType/dd:UsageByQuality/dd:BetterImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			</ns0:UsageByQuality>
+
+			<ns0:MediaTypeSupport access="readOnly">
+
+				<ns2:MediaType>plain</ns2:MediaType>
+
+				<ns2:MediaType>photoStandard</ns2:MediaType>
+
+				<ns2:MediaType>photoOther</ns2:MediaType>
+
+				<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+				<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+				<ns2:MediaType>lightWeight</ns2:MediaType>
+
+				<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+				<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+				<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+			</ns0:MediaTypeSupport>
+
+		</ns0:UsageByMediaTypeSupport>
+
+		<ns0:UsageByTimeIntervalSupport>
+
+			<ns0:JobCount typeof="dd:Integer" max="4294967295" step="0" access="readOnly" elementXPath="pudyn:UsageByTimeInterval/dd:JobCount" min="0" />
+
+			<ns2:JobDuration>lessthanTwoMinutes</ns2:JobDuration>
+
+			<ns2:JobDuration>twoToFiveMinutes</ns2:JobDuration>
+
+			<ns2:JobDuration>fiveToThirtyMinutes</ns2:JobDuration>
+
+			<ns2:JobDuration>thirtyToSixtyMinutes</ns2:JobDuration>
+
+			<ns2:JobDuration>oneToSixHours</ns2:JobDuration>
+
+			<ns2:JobDuration>sixHoursToOneDay</ns2:JobDuration>
+
+			<ns2:JobDuration>oneToThreeDays</ns2:JobDuration>
+
+			<ns2:JobDuration>threeToSevenDays</ns2:JobDuration>
+
+			<ns2:JobDuration>sevenDaysToOneMonth</ns2:JobDuration>
+
+			<ns2:JobDuration>oneToThreeMonths</ns2:JobDuration>
+
+		</ns0:UsageByTimeIntervalSupport>
+
+		<ns0:UIButtonPressCountersSupport>
+
+			<ns0:ButtonPressCount typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:ButtonPressCount" min="0" />
+
+			<ns2:ButtonPressOptions>startScanButtonPress</ns2:ButtonPressOptions>
+
+		</ns0:UIButtonPressCountersSupport>
+
+		<ns0:DetachableUIAppsLaunchCount typeof="dd:IntegerCounter" max="4294967295" step="1" access="readOnly" elementXPath="dd:DetachableUIAppsLaunchCount" min="0" />
+
+		<ns0:DetachableUIAppsImpressions typeof="dd:IntegerCounter" max="4294967295" step="1" access="readOnly" elementXPath="dd:DetachableUIAppsImpressions" min="0" />
+
+		<ns0:BluetoothImpressions typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:BluetoothImpressions" min="0" />
+
+		<ns0:EWSAccessCount typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:EWSAccessCount" min="0" />
+
+		<ns0:NetworkImpressions typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:NetworkImpressions" min="0" />
+
+		<ns0:WirelessNetworkImpressions typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:WirelessNetworkImpressions" min="0" />
+
+		<ns0:SubscriptionImpressions typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="pudyn:PrinterSubunit/pudyn:SubscriptionImpressions" min="0" />
+
+		<ns0:WirelessConfigUserSelectedOptionSupport access="readOnly">
+
+			<ns0:WirelessConfigUserSelectedOption>hostAssist</ns0:WirelessConfigUserSelectedOption>
+
+			<ns0:WirelessConfigUserSelectedOption>deviceAssist</ns0:WirelessConfigUserSelectedOption>
+
+			<ns0:WirelessConfigUserSelectedOption>connectLater</ns0:WirelessConfigUserSelectedOption>
+
+			<ns0:WirelessConfigUserSelectedOption>noSelectionMade</ns0:WirelessConfigUserSelectedOption>
+
+		</ns0:WirelessConfigUserSelectedOptionSupport>
+
+		<ns0:QuietModeImpressions>
+
+			<ns0:TotalImpressions elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:QuiteModeImpressions/pudyn:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		</ns0:QuietModeImpressions>
+
+		<ns0:CalibrationUsage>
+
+			<ns0:SuccessCount access="readOnly" step="1" max="4294967295" min="0" typeof="dd:Integer" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:CalibrationUsage/pudyn:SuccessCount" />
+
+			<ns0:FailureCount access="readOnly" step="1" max="4294967295" min="0" typeof="dd:Integer" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:CalibrationUsage/pudyn:FailureCount" />
+
+			<ns0:CancelledCount access="readOnly" step="1" max="4294967295" min="0" typeof="dd:Integer" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:CalibrationUsage/pudyn:CancelledCount" />
+
+			<ns0:SkippedCount access="readOnly" step="1" max="4294967295" min="0" typeof="dd:Integer" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:CalibrationUsage/pudyn:SkippedCount" />
+
+			<ns0:StatusSupport access="readOnly" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:CalibrationUsage/pudyn:Status">
+
+				<ns0:Status>notDone</ns0:Status>
+
+				<ns0:Status>processing</ns0:Status>
+
+				<ns0:Status>completed</ns0:Status>
+
+				<ns0:Status>failed</ns0:Status>
+
+			</ns0:StatusSupport>
+
+		</ns0:CalibrationUsage>
+
+		<ns0:OOBESetupBy>
+
+			<ns0:SetupByOSSupport access="readOnly" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:OOBESetupBy/pudyn:SetupByOS">
+
+				<ns0:SetupByOS>Android</ns0:SetupByOS>
+
+				<ns0:SetupByOS>iOS</ns0:SetupByOS>
+
+				<ns0:SetupByOS>OSX</ns0:SetupByOS>
+
+				<ns0:SetupByOS>Windows7</ns0:SetupByOS>
+
+				<ns0:SetupByOS>Windows8</ns0:SetupByOS>
+
+				<ns0:SetupByOS>Windows10</ns0:SetupByOS>
+
+				<ns0:SetupByOS>Other</ns0:SetupByOS>
+
+			</ns0:SetupByOSSupport>
+
+			<ns0:SetupByAppSupport access="readOnly" elementXPath="/pudyn:ProductUsageDyn/pudyn:PrinterSubunit/pudyn:OOBESetupBy/pudyn:SetupByApp">
+
+				<ns0:SetupByApp>Aio-Android</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Aio-iOS</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Gotham</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Karnak</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Osprey</ns0:SetupByApp>
+
+				<ns0:SetupByApp>PrinterUI</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Weave</ns0:SetupByApp>
+
+				<ns0:SetupByApp>Other</ns0:SetupByApp>
+
+			</ns0:SetupByAppSupport>
+
+		</ns0:OOBESetupBy>
+
+	</ns0:PrinterSubunitCap>
+
+	<ns0:ConsumableSubunitCap>
+
+		<ns0:ConsumableStationSupport>
+
+			<ns2:ConsumableStation>0</ns2:ConsumableStation>
+
+			<ns2:ConsumableStation>1</ns2:ConsumableStation>
+
+		</ns0:ConsumableStationSupport>
+
+		<ns0:MarkerColorSupport>
+
+			<ns2:MarkerColor>CyanMagentaYellow</ns2:MarkerColor>
+
+			<ns2:MarkerColor>Black</ns2:MarkerColor>
+
+		</ns0:MarkerColorSupport>
+
+		<ns0:ConsumableTypeEnumSupport>
+
+			<ns2:ConsumableTypeEnum>ink</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>inkCartridge</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>introInkCartridge</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>introInkSupply</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>introPrinthead</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>maintenanceCartridge</ns2:ConsumableTypeEnum>
+
+			<ns2:ConsumableTypeEnum>printhead</ns2:ConsumableTypeEnum>
+
+		</ns0:ConsumableTypeEnumSupport>
+
+		<ns0:CumulativeConsumableCountSupport elementXPath="pudyn:Consumable/dd2:CumulativeConsumableCount" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:CumulativeMarkingAgentUsedSupport>
+
+			<ns0:ValueFloat elementXPath="pudyn:ConsumableSubunit/pudyn:Consumable/dd2:CumulativeMarkingAgentUsed/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+			<ns0:UnitSupport access="readOnly">
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+				<ns2:Unit>milliliters</ns2:Unit>
+
+				<ns2:Unit>nanoliters</ns2:Unit>
+
+				<ns2:Unit>picoliters</ns2:Unit>
+
+			</ns0:UnitSupport>
+
+		</ns0:CumulativeMarkingAgentUsedSupport>
+
+		<ns0:ApproximatePagesRemainingSymbolSupport access="readOnly">
+
+			<ns3:ApproximatePagesRemainingSymbol>dashDash</ns3:ApproximatePagesRemainingSymbol>
+
+			<ns3:ApproximatePagesRemainingSymbol>questionMark</ns3:ApproximatePagesRemainingSymbol>
+
+			<ns3:ApproximatePagesRemainingSymbol>greaterThan</ns3:ApproximatePagesRemainingSymbol>
+
+			<ns3:ApproximatePagesRemainingSymbol>lessThan</ns3:ApproximatePagesRemainingSymbol>
+
+		</ns0:ApproximatePagesRemainingSymbolSupport>
+
+		<ns0:ConsumableStateSupport access="readOnly">
+
+			<ns2:ConsumableState>ok</ns2:ConsumableState>
+
+			<ns2:ConsumableState>low</ns2:ConsumableState>
+
+			<ns2:ConsumableState>empty</ns2:ConsumableState>
+
+			<ns2:ConsumableState>unknown</ns2:ConsumableState>
+
+		</ns0:ConsumableStateSupport>
+
+		<ns0:ConsumableRawPercentageLevelRemaining elementXPath="pudyn:Consumable/dd:ConsumableRawPercentageLevelRemaining" typeof="dd:Integer" min="0" max="100" step="1" access="readOnly" />
+
+		<ns0:SupplyRegion typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyRegion" min="0" />
+
+		<ns0:SupplyFillLevel typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyFillLevel" min="0" />
+
+		<ns0:SupplyFamilyNumber typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyFamilyNumber" min="0" />
+
+		<ns0:SupplyModelNumber typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyModelNumber" min="0" />
+
+		<ns0:SupplySerialNumber typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplySerialNumber" min="0" />
+
+		<ns0:SupplyStatusBits typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyStatusBits" min="0" />
+
+		<ns0:SupplyRefilledStateCounter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:SupplyRefilledStateCounter" min="0" />
+
+		<ns0:PVPCartridgeCounter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:PVPCartridgeCounter" min="0" />
+
+		<ns0:PostInkAlertCounter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:PostInkAlertCounter" min="0" />
+
+		<ns0:PrimeEventCounter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="dd:PrimeEventCounter" min="0" />
+
+		<ns0:PrimeEventLevel0Counter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="pudyn:ConsumableSubunit/pudyn:Consumable/dd:PrimeEventLevel0Counter" min="0" />
+
+		<ns0:PrimeEventLevel1Counter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="pudyn:ConsumableSubunit/pudyn:Consumable/dd:PrimeEventLevel1Counter" min="0" />
+
+		<ns0:PrimeEventLevel2Counter typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="pudyn:ConsumableSubunit/pudyn:Consumable/dd:PrimeEventLevel2Counter" min="0" />
+
+		<ns0:UsageByMarkingAgentCountSupport>
+
+			<ns0:MarkingAgentCount elementXPath="pudyn:Consumable/dd:UsageByMarkingAgentCount/dd:MarkingAgentCount" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns2:MarkingAgentCountType>HPDropsCount</ns2:MarkingAgentCountType>
+
+			<ns2:MarkingAgentCountType>nonHPDropsCount</ns2:MarkingAgentCountType>
+
+			<ns2:MarkingAgentCountType>OOISensorFiredDropsCount</ns2:MarkingAgentCountType>
+
+			<ns2:MarkingAgentCountType>serviceDropsCount</ns2:MarkingAgentCountType>
+
+		</ns0:UsageByMarkingAgentCountSupport>
+
+		<ns0:UsageByPenStallSupport>
+
+			<ns0:PenStallSupport>
+
+				<ns0:PenStallValue elementXPath="pudyn:Consumable/dd:UsageByPenStall/dd:PenStall/dd:PenStallValue" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+				<ns0:PenStallValueLocationSupport>
+
+					<ns2:PenStallValueLocation>zero</ns2:PenStallValueLocation>
+
+					<ns2:PenStallValueLocation>one</ns2:PenStallValueLocation>
+
+					<ns2:PenStallValueLocation>two</ns2:PenStallValueLocation>
+
+					<ns2:PenStallValueLocation>three</ns2:PenStallValueLocation>
+
+				</ns0:PenStallValueLocationSupport>
+
+			</ns0:PenStallSupport>
+
+			<ns0:TijGenAndVersion elementXPath="pudyn:Consumable/dd:UsageByPenStall/dd:TijGenAndVersion" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:NonHPFlagCounter elementXPath="pudyn:Consumable/dd:UsageByPenStall/dd:NonHPFlagCounter" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:PenStallNumber typeof="dd:Integer" max="4294967295" step="1" access="readOnly" elementXPath="pudyn:Consumable/dd:UsageByPenStall/dd:PenStallNumber" min="0" />
+
+		</ns0:UsageByPenStallSupport>
+
+		<ns0:RefilledCount>
+
+			<ns0:CounterfeitRefilledCount elementXPath="dd:CounterfeitRefilledCount" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:GenuineRefilledCount elementXPath="dd:GenuineRefilledCount" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		</ns0:RefilledCount>
+
+		<ns0:PenInsertionTriggerSnapshotCounter elementXPath="dd:PenInsertionTriggerSnapshotCounter" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:CumulativeHPMarkingAgentUsedSupport>
+
+			<ns0:ValueFloat elementXPath="pudyn:UsageByMarkingAgent/dd2:CumulativeHPMarkingAgentUsed/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+			<ns0:UnitSupport access="readOnly">
+
+				<ns2:Unit>microliters</ns2:Unit>
+
+				<ns2:Unit>milliliters</ns2:Unit>
+
+				<ns2:Unit>nanoliters</ns2:Unit>
+
+				<ns2:Unit>picoliters</ns2:Unit>
+
+			</ns0:UnitSupport>
+
+		</ns0:CumulativeHPMarkingAgentUsedSupport>
+
+		<ns0:UsedSupplyFullAtInstall elementXPath="pudyn:ProductUsageDyn/pudyn:Consumable/pudyn:UsedSupplyFullAtInstall" typeof="Boolean" selected="true" deselected="false" access="readOnly" />
+
+	</ns0:ConsumableSubunitCap>
+
+	<ns0:ScannerEngineSubunitCap>
+
+		<ns0:ScanImages elementXPath="dd:ScanImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:UsageByScanMediaSizeSupport>
+
+			<ns0:ScanImages elementXPath="dd:ScanImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:ScanMediaSizeSupport>
+
+				<ns2:ScanMediaSize>any</ns2:ScanMediaSize>
+
+				<ns2:ScanMediaSize>na_legal_8.5x14in</ns2:ScanMediaSize>
+
+			</ns0:ScanMediaSizeSupport>
+
+		</ns0:UsageByScanMediaSizeSupport>
+
+		<ns0:TMAScanToHostImages elementXPath="dd:TMAScanToHostImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:AdfImages elementXPath="pudyn:ScannerEngineSubunit/dd:AdfImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:FlatbedImages elementXPath="pudyn:ScannerEngineSubunit/dd:FlatbedImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:JamEvents elementXPath="pudyn:ScannerEngineSubunit/dd:JamEvents" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MispickEvents elementXPath="pudyn:ScannerEngineSubunit/dd:MispickEvents" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ScanToCardCount elementXPath="dd:ScanToCardCount" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:UsageByADFSupport>
+
+			<ns0:TotalLegalScanImages elementXPath="ProductUsageDyn/pudyn:ScannerEngineSubunit/pudyn:UsageByADF/pudyn:TotalLegalScanImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			<ns0:UsageByJobSizeAndMedia>
+
+				<ns0:UsageByJobSizeSupport>
+
+					<ns0:TotalImpressions elementXPath="pudyn:ProductUsageDyn/pudyn:ScannerEngineSubunit/pudyn:UsageByADF/pudyn:UsageByJobSizeAndMedia/pudyn:UsageByJobSize/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+					<ns2:PagesPerJob>oneToTen</ns2:PagesPerJob>
+
+					<ns2:PagesPerJob>elevenToTwenty</ns2:PagesPerJob>
+
+					<ns2:PagesPerJob>twentyOneToThirtyFive</ns2:PagesPerJob>
+
+					<ns2:PagesPerJob>greaterThanThirtyfive</ns2:PagesPerJob>
+
+				</ns0:UsageByJobSizeSupport>
+
+				<ns0:MediaSizeNameSupport access="readOnly">
+
+					<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+				</ns0:MediaSizeNameSupport>
+
+			</ns0:UsageByJobSizeAndMedia>
+
+		</ns0:UsageByADFSupport>
+
+	</ns0:ScannerEngineSubunitCap>
+
+	<ns0:MassStorageSubunitCap>
+
+		<ns0:TotalImpressions elementXPath="pudyn:MassStorageSubunit/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ColorImpressions elementXPath="pudyn:MassStorageSubunit/dd:ColorImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MonochromeImpressions elementXPath="pudyn:MassStorageSubunit/dd:MonochromeImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MemoryDevicesInserted elementXPath="pudyn:MassStorageSubunit/dd:MemoryDevicesInserted" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:PictbridgeConnections elementXPath="pudyn:MassStorageSubunit/dd:PictbridgeConnections" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+	</ns0:MassStorageSubunitCap>
+
+	<ns0:CopyApplicationSubunitCap>
+
+		<ns0:TotalImpressions elementXPath="pudyn:CopyApplicationSubunit/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ColorImpressions elementXPath="pudyn:CopyApplicationSubunit/dd:ColorImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MonochromeImpressions elementXPath="pudyn:CopyApplicationSubunit/dd:MonochromeImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:AdfImages elementXPath="pudyn:CopyApplicationSubunit/dd:AdfImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:FlatbedImages elementXPath="pudyn:CopyApplicationSubunit/dd:FlatbedImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:TotalAdfLegalImages elementXPath="pudyn:ProductUsageDyn/pudyn:CopyApplicationSubunit/pudyn:TotalAdfLegallmages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+	</ns0:CopyApplicationSubunitCap>
+
+	<ns0:ScanApplicationSubunitCap>
+
+		<ns0:AdfImages elementXPath="pudyn:ScanApplicationSubunit/dd:AdfImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:FlatbedImages elementXPath="pudyn:ScanApplicationSubunit/dd:FlatbedImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ImagesSentToEmail elementXPath="pudyn:ScanApplicationSubunit/dd:ImagesSentToEmail" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ImagesSentToFolder elementXPath="pudyn:ScanApplicationSubunit/dd:ImagesSentToFolder" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ScanToHostImages elementXPath="dd:ScanToHostImages" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+	</ns0:ScanApplicationSubunitCap>
+
+	<ns0:PrintApplicationSubunitCap>
+
+		<ns0:TotalImpressions elementXPath="dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:PhotoImpressions elementXPath="dd:PhotoImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:MediaSize_4x6in_10x15cm_Impressions elementXPath="dd:MediaSize_4x6in_10x15cm_Impressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:CloudPrintImpressions elementXPath="dd:CloudPrintImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+		<ns0:ReportsImpressionsInRTP access="readOnly" step="1" max="4294967295" min="0" typeof="dd:Integer" elementXPath="/pudyn:PrintApplicationSubunit/pudyn:ReportsImpressionsInRTP" />
+
+	</ns0:PrintApplicationSubunitCap>
+
+	<ns0:PonyExpressSubunitCap>
+
+		<ns0:PECounter elementXPath="pudyn:PonyExpressSubunit/pudyn:PECounter" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+	</ns0:PonyExpressSubunitCap>
+
+	<ns0:MobileApplicationSubunitCap>
+
+		<ns0:TotalUsageCap>
+
+			<ns0:CounterCap>
+
+				<ns0:TotalImpressions elementXPath="pudyn:MobileApplicationSubunit/pudyn:Totalusage/pudyn:Counter/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			</ns0:CounterCap>
+
+			<ns0:RemoteDeviceTypeSupport>
+
+				<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>iOS</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Android</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>samsung</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Chrome</ns0:RemoteDeviceType>
+
+			</ns0:RemoteDeviceTypeSupport>
+
+			<ns0:DriverTypeSupport>
+
+				<ns0:DriverType>discrete</ns0:DriverType>
+
+				<ns0:DriverType>inOS</ns0:DriverType>
+
+				<ns0:DriverType>ePrint</ns0:DriverType>
+
+				<ns0:DriverType>UniversalPrintDriver</ns0:DriverType>
+
+			</ns0:DriverTypeSupport>
+
+		</ns0:TotalUsageCap>
+
+		<ns0:DocumentUsageCap>
+
+			<ns0:CounterCap>
+
+				<ns0:TotalImpressions elementXPath="pudyn:MobileApplicationSubunit/pudyn:DocumentUsage/pudyn:Counter/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			</ns0:CounterCap>
+
+			<ns0:RemoteDeviceTypeSupport>
+
+				<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>iOS</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Android</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>samsung</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Chrome</ns0:RemoteDeviceType>
+
+			</ns0:RemoteDeviceTypeSupport>
+
+		</ns0:DocumentUsageCap>
+
+		<ns0:PhotoUsageCap>
+
+			<ns0:CounterCap>
+
+				<ns0:TotalImpressions elementXPath="pudyn:MobileApplicationSubunit/pudyn:PhotoUsage/pudyn:Counter/dd:TotalImpressions" typeof="dd:Integer" min="0" max="4294967295" step="1" access="readOnly" />
+
+			</ns0:CounterCap>
+
+			<ns0:RemoteDeviceTypeSupport>
+
+				<ns0:RemoteDeviceType>OSX</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>iOS</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Android</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>samsung</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Windows</ns0:RemoteDeviceType>
+
+				<ns0:RemoteDeviceType>Chrome</ns0:RemoteDeviceType>
+
+			</ns0:RemoteDeviceTypeSupport>
+
+		</ns0:PhotoUsageCap>
+
+	</ns0:MobileApplicationSubunitCap>
+
+</ns0:ProductUsageCap>

@@ -1,0 +1,89 @@
+<ns0:NetAppsDyn xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/netappdyn/2009/06/24" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/dictionaries/2009/04/06" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/netappdyn/2009/06/24 ../schemas/NetAppsDyn.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.567</ns2:Revision>
+
+		<ns2:Date>2012-11-02</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:DNSSDConfig>
+
+		<ns2:MDNSSupport>enabled</ns2:MDNSSupport>
+
+		<ns2:ApplicationServiceName>HP printer (000000)</ns2:ApplicationServiceName>
+
+		<ns3:DomainName>local</ns3:DomainName>
+
+		<ns2:DNSSDPrintPreferredService>IPP</ns2:DNSSDPrintPreferredService>
+
+	</ns0:DNSSDConfig>
+
+	<ns0:ProxyConfig>
+
+		<ns2:ResourceURI />
+
+		<ns2:UserName />
+
+		<ns2:ProxySupport>off</ns2:ProxySupport>
+
+	</ns0:ProxyConfig>
+
+	<ns2:SNMPConfigWithVersion>
+
+		<ns2:AccessOption>readOnly</ns2:AccessOption>
+
+		<ns2:GetCommunityNameConfig>publicAllowed</ns2:GetCommunityNameConfig>
+
+		<ns2:GetCommunityName />
+
+		<ns2:SetCommunityName />
+
+		<ns2:SNMP>enabled</ns2:SNMP>
+
+		<ns2:Version>
+
+			<ns2:Revision>1.0</ns2:Revision>
+
+		</ns2:Version>
+
+	</ns2:SNMPConfigWithVersion>
+
+	<ns0:WebServicesConfig>
+
+		<ns2:WSDiscovery>enabled</ns2:WSDiscovery>
+
+		<ns2:WSPrint>enabled</ns2:WSPrint>
+
+		<ns0:WSScan>enabled</ns0:WSScan>
+
+	</ns0:WebServicesConfig>
+
+	<ns2:DHCPv6>enabled</ns2:DHCPv6>
+
+	<ns2:LLMNR>enabled</ns2:LLMNR>
+
+	<ns2:HTTPSRedirection>disabled</ns2:HTTPSRedirection>
+
+	<ns2:Port9100PrintingSupport>enabled</ns2:Port9100PrintingSupport>
+
+	<ns2:DHCPv4FQDN>enabled</ns2:DHCPv4FQDN>
+
+	<ns2:IPPSupport>enabled</ns2:IPPSupport>
+
+	<ns0:WebScan>disabled</ns0:WebScan>
+
+	<ns0:DirectPrint>enabled</ns0:DirectPrint>
+
+	<ns0:WPADSettings>
+
+		<ns0:ResourceURI />
+
+		<ns0:Port>0</ns0:Port>
+
+		<ns0:WPADStatus>failure</ns0:WPADStatus>
+
+	</ns0:WPADSettings>
+
+</ns0:NetAppsDyn>

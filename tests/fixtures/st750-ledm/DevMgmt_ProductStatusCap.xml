@@ -1,0 +1,433 @@
+<ns0:ProductStatusCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/productstatuscap/2007/10/31" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/productstatuscategories/2007/10/31" xmlns:ns4="http://www.hp.com/schemas/imaging/con/ledm/alertdetails/2007/10/31" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd http://www.hp.com/schemas/imaging/con/ledm/alertdetails/2007/10/31 ../schemas/AlertDetails.xsd http://www.hp.com/schemas/imaging/con/ledm/productstatuscategories/2007/10/31 ../schemas/ProductStatusCategories.xsd http://www.hp.com/schemas/imaging/con/ledm/localizationids/2007/10/31 ../schemas/LocalizationIds.xsd http://www.hp.com/schemas/imaging/con/ledm/productstatuscap/2007/10/31 ../schemas/ProductStatusCap.xsd http://www.hp.com/schemas/imaging/con/ledm/2007/09/21 ../schemas/LEDM.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.281</ns2:Revision>
+
+		<ns2:Date>2011-05-24</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:StatusCap>
+
+		<ns0:StatusCategorySupport>
+
+			<ns3:StatusCategory>antiTheftEnabledSupplyDetected</ns3:StatusCategory>
+
+			<ns3:StatusCategory>BBCMediaDetected</ns3:StatusCategory>
+
+			<ns3:StatusCategory>calibrating</ns3:StatusCategory>
+
+			<ns3:StatusCategory>calibrationRequired</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cancelJob</ns3:StatusCategory>
+
+			<ns3:StatusCategory>carriageJam</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeCounterfeit</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeCounterfeitQuestion</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeFailure</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeInWrongOrder</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeLow</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeMissing</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeRefilled</ns3:StatusCategory>
+
+			<ns3:StatusCategory>cartridgeVeryLow</ns3:StatusCategory>
+
+			<ns3:StatusCategory>closeDoorOrCover</ns3:StatusCategory>
+
+			<ns3:StatusCategory>copying</ns3:StatusCategory>
+
+			<ns3:StatusCategory>copyJobError</ns3:StatusCategory>
+
+			<ns3:StatusCategory>genuineHP</ns3:StatusCategory>
+
+			<ns3:StatusCategory>improperOrientationInTray</ns3:StatusCategory>
+
+			<ns3:StatusCategory>improperShutdown</ns3:StatusCategory>
+
+			<ns3:StatusCategory>incompatibleConsumable</ns3:StatusCategory>
+
+			<ns3:StatusCategory>initializing</ns3:StatusCategory>
+
+			<ns3:StatusCategory>inkSystemInitializing</ns3:StatusCategory>
+
+			<ns3:StatusCategory>inPowerSave</ns3:StatusCategory>
+
+			<ns3:StatusCategory>jamInPrinter</ns3:StatusCategory>
+
+			<ns3:StatusCategory>mediaTooLongToAutoDuplex</ns3:StatusCategory>
+
+			<ns3:StatusCategory>mediaTooShortToAutoDuplex</ns3:StatusCategory>
+
+			<ns3:StatusCategory>mediaTooShortToPrint</ns3:StatusCategory>
+
+			<ns3:StatusCategory>nonHPSupplyDetected</ns3:StatusCategory>
+
+			<ns3:StatusCategory>printerError</ns3:StatusCategory>
+
+			<ns3:StatusCategory>processing</ns3:StatusCategory>
+
+			<ns3:StatusCategory>ready</ns3:StatusCategory>
+
+			<ns3:StatusCategory>replaceCartridgeOut</ns3:StatusCategory>
+
+			<ns3:StatusCategory>scannerError</ns3:StatusCategory>
+
+			<ns3:StatusCategory>scannerAdfDoorOpen</ns3:StatusCategory>
+
+			<ns3:StatusCategory>scannerAdfJam</ns3:StatusCategory>
+
+			<ns3:StatusCategory>scannerAdfMispick</ns3:StatusCategory>
+
+			<ns3:StatusCategory>scanProcessing</ns3:StatusCategory>
+
+			<ns3:StatusCategory>SETUPsupplyUpgradeFailed</ns3:StatusCategory>
+
+			<ns3:StatusCategory>shaidElectricalFailure</ns3:StatusCategory>
+
+			<ns3:StatusCategory>sharedAddressError</ns3:StatusCategory>
+
+			<ns3:StatusCategory>shuttingDown</ns3:StatusCategory>
+
+			<ns3:StatusCategory>sizeMismatchInTray</ns3:StatusCategory>
+
+			<ns3:StatusCategory>sizeMismatchLargeMediaInTray</ns3:StatusCategory>
+
+			<ns3:StatusCategory>sizeMismatchSmallMediaInTray</ns3:StatusCategory>
+
+			<ns3:StatusCategory>supplyForwardIncompatible</ns3:StatusCategory>
+
+			<ns3:StatusCategory>supplyUpgradeFailed</ns3:StatusCategory>
+
+			<ns3:StatusCategory>supplyUpgradeSuccess</ns3:StatusCategory>
+
+			<ns3:StatusCategory>supportMessageAlert</ns3:StatusCategory>
+
+			<ns3:StatusCategory>trayClosed</ns3:StatusCategory>
+
+			<ns3:StatusCategory>trayEmptyOrOpen</ns3:StatusCategory>
+
+			<ns3:StatusCategory>trayOpen</ns3:StatusCategory>
+
+			<ns3:StatusCategory>upgradableSupply</ns3:StatusCategory>
+
+			<ns3:StatusCategory>usedConsumable</ns3:StatusCategory>
+
+		</ns0:StatusCategorySupport>
+
+		<ns0:StringId step="1" max="4294967295" min="1" elementXPath="psdyn:ProductStatusDyn/psdyn:Status/locid:StringId" typeof="dd:Integer" />
+
+	</ns0:StatusCap>
+
+	<ns0:AlertTableCap>
+
+		<ns0:ModificationNumber step="1" max="4294967295" min="0" elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/dd:ModificationNumber" typeof="dd:Integer" />
+
+		<ns0:AlertCap>
+
+			<ns0:ProductStatusAlertIDSupport>
+
+				<ns0:DeviceCategory>
+
+					<ns0:Warnings>
+
+						<ns4:ProductStatusAlertID>calibrationRequired</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>improperShutdown</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>sizeMismatchLargeMediaInTray</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>sizeMismatchSmallMediaInTray</ns4:ProductStatusAlertID>
+
+					</ns0:Warnings>
+
+					<ns0:Errors>
+
+						<ns4:ProductStatusAlertID>calibrating</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>carriageJam</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>closeDoorOrCover</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>copyJobError</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>improperOrientationInTray</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>jamInPrinter</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>mediaTooLongToAutoDuplex</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>mediaTooShortToAutoDuplex</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>mediaTooShortToPrint</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>printerError</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>sharedAddressError</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>sizeMismatchInTray</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>trayEmptyOrOpen</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>trayOpen</ns4:ProductStatusAlertID>
+
+					</ns0:Errors>
+
+				</ns0:DeviceCategory>
+
+				<ns0:ConsumableCategory>
+
+					<ns0:Warnings>
+
+						<ns4:ProductStatusAlertID>cartridgeCounterfeit</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeCounterfeitQuestion</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeRefilled</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeVeryLow</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>supportMessageAlert</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>upgradableSupply</ns4:ProductStatusAlertID>
+
+					</ns0:Warnings>
+
+					<ns0:Errors>
+
+						<ns4:ProductStatusAlertID>antiTheftEnabledSupplyDetected</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeFailure</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeInWrongOrder</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>cartridgeMissing</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>incompatibleConsumable</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>replaceCartridgeOut</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>SETUPsupplyUpgradeFailed</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>shaidElectricalFailure</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>supplyForwardIncompatible</ns4:ProductStatusAlertID>
+
+						<ns4:ProductStatusAlertID>supplyUpgradeFailed</ns4:ProductStatusAlertID>
+
+					</ns0:Errors>
+
+				</ns0:ConsumableCategory>
+
+			</ns0:ProductStatusAlertIDSupport>
+
+			<ns0:StringId step="1" max="4294967295" min="1" elementXPath="psdyn:ProductStatusDyn/psdyn:Status/locid:StringId" typeof="dd:Integer" />
+
+			<ns0:SequenceNumber step="1" max="4294967295" min="0" elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/dd:SequenceNumber" typeof="dd:Integer" />
+
+			<ns0:SeveritySupport>
+
+				<ns4:Severity>Info</ns4:Severity>
+
+				<ns4:Severity>Warning</ns4:Severity>
+
+				<ns4:Severity>StrictWarning</ns4:Severity>
+
+				<ns4:Severity>Error</ns4:Severity>
+
+			</ns0:SeveritySupport>
+
+			<ns0:AlertPriority step="1" max="100" min="1" elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/dd:AlertPriority" typeof="dd:Integer" />
+
+			<ns0:AlertDetailsCap>
+
+				<ns0:AlertDetailsMarkerColorSupport>
+
+					<ns4:AlertDetailsMarkerColor>CyanMagentaYellow</ns4:AlertDetailsMarkerColor>
+
+					<ns4:AlertDetailsMarkerColor>Black</ns4:AlertDetailsMarkerColor>
+
+					<ns4:AlertDetailsMarkerColor>Cyan</ns4:AlertDetailsMarkerColor>
+
+					<ns4:AlertDetailsMarkerColor>Magenta</ns4:AlertDetailsMarkerColor>
+
+					<ns4:AlertDetailsMarkerColor>Yellow</ns4:AlertDetailsMarkerColor>
+
+					<ns4:AlertDetailsMarkerColor>Black</ns4:AlertDetailsMarkerColor>
+
+				</ns0:AlertDetailsMarkerColorSupport>
+
+				<ns0:AlertDetailsConsumableTypeEnumSupport>
+
+					<ns4:AlertDetailsConsumableTypeEnum>inkCartridge</ns4:AlertDetailsConsumableTypeEnum>
+
+				</ns0:AlertDetailsConsumableTypeEnumSupport>
+
+				<ns0:AlertDetailsMarkerLocation step="1" max="5" min="0" elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/ad:AlertDetails/ad:AlertDetailsMarkerLocation" typeof="dd:Integer" />
+
+				<ns0:AlertDetailsInputBinSupport>
+
+					<ns4:AlertDetailsInputBin>Tray1</ns4:AlertDetailsInputBin>
+
+				</ns0:AlertDetailsInputBinSupport>
+
+				<ns0:AlertDetailsMediaTypeSupport>
+
+					<ns4:AlertDetailsMediaType>plain</ns4:AlertDetailsMediaType>
+
+					<ns4:AlertDetailsMediaType>specialty</ns4:AlertDetailsMediaType>
+
+					<ns4:AlertDetailsMediaType>lightGlossy</ns4:AlertDetailsMediaType>
+
+					<ns4:AlertDetailsMediaType>matteBrochure</ns4:AlertDetailsMediaType>
+
+				</ns0:AlertDetailsMediaTypeSupport>
+
+				<ns0:AlertDetailsMediaSizeSupport>
+
+					<ns4:AlertDetailsMediaSize>na_executive_7.25x10.5in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_letter_8.5x11in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_legal_8.5x14in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_govt-letter_8x10in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_invoice_5.5x8.5in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_a5_148x210mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_a4_210x297mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_b5_176x250mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jis_b5_182x257mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jpn_oufuku-rot_148x200mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jpn_oufuku_148x200mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jpn_hagaki_100x148mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_a6_105x148mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_index-4x6_4x6in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>om_small-photo_100x150mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_5x7_5x7in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_index-5x8_5x8in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_number-10_4.125x9.5in</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_dl_110x220mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>iso_c6_114x162mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jpn_chou3_120x235mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>jpn_chou4_90x205mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>om_photo_89x127mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>custom_photo-2l-size-card_127x178mm</ns4:AlertDetailsMediaSize>
+
+					<ns4:AlertDetailsMediaSize>na_foolscap_8.5x13in</ns4:AlertDetailsMediaSize>
+
+				</ns0:AlertDetailsMediaSizeSupport>
+
+				<ns0:AlertDetailsErrorCode elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/ad:AlertDetails/ad:AlertDetailsErrorCode" typeof="dd:String" length="16" />
+
+				<ns0:AlertDetailsDoorCoverLocationSupport>
+
+					<ns4:AlertDetailsDoorCoverLocation>ADFCover</ns4:AlertDetailsDoorCoverLocation>
+
+					<ns4:AlertDetailsDoorCoverLocation>cover</ns4:AlertDetailsDoorCoverLocation>
+
+					<ns4:AlertDetailsDoorCoverLocation>rearDoor</ns4:AlertDetailsDoorCoverLocation>
+
+				</ns0:AlertDetailsDoorCoverLocationSupport>
+
+				<ns0:AlertDetailsJamLocationSupport>
+
+					<ns4:AlertDetailsJamLocation>adf</ns4:AlertDetailsJamLocation>
+
+					<ns4:AlertDetailsJamLocation>cartridgeArea</ns4:AlertDetailsJamLocation>
+
+					<ns4:AlertDetailsJamLocation>duplexer</ns4:AlertDetailsJamLocation>
+
+					<ns4:AlertDetailsJamLocation>printPaperPath</ns4:AlertDetailsJamLocation>
+
+				</ns0:AlertDetailsJamLocationSupport>
+
+				<ns0:AlertDetailsJamClearAccessLocationSupport>
+
+					<ns4:AlertDetailsJamClearAccessLocation>ADFCover</ns4:AlertDetailsJamClearAccessLocation>
+
+					<ns4:AlertDetailsJamClearAccessLocation>cover</ns4:AlertDetailsJamClearAccessLocation>
+
+				</ns0:AlertDetailsJamClearAccessLocationSupport>
+
+				<ns0:AlertDetailsCopyJobErrorSupport>
+
+					<ns4:AlertDetailsCopyJobError>duplexCopyNotSupportedOnSmallMedia</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>paperTypeNotSupportedInSmallSize</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>paperSizeNotSupportedInRearTray</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>paperTypeNotSupportedInLowerTray</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>paperSizeNotSupportedInLowerTray</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>duplexCopyNotSupportedOnPaperOrTray</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>reduceEnlargeFeatureNotSupportedWithDuplexCopy</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>collationFeatureRequestNewJob</ns4:AlertDetailsCopyJobError>
+
+					<ns4:AlertDetailsCopyJobError>duplexCopyNotSupportedOnLargeMedia</ns4:AlertDetailsCopyJobError>
+
+				</ns0:AlertDetailsCopyJobErrorSupport>
+
+				<ns0:AlertDetailsEstimatedTimeToCompletionSupport>
+
+					<ns0:ValueFloat elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/psdyn:AlertDetailsEstimatedTimeToCompletion/dd:ValueFloat" typeof="dd:ValueFloat" min="0.00" max="10000.00" step="0.01" access="readOnly" />
+
+					<ns0:UnitSupport access="readOnly">
+
+						<ns2:Unit>hours</ns2:Unit>
+
+						<ns2:Unit>minutes</ns2:Unit>
+
+						<ns2:Unit>seconds</ns2:Unit>
+
+					</ns0:UnitSupport>
+
+				</ns0:AlertDetailsEstimatedTimeToCompletionSupport>
+
+				<ns0:AlertDetailsFirmwareUpdateTypeSupport access="readOnly" elementXPath="psdyn:AlertTable/psdyn:Alert/ad:AlertDetails/ad:AlertDetailsFirmwareUpdateType">
+
+					<ns0:AlertDetailsFirmwareUpdateType>mandatory</ns0:AlertDetailsFirmwareUpdateType>
+
+				</ns0:AlertDetailsFirmwareUpdateTypeSupport>
+
+			</ns0:AlertDetailsCap>
+
+			<ns0:ResourceURI elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/dd:ResourceURI" length="128" typeof="dd:String" />
+
+			<ns0:ResourceType elementXPath="psdyn:ProductStatusDyn/psdyn:AlertTable/psdyn:Alert/dd:ResourceType" length="128" typeof="dd:String" />
+
+		</ns0:AlertCap>
+
+	</ns0:AlertTableCap>
+
+</ns0:ProductStatusCap>

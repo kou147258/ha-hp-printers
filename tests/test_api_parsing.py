@@ -34,6 +34,12 @@ from custom_components.hp_printers.const import (
     STATUS_OPTIONS,
 )
 
+# The optional second wave of an LEDM update: the print configuration, the
+# current media, the network services and the supplies programme. Stands in
+# for "this model serves none of them", which is the case every LEDM printer
+# except one measured serves.
+_NO_OPTIONAL_DOCUMENTS: tuple[Any, ...] = (None, None, None, None)
+
 
 def _xml(value: str) -> Any:
     """Parse XML and strip namespaces, mirroring the live parser."""
@@ -172,8 +178,21 @@ async def test_async_get_data_parses_full_response() -> None:
         """
     )
 
+    # Six documents the update always needs, then the optional second wave.
+    # The list is positional because _fetch_optional is called by a gather
+    # whose order is the argument order, so appending to it is the way a new
+    # optional endpoint is stubbed. An absent optional document is the normal
+    # case and must not fail the update.
     client._fetch = AsyncMock(  # noqa: SLF001
-        side_effect=[status, usage, consumable, logs, io_config, media_handling]
+        side_effect=[
+            status,
+            usage,
+            consumable,
+            logs,
+            io_config,
+            media_handling,
+            *_NO_OPTIONAL_DOCUMENTS,
+        ]
     )
 
     data = await client.async_get_data()

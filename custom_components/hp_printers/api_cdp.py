@@ -35,25 +35,49 @@ from .api import (
     _percent,
 )
 from .const import (
+    CDP_ADAPTER_STATS,
+    CDP_ALERTS,
+    CDP_BLUETOOTH,
     CDP_CALIBRATION,
     CDP_CALIBRATION_CAPABILITIES,
     CDP_CALIBRATION_TRIGGER,
+    CDP_CERTIFICATE,
     CDP_DEVICE_SERVICE_COUNTERS,
     CDP_DEVICE_USAGE,
     CDP_EVENTS,
+    CDP_FIRMWARE_CHECK,
+    CDP_FIRMWARE_CONFIG,
+    CDP_FIRMWARE_STATUS,
     CDP_IDENTITY,
+    CDP_INTERNET_DIAGNOSTICS,
     CDP_PRINT_CONFIG,
+    CDP_PRINT_SERVICES,
+    CDP_PRINT_SETUP_STATUS,
     CDP_PRINT_STATUS,
     CDP_REPORT_PRINT,
     CDP_REPORTS,
     CDP_SCAN_STATUS,
     CDP_SECURITY_CONFIG,
+    CDP_SERVICE_CONFIG,
+    CDP_SETUP_STATUS,
+    CDP_SNMP_CONFIG,
     CDP_SUPPLIES,
     CDP_SUPPLY_CONFIG,
+    CDP_SUPPLY_CONFIG_PRIVATE,
+    CDP_SUPPLY_LIFETIME,
+    CDP_SUPPLY_REGION_RESET,
     CDP_SYSTEM_STATISTICS,
     COLOR_NAMES,
 )
-from .models import Consumable, EventLogEntry, PrinterData, ProductInfo, SubunitUsage
+from .models import (
+    ActiveAlert,
+    AdapterStats,
+    Consumable,
+    EventLogEntry,
+    PrinterData,
+    ProductInfo,
+    SubunitUsage,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -536,6 +560,52 @@ class CDPClient:
         )
         events_doc = await self._fetch_optional(CDP_EVENTS)
 
+        # The second wave. Kept separate from the first so that a model which
+        # does not serve any of these -- every LEDM printer, and a CDP printer
+        # that has never enrolled in cloud services -- costs one gather of
+        # 404s rather than delaying the counters above. Everything here is
+        # optional by construction.
+        (
+            setup_doc,
+            alerts_doc,
+            firmware_doc,
+            firmware_check,
+            firmware_config,
+            certificate_doc,
+            adapter_doc,
+            internet_doc,
+            print_services_doc,
+            snmp_doc,
+            bluetooth_doc,
+            service_config,
+            supply_lifetime,
+            supply_private,
+            region_reset,
+            print_setup,
+        ) = await asyncio.gather(
+            *(
+                self._fetch_optional(path)
+                for path in (
+                    CDP_SETUP_STATUS,
+                    CDP_ALERTS,
+                    CDP_FIRMWARE_STATUS,
+                    CDP_FIRMWARE_CHECK,
+                    CDP_FIRMWARE_CONFIG,
+                    CDP_CERTIFICATE,
+                    CDP_ADAPTER_STATS,
+                    CDP_INTERNET_DIAGNOSTICS,
+                    CDP_PRINT_SERVICES,
+                    CDP_SNMP_CONFIG,
+                    CDP_BLUETOOTH,
+                    CDP_SERVICE_CONFIG,
+                    CDP_SUPPLY_LIFETIME,
+                    CDP_SUPPLY_CONFIG_PRIVATE,
+                    CDP_SUPPLY_REGION_RESET,
+                    CDP_PRINT_SETUP_STATUS,
+                )
+            )
+        )
+
         return PrinterData(
             status=_status(_text(status_doc, "printerState")),
             status_message=self._state_message(status_doc),
@@ -564,7 +634,191 @@ class CDPClient:
             # printer refuse a non-HP cartridge", so they land on one field
             # rather than two half-populated ones.
             genuine_supplies_only=_bool(supply_config or {}, "antiTheftEnabled"),
+            # --- second wave ---
+            setup_operation_state=_text(setup_doc or {}, "setupOperationState"),
+            setup_pending_steps=self._parse_setup_steps(setup_doc),
+            firmware_update_result=_text(firmware_doc or {}, "lastUpdateResult"),
+            firmware_update_available=_text(firmware_check or {}, "availableVersion"),
+            auto_update_enabled=_bool(firmware_config or {}, "autoUpdateEnabled"),
+            active_alerts=self._parse_alerts(alerts_doc),
+            certificate_valid_from=_date(
+                (certificate_doc or {}).get("validity") or {}, "fromDate"
+            ),
+            certificate_expires=_date(
+                (certificate_doc or {}).get("validity") or {}, "toDate"
+            ),
+            adapter_stats=self._parse_adapter_stats(adapter_doc),
+            internet_diagnostics_result=_text(internet_doc or {}, "lastResult"),
+            carriage_status=_text(print_setup or {}, "carriageStatus"),
+            cartridge_changes=self._parse_cartridge_changes(
+                supply_lifetime, supplies_doc
+            ),
+            region_reset_remaining=_int(region_reset or {}, "numberRemaining"),
+            anti_theft_enabled=_bool(supply_private or {}, "antiTheftEnabled"),
+            holo_enabled=_bool(supply_private or {}, "holoEnabled"),
+            low_messaging_enabled=_bool(supply_private or {}, "lowMessagingEnabled"),
+            print_services=self._parse_print_services(print_services_doc),
+            snmp_enabled=self._parse_snmp(snmp_doc, "enabled"),
+            snmp_public_allowed=self._parse_snmp(snmp_doc, "readOnlyPublicAllowed"),
+            bluetooth_beaconing=_bool(bluetooth_doc or {}, "currentBeaconingEnabled"),
+            service_id=_text(service_config or {}, "serviceId"),
         )
+
+    @staticmethod
+    def _parse_setup_steps(setup_doc: dict[str, Any] | None) -> tuple[str, ...]:
+        """Return the setup steps the device is still waiting on.
+
+        The document is a flat bag of ``action<Something>`` entries, each with
+        its own ``status``. Only the ones not yet ``completed`` are returned:
+        the finished steps are not news, and listing them would make a
+        printer that completed all five look identical to one that completed
+        none.
+        """
+        if not setup_doc:
+            return ()
+        pending: list[tuple[int, str]] = []
+        for key, value in setup_doc.items():
+            if not key.startswith("action") or not isinstance(value, dict):
+                continue
+            if str(value.get("status", "")).lower() == "completed":
+                continue
+            order = value.get("suggestedOrder")
+            pending.append(
+                (order if isinstance(order, int) else 99, key.removeprefix("action"))
+            )
+        return tuple(name for _order, name in sorted(pending))
+
+    @staticmethod
+    def _parse_alerts(alerts_doc: dict[str, Any] | None) -> tuple[ActiveAlert, ...]:
+        """Build the alerts the device is raising right now.
+
+        Only entries the device marked ``severity`` are kept, and the
+        categories are returned in the order given rather than sorted: the
+        device orders them by its own priority, and re-sorting would discard
+        the ranking that is the most useful part.
+        """
+        if not alerts_doc:
+            return ()
+        alerts = alerts_doc.get("alerts")
+        if not isinstance(alerts, list):
+            return ()
+        parsed: list[ActiveAlert] = []
+        for entry in alerts:
+            if not isinstance(entry, dict):
+                continue
+            category = _text(entry, "category")
+            if category is None:
+                continue
+            parsed.append(
+                ActiveAlert(
+                    alert_id=_int(entry, "id"),
+                    category=category,
+                    severity=_text(entry, "severity"),
+                    priority=_int(entry, "priority"),
+                    sequence=_int(entry, "sequenceNum"),
+                )
+            )
+        return tuple(parsed)
+
+    @staticmethod
+    def _parse_adapter_stats(
+        adapter_doc: dict[str, Any] | None,
+    ) -> tuple[AdapterStats, ...]:
+        """Split the counter document into one record per interface.
+
+        Every key that is not a version marker is an interface name, and the
+        device puts them at the top level rather than under an ``adapters``
+        list, so the shape is read from the document rather than assumed.
+        """
+        if not adapter_doc:
+            return ()
+        found: list[AdapterStats] = []
+        for name, values in adapter_doc.items():
+            if name == "version" or not isinstance(values, dict):
+                continue
+            found.append(
+                AdapterStats(
+                    name=name,
+                    received_bytes=_int(values, "receivedBytes"),
+                    transmitted_packets=_int(values, "transmittedPackets"),
+                    received_unicast=_int(values, "receivedUnicastPackets"),
+                    received_multicast=_int(values, "receivedMulticastPackets"),
+                    receiver_errors=_int(values, "receiverErrors"),
+                    transmitter_errors=_int(values, "transmitterErrors"),
+                    transmitter_collisions=_int(values, "transmitterCollisions"),
+                    transmitter_late_collisions=_int(
+                        values, "transmitterLateCollisions"
+                    ),
+                )
+            )
+        return tuple(sorted(found, key=lambda adapter: adapter.name))
+
+    @staticmethod
+    def _parse_cartridge_changes(
+        lifetime_doc: dict[str, Any] | None, supplies_doc: dict[str, Any] | None
+    ) -> int | None:
+        """Return the highest number of cartridges any single slot has held.
+
+        The document lists one entry per slot and the slots change between
+        models -- two printheads on one family, five on another -- so a
+        single number is what a user can actually be told. The maximum is
+        reported rather than the sum: the slots are refilled independently,
+        and three slots holding two cartridges each is a machine on its second
+        round, not one that has seen six.
+        """
+        if not lifetime_doc:
+            return None
+        slots = lifetime_doc.get("supplyUsageBySlot")
+        if not isinstance(slots, list) or not slots:
+            return None
+        counts = [
+            value
+            for value in (
+                _int(slot, "numberOfSupplies")
+                for slot in slots
+                if isinstance(slot, dict)
+            )
+            if value is not None
+        ]
+        return max(counts) if counts else None
+
+    @staticmethod
+    def _parse_print_services(services_doc: dict[str, Any] | None) -> tuple[str, ...]:
+        """Return the names of the print protocols the device has switched on.
+
+        These are the ports a client can reach the printer on, so the set is
+        its exposed surface. The flag *name* inside each service is not
+        uniform -- ``airPrint`` uses ``enabled``, ``ipp`` uses ``ipp`` and
+        ``ippSecure`` -- so the service is reported as on when any of its
+        flags is true, and the per-flag detail is left to the raw document.
+        Reporting ``ipp`` as one entry rather than two is also the honest
+        answer to "is IPP on", which is the question being asked.
+        """
+        if not services_doc:
+            return ()
+        enabled = [
+            name
+            for name, flags in services_doc.items()
+            if name != "version"
+            and isinstance(flags, dict)
+            and any(str(flag).lower() == "true" for flag in flags.values())
+        ]
+        return tuple(sorted(enabled))
+
+    @staticmethod
+    def _parse_snmp(snmp_doc: dict[str, Any] | None, key: str) -> bool | None:
+        """Read one flag out of the SNMP configuration.
+
+        Nested one level down under ``snmpV1V2Config``, which is a different
+        shape on each firmware measured, so a missing document is None rather
+        than False.
+        """
+        if not snmp_doc:
+            return None
+        config = snmp_doc.get("snmpV1V2Config")
+        if not isinstance(config, dict):
+            return None
+        return _bool(config, key)
 
     @staticmethod
     def _state_message(status_doc: dict[str, Any]) -> str | None:

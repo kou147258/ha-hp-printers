@@ -1,7 +1,7 @@
 """Data models for the HP Printers integration."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,6 +255,61 @@ class JobEntry:
 
 
 @dataclass(frozen=True, slots=True)
+class ActiveAlert:
+    """One alert the device is currently raising.
+
+    Distinct from :class:`EventLogEntry`, which is history. An alert is
+    something the machine is saying right now and may clear on its own, so
+    the pair of them answers "is anything wrong" and "is anything *happening*"
+    separately.
+    """
+
+    alert_id: int | None = None
+    category: str | None = None
+    severity: str | None = None
+    priority: int | None = None
+    sequence: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AdapterStats:
+    """Traffic and error counters for one network interface.
+
+    Per interface rather than aggregate, because the aggregate cannot tell a
+    printer that is working over Wi-Fi from one whose cable is unplugged: both
+    report a small number, and only the split shows which port is live.
+    """
+
+    name: str
+    received_bytes: int | None = None
+    transmitted_packets: int | None = None
+    received_unicast: int | None = None
+    received_multicast: int | None = None
+    receiver_errors: int | None = None
+    transmitter_errors: int | None = None
+    transmitter_collisions: int | None = None
+    transmitter_late_collisions: int | None = None
+
+    @property
+    def error_total(self) -> int:
+        """Return every error counter added together.
+
+        Collisions and late collisions are counted separately by the device
+        but are the same physical fault seen twice, so they are summed here
+        rather than left for a caller to remember to include.
+        """
+        return sum(
+            value or 0
+            for value in (
+                self.receiver_errors,
+                self.transmitter_errors,
+                self.transmitter_collisions,
+                self.transmitter_late_collisions,
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class PrinterData:
     """Everything fetched on a single coordinator refresh."""
 
@@ -336,6 +391,103 @@ class PrinterData:
     calibration_last_result: str | None = None
     calibration_failure_reason: str | None = None
     calibration_status: str | None = None
+
+    # ------------------------------------------------------------------
+    # Setup progress.
+    #
+    # A device reports the first-time setup checklist and marks each step.
+    # On the CDP model measured, the alignment step is still ``pending``
+    # while ``calibration_last_result`` is ``failed`` -- so the failure is
+    # not a broken printhead but a setup step that was never completed. That
+    # is a different problem with a different fix, and the result field on
+    # its own cannot tell them apart.
+    # ------------------------------------------------------------------
+    setup_operation_state: str | None = None
+    setup_pending_steps: tuple[str, ...] = ()
+
+    # ------------------------------------------------------------------
+    # Firmware.
+    #
+    # The measured CDP model has auto-update enabled, no update available,
+    # and a history in which every attempt failed. None of that is visible
+    # from the firmware build date, which is the only version marker the
+    # read path had before.
+    # ------------------------------------------------------------------
+    firmware_update_result: str | None = None
+    firmware_update_available: str | None = None
+    auto_update_enabled: bool | None = None
+
+    # ------------------------------------------------------------------
+    # Alerts currently raised, as opposed to the event log, which is a
+    # record of what happened. The two answer different questions and the
+    # gap is the useful part: a healthy event log with a live alert is a
+    # machine that is fine and is complaining right now.
+    # ------------------------------------------------------------------
+    active_alerts: tuple[ActiveAlert, ...] = ()
+
+    # ------------------------------------------------------------------
+    # Security and health facts that have no other home.
+    # ------------------------------------------------------------------
+    # The self-signed certificate the EWS is reached over. It is issued for
+    # ten years and nothing warns when it runs out; on that day HTTPS access
+    # stops working and the reason is not obvious.
+    certificate_expires: date | None = None
+    certificate_valid_from: date | None = None
+    # Per-interface counters. The LEDM side reports one aggregate set; CDP
+    # separates them, which is what tells a printer that is on Wi-Fi from
+    # one whose ethernet port is dead.
+    adapter_stats: tuple[AdapterStats, ...] = ()
+    internet_diagnostics_result: str | None = None
+    carriage_status: str | None = None
+    # How many cartridges have occupied each slot, ever.
+    cartridge_changes: int | None = None
+    # A consumable-protection counter with a countdown. Some region-reset
+    # schemes allow a fixed number of attempts and then stop.
+    region_reset_remaining: int | None = None
+    anti_theft_enabled: bool | None = None
+    holo_enabled: bool | None = None
+    low_messaging_enabled: bool | None = None
+    # Network services that are on are attack surface, so "on" is the state
+    # worth surfacing. The values are the keys, so a model with a service
+    # this one lacks simply does not get that entity.
+    print_services: tuple[str, ...] = ()
+    snmp_enabled: bool | None = None
+    snmp_public_allowed: bool | None = None
+    bluetooth_beaconing: bool | None = None
+    service_id: str | None = None
+
+    # ------------------------------------------------------------------
+    # The LEDM printers' small CDP layer.
+    #
+    # An LEDM model answers a handful of /cdm/ documents, and two of them
+    # carry values the LEDM side does not expose at all -- quiet mode and
+    # the control panel's language. Read on the model that has them rather
+    # than reported as absent, because "absent" would be wrong.
+    # ------------------------------------------------------------------
+    quiet_print_mode: bool | None = None
+    panel_language: str | None = None
+    # LEDM's print configuration. The quality and resolution are the
+    # settings, not the measured output, so they describe how the machine is
+    # configured rather than what it has produced.
+    print_quality: str | None = None
+    resolution_setting: str | None = None
+    default_copies: int | None = None
+    borderless_printing: bool | None = None
+    current_media_type: str | None = None
+    current_media_size: str | None = None
+    # The instant-ink programme, when the model offers one. Empty on a
+    # printer that was never enrolled.
+    instant_ink_status: str | None = None
+    # Model name with the SKU and region code appended, e.g.
+    # "Smart Tank 750 series:28B72A:0". The identity document carries only the
+    # model half, and the region code is what makes two otherwise identical
+    # machines distinguishable in a device list.
+    full_model_string: str | None = None
+
+    @property
+    def setup_incomplete(self) -> bool:
+        """Return whether the device is still waiting on a setup step."""
+        return bool(self.setup_pending_steps)
 
     @property
     def main_paper_tray(self) -> PaperTray | None:

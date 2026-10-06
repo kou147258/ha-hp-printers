@@ -1,0 +1,30 @@
+{
+  "supportedCertificateFormatForExportId": [
+    "pkcs12"
+  ],
+  "supportedCertificateFormatForImportId": [
+    "pkcs12"
+  ],
+  "supportedCertificateFormatForInstallId": [
+    "pem",
+    "cer",
+    "der"
+  ],
+  "supportedKeyTypesToStrengths": [
+    {
+      "keyStrengths": [
+        "bits2048"
+      ],
+      "keyType": "rsa",
+      "signatureAlgorithms": [
+        "sha1WithRsa",
+        "sha256WithRsa",
+        "sha384WithRsa",
+        "sha512WithRsa"
+      ]
+    }
+  ],
+  "supportsMultipleCa": "false",
+  "supportsMultipleId": "false",
+  "version": "1.0.0"
+}

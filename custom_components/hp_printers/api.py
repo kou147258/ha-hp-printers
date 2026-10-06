@@ -9,6 +9,7 @@ available resources, and each resource is exposed as a paired
 
 import asyncio
 from datetime import datetime
+import json
 import logging
 import ssl
 from typing import Any
@@ -18,14 +19,21 @@ from aiohttp import ClientError, ClientSession, ClientTimeout
 from defusedxml import ElementTree as DefusedET
 
 from .const import (
+    CDP_LEDM_INSTANT_INK,
+    CDP_LEDM_PANEL,
+    CDP_LEDM_QUIET_MODE,
     COLOR_NAMES,
     ENDPOINT_CONSUMABLE_CONFIG,
     ENDPOINT_IO_CONFIG,
+    ENDPOINT_MEDIA_DYN,
     ENDPOINT_MEDIA_HANDLING,
+    ENDPOINT_NET_APPS,
+    ENDPOINT_PRINT_CONFIG,
     ENDPOINT_PRODUCT_CONFIG,
     ENDPOINT_PRODUCT_LOGS,
     ENDPOINT_PRODUCT_STATUS,
     ENDPOINT_PRODUCT_USAGE,
+    ENDPOINT_SHOP_FOR_SUPPLIES,
     STATUS_OPTIONS,
 )
 from .models import (
@@ -332,6 +340,27 @@ class LEDMClient:
         consumables = self._parse_consumables(consumable_doc, usage_doc)
         events, jobs, assert_text = self._parse_logs(logs_doc)
 
+        # Second wave. Optional throughout, and kept out of the first gather
+        # so that a model serving none of them still gets its counters on the
+        # same tick.
+        (
+            print_config,
+            media_dyn,
+            net_apps,
+            shop_for_supplies,
+        ) = await asyncio.gather(
+            self._fetch_optional(ENDPOINT_PRINT_CONFIG),
+            self._fetch_optional(ENDPOINT_MEDIA_DYN),
+            self._fetch_optional(ENDPOINT_NET_APPS),
+            self._fetch_optional(ENDPOINT_SHOP_FOR_SUPPLIES),
+        )
+
+        # An LEDM printer also answers a handful of /cdm/ documents, and two
+        # of them carry values LEDM does not expose anywhere: the quiet-print
+        # flag and the control panel's language. Read on a model that has
+        # them rather than reported absent, because "absent" would be a lie.
+        quiet_mode, panel_language, instant_ink = await self._async_ledm_cdp()
+
         return PrinterData(
             status=status,
             status_message=status_message,
@@ -353,7 +382,80 @@ class LEDMClient:
             **_parse_extra_counters(usage_doc),
             **_parse_quality_by_media(usage_doc),
             **_parse_media_handling(media_doc),
+            **_parse_print_configuration(print_config),
+            **_parse_current_media(media_dyn),
+            **_parse_network_services(net_apps),
+            **_parse_instant_ink(shop_for_supplies, instant_ink),
+            quiet_print_mode=quiet_mode,
+            panel_language=panel_language,
         )
+
+    async def _async_ledm_cdp(self) -> tuple[bool | None, str | None, str | None]:
+        """Read the three CDP documents an LEDM printer also answers.
+
+        This is not a fallback path. On the LEDM models measured, these are
+        the *only* place the quiet-print flag, the panel language and the
+        instant-ink status exist -- the XML side has no equivalent, so a
+        client that only spoke LEDM would report all three as absent, which
+        is a different statement from "the printer does not have them".
+
+        Every request is optional and every failure is swallowed: a model
+        that serves none of them costs three 404s on a slow cadence and
+        nothing else.
+        """
+        results = await asyncio.gather(
+            *(
+                self._fetch_cdp_optional(path)
+                for path in (
+                    CDP_LEDM_QUIET_MODE,
+                    CDP_LEDM_PANEL,
+                    CDP_LEDM_INSTANT_INK,
+                )
+            )
+        )
+        quiet_doc, panel_doc, ink_doc = results
+
+        def _flag(document: dict | None, key: str) -> bool | None:
+            if not document or key not in document:
+                return None
+            return str(document[key]).lower() == "true"
+
+        quiet = _flag(quiet_doc, "quietPrintModeEnabled")
+        language = _text(panel_doc or {}, "deviceLanguage") if panel_doc else None
+        ink = _text(ink_doc or {}, "supplySubscriptionStatusCode") if ink_doc else None
+        # An empty string means "not enrolled in the programme", which is a
+        # real answer and not the same as the device not having the feature.
+        return quiet, language, (ink or None) if ink is not None else None
+
+    async def _fetch_cdp_optional(self, endpoint: str) -> dict | None:
+        """GET one JSON document from a printer that otherwise speaks XML.
+
+        The contract is "never raise". The caller has nothing to do with a
+        failure here -- there is no retry worth making for a document the
+        model may simply not serve -- so a transport error, a malformed body
+        and a client with no session at all all have the same correct answer,
+        which is None. Catching narrowly would let the third case escape and
+        take the whole update down over a document that was optional in the
+        first place.
+        """
+        if self._session is None:
+            return None
+        url = f"{self.base_url}{endpoint}"
+        try:
+            async with self._session.get(
+                url, timeout=REQUEST_TIMEOUT, ssl=self._ssl_context
+            ) as response:
+                if response.status != 200:
+                    return None
+                body = await response.text()
+        except Exception as err:  # noqa: BLE001 - the contract is "never raise"
+            _LOGGER.debug("LEDM-side CDP probe %s unavailable: %s", endpoint, err)
+            return None
+        try:
+            document = json.loads(body)
+        except ValueError:
+            return None
+        return document if isinstance(document, dict) else None
 
     def _parse_network(self, io_doc: Element | None) -> NetworkHealth:
         """Parse the network adaptor's state and error counters.
@@ -730,3 +832,135 @@ def as_diagnostics(data: Any) -> Any:
     if isinstance(data, datetime):
         return data.isoformat()
     return data
+
+
+def _parse_print_configuration(config_doc: Element | None) -> dict[str, Any]:
+    """Return the print settings the device is configured with.
+
+    These are *settings*, not measurements: ``PrintQuality`` says what the
+    machine is set to, not what came out of it. Exposed because "why is my
+    output worse than it used to be" is often a resolution someone changed,
+    and nothing else here would show it.
+    """
+    if config_doc is None:
+        return {
+            "print_quality": None,
+            "resolution_setting": None,
+            "default_copies": None,
+            "borderless_printing": None,
+        }
+    return {
+        "print_quality": _text(config_doc, "PrintQuality"),
+        "resolution_setting": _text(config_doc, "ResolutionSetting"),
+        "default_copies": _int(config_doc, "DefaultPrintCopies"),
+        "borderless_printing": _enabled(_text(config_doc, "BorderlessPrinting")),
+    }
+
+
+def _parse_current_media(media_doc: Element | None) -> dict[str, Any]:
+    """Return the media the printer is currently set to.
+
+    The name is kept verbatim (``iso_a4_210x297mm``) rather than mapped to
+    something friendlier: the device's own vocabulary is the only one that
+    matches what the printer's own web page and the paper loaded in the tray
+    will call it, and a guessed label would drift from both.
+    """
+    if media_doc is None:
+        return {"current_media_type": None, "current_media_size": None}
+    return {
+        "current_media_type": _text(media_doc, "MediaType"),
+        "current_media_size": _text(media_doc, "MediaSizeName"),
+    }
+
+
+def _parse_network_services(net_doc: Element | None) -> dict[str, Any]:
+    """Return which discovery and name-resolution services are switched on.
+
+    Kept because each one is a way for something else on the network to find
+    the printer: mDNS advertises it continuously, WS-Discovery answers on
+    demand, and both are on by default on the model measured. The SNMP flags
+    come from the same document and are the more serious of the two, because
+    the community string is the device's own default and is not a secret.
+    """
+    if net_doc is None:
+        return {
+            "snmp_enabled": None,
+            "snmp_public_allowed": None,
+            "print_services": (),
+        }
+    snmp = _find(net_doc, "SNMPConfigWithVersion")
+    web = _find(net_doc, "WebServicesConfig")
+    dns_sd = _find(net_doc, "DNSSDConfig")
+
+    enabled: list[str] = []
+    if dns_sd is not None and _enabled(_text(dns_sd, "MDNSSupport")):
+        enabled.append("mdns")
+    if web is not None:
+        for tag, name in (
+            ("WSDiscovery", "ws-discovery"),
+            ("WSPrint", "ws-print"),
+            ("WSScan", "ws-scan"),
+        ):
+            if _enabled(_text(web, tag)):
+                enabled.append(name)
+
+    return {
+        "snmp_enabled": _enabled(_text(snmp, "SNMP")) if snmp is not None else None,
+        # Not a boolean and not read through _enabled: the device's own
+        # NetAppsCap declares exactly two legal values, ``publicAllowed`` and
+        # ``publicNotAllowed``. Neither contains "enabled", so a generic
+        # on/off test reports a printer that permits the default community
+        # string as having it switched off -- which is the opposite of the
+        # exposure worth warning about.
+        "snmp_public_allowed": _snmp_public_allowed(
+            _text(snmp, "GetCommunityNameConfig")
+        )
+        if snmp is not None
+        else None,
+        "print_services": tuple(sorted(enabled)),
+    }
+
+
+def _snmp_public_allowed(value: str | None) -> bool | None:
+    """Return whether the device accepts the built-in public community.
+
+    The enumeration is the device's own, read from NetAppsCap rather than
+    guessed: ``publicAllowed`` and ``publicNotAllowed`` are the only two
+    values declared. Anything else is reported as unknown rather than
+    defaulted to False, because defaulting a security field to the safe-looking
+    answer is the one way this can be quietly wrong.
+    """
+    if value is None:
+        return None
+    normalized = value.strip().lower()
+    if normalized == "publicallowed":
+        return True
+    if normalized == "publicnotallowed":
+        return False
+    return None
+
+
+def _parse_instant_ink(
+    supplies_doc: Element | None, status_code: str | None
+) -> dict[str, Any]:
+    """Return the instant-ink status and the full model string.
+
+    Two documents, because neither is complete alone. The CDP document
+    carries the enrolment status that LEDM does not have at all -- an empty
+    string there means "never enrolled", which is an answer. The LEDM
+    supplies document carries a model string that appends the SKU and region
+    code to the model name, which the identity document does not include and
+    which is what distinguishes two otherwise identical-looking machines.
+
+    The two are kept apart on purpose. Folding the model string in as a
+    fallback for the status would report "Smart Tank 750 series:28B72A:0" as
+    an enrolment state, which is a category error rather than a small
+    imprecision.
+    """
+    model_string = None
+    if supplies_doc is not None:
+        model_string = _text(supplies_doc, "GloballyUniqueDeviceModelID")
+    return {
+        "instant_ink_status": status_code or None,
+        "full_model_string": model_string,
+    }

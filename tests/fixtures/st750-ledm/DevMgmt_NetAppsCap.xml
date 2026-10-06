@@ -1,0 +1,201 @@
+<ns0:NetAppsCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/netappcap/2009/06/24" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/netappdyn/2009/06/24" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/netappcap/2009/06/24 ../schemas/NetAppsCap.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.567</ns2:Revision>
+
+		<ns2:Date>2012-11-02</ns2:Date>
+
+	</ns2:Version>
+
+	<ns0:DNSSDConfigSupport>
+
+		<ns0:MDNSSupport access="readWrite">
+
+			<ns2:MDNSSupport>enabled</ns2:MDNSSupport>
+
+			<ns2:MDNSSupport>disabled</ns2:MDNSSupport>
+
+		</ns0:MDNSSupport>
+
+		<ns0:ApplicationServiceName typeof="dd:String" length="63" elementXPath="nadyn:DNSSDConfig/dd:ApplicationServiceName" access="readWrite" />
+
+		<ns0:DomainName typeof="dd:String" length="70" elementXPath="nadyn:DNSSDConfig/dd3:DomainName" access="readWrite" />
+
+		<ns0:DNSSDPrintPreferredServiceSupport access="readWrite">
+
+			<ns2:DNSSDPrintPreferredService>P9100</ns2:DNSSDPrintPreferredService>
+
+			<ns2:DNSSDPrintPreferredService>IPP</ns2:DNSSDPrintPreferredService>
+
+		</ns0:DNSSDPrintPreferredServiceSupport>
+
+	</ns0:DNSSDConfigSupport>
+
+	<ns0:ProxyConfigSupport>
+
+		<ns0:ResourceURI typeof="dd:String" length="127" elementXPath="nadyn:ProxyConfig/dd:ResourceURI" access="readWrite" />
+
+		<ns0:Port typeof="dd:Int" min="1" max="65535" step="1" elementXPath="nadyn:ProxyConfig/dd:Port" access="readWrite" />
+
+		<ns0:UserName typeof="dd:String" length="63" elementXPath="nadyn:ProxyConfig/dd:UserName" access="readWrite" />
+
+		<ns0:Password typeof="dd:String" length="31" elementXPath="nadyn:ProxyConfig/dd:Password" access="writeOnly" />
+
+		<ns0:ProxySupport access="readWrite">
+
+			<ns2:ProxySupport>off</ns2:ProxySupport>
+
+			<ns2:ProxySupport>on</ns2:ProxySupport>
+
+		</ns0:ProxySupport>
+
+		<ns0:ProxyModeSupport access="readWrite">
+
+			<ns3:ProxyMode>manual</ns3:ProxyMode>
+
+		</ns0:ProxyModeSupport>
+
+	</ns0:ProxyConfigSupport>
+
+	<ns0:SNMPConfigWithVersionSupport>
+
+		<ns0:SNMPSupport access="readWrite">
+
+			<ns2:SNMP>enabled</ns2:SNMP>
+
+			<ns2:SNMP>disabled</ns2:SNMP>
+
+		</ns0:SNMPSupport>
+
+		<ns0:AccessOptionSupport access="readWrite">
+
+			<ns2:AccessOption>readWrite</ns2:AccessOption>
+
+			<ns2:AccessOption>readOnly</ns2:AccessOption>
+
+		</ns0:AccessOptionSupport>
+
+		<ns0:GetCommunityNameConfigSupport access="readWrite">
+
+			<ns2:GetCommunityNameConfig>publicAllowed</ns2:GetCommunityNameConfig>
+
+			<ns2:GetCommunityNameConfig>publicNotAllowed</ns2:GetCommunityNameConfig>
+
+		</ns0:GetCommunityNameConfigSupport>
+
+		<ns0:GetCommunityName typeof="dd:String" length="23" access="readWrite" elementXPath="dd:SNMPConfigWithVersion/dd:GetCommunityName" />
+
+		<ns0:SetCommunityName typeof="dd:String" length="23" access="readWrite" elementXPath="dd:SNMPConfigWithVersion/dd:SetCommunityName" />
+
+		<ns0:Version typeof="dd:String" length="3" access="readOnly" elementXPath="dd:SNMPConfigWithVersion/dd:Version" />
+
+	</ns0:SNMPConfigWithVersionSupport>
+
+	<ns0:WebServicesConfigSupport>
+
+		<ns0:WSDiscovery access="readWrite">
+
+			<ns2:WSDiscovery>enabled</ns2:WSDiscovery>
+
+			<ns2:WSDiscovery>disabled</ns2:WSDiscovery>
+
+		</ns0:WSDiscovery>
+
+		<ns0:WSPrint access="readWrite">
+
+			<ns2:WSPrint>enabled</ns2:WSPrint>
+
+			<ns2:WSPrint>disabled</ns2:WSPrint>
+
+		</ns0:WSPrint>
+
+		<ns0:WSScan typeof="dd:Boolean" selected="enabled" deselected="disabled" elementXPath="nadyn:NetAppsDyn/nadyn:WebServicesConfig/nadyn:WSScan" access="readWrite" />
+
+	</ns0:WebServicesConfigSupport>
+
+	<ns0:DHCPv6Support access="readWrite">
+
+		<ns2:DHCPv6>enabled</ns2:DHCPv6>
+
+		<ns2:DHCPv6>disabled</ns2:DHCPv6>
+
+	</ns0:DHCPv6Support>
+
+	<ns0:LLMNRSupport access="readWrite">
+
+		<ns2:LLMNR>enabled</ns2:LLMNR>
+
+		<ns2:LLMNR>disabled</ns2:LLMNR>
+
+	</ns0:LLMNRSupport>
+
+	<ns0:HTTPSRedirectionSupport access="readWrite">
+
+		<ns2:HTTPSRedirection>enabled</ns2:HTTPSRedirection>
+
+		<ns2:HTTPSRedirection>disabled</ns2:HTTPSRedirection>
+
+	</ns0:HTTPSRedirectionSupport>
+
+	<ns0:P9100Support access="readWrite">
+
+		<ns2:Port9100PrintingSupport>enabled</ns2:Port9100PrintingSupport>
+
+		<ns2:Port9100PrintingSupport>disabled</ns2:Port9100PrintingSupport>
+
+	</ns0:P9100Support>
+
+	<ns0:DHCPv4FQDNSupport access="readWrite">
+
+		<ns2:DHCPv4FQDN>enabled</ns2:DHCPv4FQDN>
+
+		<ns2:DHCPv4FQDN>disabled</ns2:DHCPv4FQDN>
+
+	</ns0:DHCPv4FQDNSupport>
+
+	<ns0:IPP access="readWrite">
+
+		<ns2:IPPSupport>enabled</ns2:IPPSupport>
+
+		<ns2:IPPSupport>disabled</ns2:IPPSupport>
+
+	</ns0:IPP>
+
+	<ns0:WebScanSupport access="readWrite">
+
+		<ns3:WebScan>enabled</ns3:WebScan>
+
+		<ns3:WebScan>disabled</ns3:WebScan>
+
+	</ns0:WebScanSupport>
+
+	<ns0:DirectPrintSupport access="readWrite">
+
+		<ns3:DirectPrint>disabled</ns3:DirectPrint>
+
+		<ns3:DirectPrint>enabled</ns3:DirectPrint>
+
+	</ns0:DirectPrintSupport>
+
+	<ns0:WPADSettingsSupport>
+
+		<ns0:ResourceURI typeof="dd:string" length="127" elementXPath="nadyn:NetAppsDyn/nadyn:WPADSettings/nadyn:ResourceURI" access="readOnly" />
+
+		<ns0:Port typeof="dd:integer" elementXPath="nadyn:NetAppsDyn/nadyn:WPADSettings/nadyn:Port" min="0" max="65535" step="1" access="readOnly" />
+
+		<ns0:WPADStatusSupport access="readOnly">
+
+			<ns0:WPADStatus>failure</ns0:WPADStatus>
+
+			<ns0:WPADStatus>inProgress</ns0:WPADStatus>
+
+			<ns0:WPADStatus>notStarted</ns0:WPADStatus>
+
+			<ns0:WPADStatus>success</ns0:WPADStatus>
+
+		</ns0:WPADStatusSupport>
+
+	</ns0:WPADSettingsSupport>
+
+</ns0:NetAppsCap>

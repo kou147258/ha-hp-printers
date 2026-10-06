@@ -1,0 +1,419 @@
+<ns0:MediaHandlingCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/mediahandlingcap/2009/06/25" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/mediahandlingcap/2007/11/26" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/mediahandlingcap/2007/11/26 ../schemas/MediaHandlingCap.xsd   http://www.hp.com/schemas/imaging/con/ledm/mediahandlingcap/2009/06/25 ../schemas/ledm2/MediaHandlingCap.xsd  http://www.hp.com/schemas/imaging/con/ledm/mediahandlingdyn/2007/11/21 ../schemas/MediaHandlingDyn.xsd  http://www.hp.com/schemas/imaging/con/ledm/2007/09/21 ../schemas/LEDM.xsd  http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd">
+
+	<ns2:Version>
+
+		<ns2:Revision>SVN-IPG-LEDM.29</ns2:Revision>
+
+		<ns2:Date>2010-05-13</ns2:Date>
+
+	</ns2:Version>
+
+	<ns3:MediaHandlingInfoCap>
+
+		<ns3:NumOfInputTrays typeof="dd:NonNegativeInteger" max="1" step="1" elementXPath="mhdyn:MediaHandlingDyn/mhdyn:MediaHandlingInfo/dd:NumOfInputTrays" min="1" />
+
+		<ns3:NumOfOutputBins typeof="dd:NonNegativeInteger" max="1" step="1" elementXPath="mhdyn:MediaHandlingDyn/mhdyn:MediaHandlingInfo/dd:NumOfOutputBins" min="1" />
+
+		<ns3:DefaultInputTraySupport access="readWrite">
+
+			<ns2:DefaultInputTray>Tray1</ns2:DefaultInputTray>
+
+		</ns3:DefaultInputTraySupport>
+
+		<ns3:DefaultOutputBinSupport>
+
+			<ns2:DefaultOutputBin>OutputBin1</ns2:DefaultOutputBin>
+
+		</ns3:DefaultOutputBinSupport>
+
+		<ns3:MediaOutTime typeof="dd:Int" max="7200" step="1" elementXPath="mhdyn:MediaHandlingDyn/mhdyn:MediaHandlingInfo/dd:MediaOutTime" min="-1" />
+
+		<ns3:MediaOutActionTypeSupport>
+
+			<ns2:MediaOutActionType>waitForPaperToBeLoaded</ns2:MediaOutActionType>
+
+		</ns3:MediaOutActionTypeSupport>
+
+	</ns3:MediaHandlingInfoCap>
+
+	<ns0:InputTrayCap>
+
+		<ns0:InputBinSupport>
+
+			<ns2:InputBin>Tray1</ns2:InputBin>
+
+		</ns0:InputBinSupport>
+
+		<ns0:TrayLockSupport access="readWrite">
+
+			<ns2:TrayLock>off</ns2:TrayLock>
+
+			<ns2:TrayLock>on</ns2:TrayLock>
+
+		</ns0:TrayLockSupport>
+
+		<ns3:InputTrayLocationSupport>
+
+			<ns2:InputTrayLocation>bottom</ns2:InputTrayLocation>
+
+		</ns3:InputTrayLocationSupport>
+
+		<ns0:MaxCapacitySupport>
+
+			<ns2:MaxCapacity>0</ns2:MaxCapacity>
+
+			<ns3:UnitSupport>
+
+				<ns2:Unit>pages</ns2:Unit>
+
+			</ns3:UnitSupport>
+
+		</ns0:MaxCapacitySupport>
+
+		<ns3:TrayTypeSupport>
+
+			<ns2:TrayType>genericMedia</ns2:TrayType>
+
+		</ns3:TrayTypeSupport>
+
+		<ns0:MediaFeedSizeRangeSupport access="readOnly">
+
+			<ns2:MediaFeedSizeRange>
+
+				<ns2:Min>0</ns2:Min>
+
+				<ns2:Max>0</ns2:Max>
+
+				<ns2:Unit>tenThousandthsOfInches</ns2:Unit>
+
+			</ns2:MediaFeedSizeRange>
+
+			<ns3:UnitSupport>
+
+				<ns2:Unit>tenThousandthsOfInches</ns2:Unit>
+
+			</ns3:UnitSupport>
+
+		</ns0:MediaFeedSizeRangeSupport>
+
+		<ns3:ComponentOriginSupport>
+
+			<ns2:ComponentOrigin>builtIn</ns2:ComponentOrigin>
+
+		</ns3:ComponentOriginSupport>
+
+		<ns3:PageOrientationSupport>
+
+			<ns2:PageOrientation>FaceDown</ns2:PageOrientation>
+
+		</ns3:PageOrientationSupport>
+
+		<ns3:TrayStateSupport access="readOnly">
+
+			<ns2:TrayState>installed</ns2:TrayState>
+
+			<ns2:TrayState>missing</ns2:TrayState>
+
+			<ns2:TrayState>engaged</ns2:TrayState>
+
+			<ns2:TrayState>error</ns2:TrayState>
+
+			<ns2:TrayState>notEngaged</ns2:TrayState>
+
+		</ns3:TrayStateSupport>
+
+		<ns3:FeederTypeSupport>
+
+			<ns2:FeederType>auto</ns2:FeederType>
+
+		</ns3:FeederTypeSupport>
+
+		<ns3:PlexSupport>
+
+			<ns2:Plex>Duplex</ns2:Plex>
+
+		</ns3:PlexSupport>
+
+		<ns3:MediaTypeSupport access="readWrite">
+
+			<ns2:MediaType>plain</ns2:MediaType>
+
+			<ns2:MediaType>photoStandard</ns2:MediaType>
+
+			<ns2:MediaType>photoOther</ns2:MediaType>
+
+			<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+			<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+			<ns2:MediaType>lightWeight</ns2:MediaType>
+
+			<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+			<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+			<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+		</ns3:MediaTypeSupport>
+
+		<ns3:MediaSizeNameSupport access="readWrite">
+
+			<ns2:MediaSizeName>na_executive_7.25x10.5in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_letter_8.5x11in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_govt-letter_8x10in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_invoice_5.5x8.5in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_a5_148x210mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_b5_176x250mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jis_b5_182x257mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jpn_oufuku-rot_148x200mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jpn_oufuku_148x200mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jpn_hagaki_100x148mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_a6_105x148mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_index-4x6_4x6in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>om_small-photo_100x150mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_5x7_5x7in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_index-5x8_5x8in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_number-10_4.125x9.5in</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_dl_110x220mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>iso_c6_114x162mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>jpn_chou4_90x205mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>om_photo_89x127mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>custom_photo-2l-size-card_127x178mm</ns2:MediaSizeName>
+
+			<ns2:MediaSizeName>na_foolscap_8.5x13in</ns2:MediaSizeName>
+
+		</ns3:MediaSizeNameSupport>
+
+		<ns0:AvailableMediaSizesSupport>false</ns0:AvailableMediaSizesSupport>
+
+		<ns0:MediaSettingsBySizeCategorySupport>
+
+			<ns3:MediaSettingBySizeCategorySupport>
+
+				<ns3:MediaSizeCategorySupport access="readOnly">
+
+					<ns3:MediaSizeCategory>small</ns3:MediaSizeCategory>
+
+				</ns3:MediaSizeCategorySupport>
+
+				<ns3:MediaSizeNameSupport access="readWrite">
+
+					<ns2:MediaSizeName>na_index-4x6_4x6in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>om_small-photo_100x150mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_a6_105x148mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_number-10_4.125x9.5in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_c6_114x162mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_dl_110x220mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_chou4_90x205mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_hagaki_100x148mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>om_photo_89x127mm</ns2:MediaSizeName>
+
+				</ns3:MediaSizeNameSupport>
+
+				<ns3:MediaTypeSupport access="readWrite">
+
+					<ns2:MediaType>plain</ns2:MediaType>
+
+					<ns2:MediaType>photoStandard</ns2:MediaType>
+
+					<ns2:MediaType>photoOther</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+					<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+					<ns2:MediaType>lightWeight</ns2:MediaType>
+
+					<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+					<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+				</ns3:MediaTypeSupport>
+
+			</ns3:MediaSettingBySizeCategorySupport>
+
+			<ns3:MediaSettingBySizeCategorySupport>
+
+				<ns3:MediaSizeCategorySupport access="readOnly">
+
+					<ns3:MediaSizeCategory>medium</ns3:MediaSizeCategory>
+
+				</ns3:MediaSizeCategorySupport>
+
+				<ns3:MediaSizeNameSupport access="readWrite">
+
+					<ns2:MediaSizeName>na_5x7_5x7in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>custom_photo-2l-size-card_127x178mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_a5_148x210mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_index-5x8_5x8in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_chou3_120x235mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_invoice_5.5x8.5in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_oufuku_148x200mm</ns2:MediaSizeName>
+
+				</ns3:MediaSizeNameSupport>
+
+				<ns3:MediaTypeSupport access="readWrite">
+
+					<ns2:MediaType>plain</ns2:MediaType>
+
+					<ns2:MediaType>photoStandard</ns2:MediaType>
+
+					<ns2:MediaType>photoOther</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+					<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+					<ns2:MediaType>lightWeight</ns2:MediaType>
+
+					<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+					<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+				</ns3:MediaTypeSupport>
+
+			</ns3:MediaSettingBySizeCategorySupport>
+
+			<ns3:MediaSettingBySizeCategorySupport>
+
+				<ns3:MediaSizeCategorySupport access="readOnly">
+
+					<ns3:MediaSizeCategory>large</ns3:MediaSizeCategory>
+
+				</ns3:MediaSizeCategorySupport>
+
+				<ns3:MediaSizeNameSupport access="readWrite">
+
+					<ns2:MediaSizeName>na_foolscap_8.5x13in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_govt-letter_8x10in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_a4_210x297mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>iso_b5_176x250mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jis_b5_182x257mm</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_executive_7.25x10.5in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_letter_8.5x11in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>na_legal_8.5x14in</ns2:MediaSizeName>
+
+					<ns2:MediaSizeName>jpn_oufuku-rot_148x200mm</ns2:MediaSizeName>
+
+				</ns3:MediaSizeNameSupport>
+
+				<ns3:MediaTypeSupport access="readWrite">
+
+					<ns2:MediaType>plain</ns2:MediaType>
+
+					<ns2:MediaType>photoStandard</ns2:MediaType>
+
+					<ns2:MediaType>photoOther</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossy</ns2:MediaType>
+
+					<ns2:MediaType>specialtyMatte</ns2:MediaType>
+
+					<ns2:MediaType>lightWeight</ns2:MediaType>
+
+					<ns2:MediaType>matteBrochure</ns2:MediaType>
+
+					<ns2:MediaType>matteInkjet</ns2:MediaType>
+
+					<ns2:MediaType>specialtyGlossyInkjet</ns2:MediaType>
+
+				</ns3:MediaTypeSupport>
+
+			</ns3:MediaSettingBySizeCategorySupport>
+
+		</ns0:MediaSettingsBySizeCategorySupport>
+
+		<ns0:MediaStateSupport access="readOnly">
+
+			<ns0:MediaState>present</ns0:MediaState>
+
+			<ns0:MediaState>missing</ns0:MediaState>
+
+		</ns0:MediaStateSupport>
+
+		<ns0:StackHeightSupport access="readOnly" min="0" elementXPath="mhdyn:InputTray/mhdyn:StackHeight" step="1" max="100" typeof="xs:integer" />
+
+	</ns0:InputTrayCap>
+
+	<ns3:OutputBinCap>
+
+		<ns3:HPOutputBinSupport>
+
+			<ns2:HPOutputBin>OutputBin1</ns2:HPOutputBin>
+
+		</ns3:HPOutputBinSupport>
+
+		<ns3:MediaHandlingDeviceFunctionTypeSupport>
+
+			<ns2:MediaHandlingDeviceFunctionType>stack</ns2:MediaHandlingDeviceFunctionType>
+
+		</ns3:MediaHandlingDeviceFunctionTypeSupport>
+
+	</ns3:OutputBinCap>
+
+	<ns3:AccessoriesCap>
+
+		<ns3:MediaHandlingDeviceFunctionTypeSupport>
+
+			<ns2:MediaHandlingDeviceFunctionType>autoDuplexor</ns2:MediaHandlingDeviceFunctionType>
+
+			<ns2:MediaHandlingDeviceFunctionType>adf</ns2:MediaHandlingDeviceFunctionType>
+
+		</ns3:MediaHandlingDeviceFunctionTypeSupport>
+
+	</ns3:AccessoriesCap>
+
+</ns0:MediaHandlingCap>
