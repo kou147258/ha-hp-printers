@@ -222,7 +222,26 @@ Two rules the anonymizer has already been bitten by:
   JavaScript bundle references all answer 404. Do not infer a write path from
   the EWS bundle: that bundle is shared across HP's whole product line and
   contains code for features the hardware does not have.
-- **The write request shapes come from the printer's own web application,
+- **The EWS web application is a separate surface from the data
+  interfaces, and it can have features neither of them exposes.** Three on
+  one LEDM model, found only after concluding twice that they did not exist:
+  the quiet-print flag, in the small CDP layer the printer answers alongside
+  its XML; the whole maintenance interface, in
+  `/DevMgmt/InternalPrintCap.xml`, which is in neither `DiscoveryTree.xml`
+  nor any path the web page itself is mounted at; and the firmware update
+  page, reachable *only* through the web app — every firmware manifest path
+  answers 404, and the page path answers 403. **Do not conclude that a
+  feature is absent from what the data interfaces return.** Check the
+  bundle the printer ships its own browser, and check the paths the
+  maintenance manifest chain implies.
+- **Never invent a request body.** The device answers every malformed body
+  with a 400 and an *empty* body, so probing cannot recover one and a wrong
+  guess fails silently. The only source that has ever worked is the code the
+  printer ships to its own browser: it is where both the CDP report and
+  calibration bodies came from, and both were wrong when guessed. Where no
+  such code exists — the firmware check endpoint — say so rather than
+  guessing, because a guessed body that lands on firmware is a different
+  proposition from one that lands on a cleaning cycle.
   not from the discovery document.** `/cdm/servicesDiscovery` names the
   endpoints and the methods and says nothing about the body — and the device
   answers every malformed body with a 400 and an **empty** body, so probing
