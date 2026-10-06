@@ -169,6 +169,7 @@ device page.
 | Accepting jobs | binary_sensor | `on` when the printer is ready for a new job. On a CDP model this is the only "ready for work" signal there is. |
 | Scanner status | sensor (diagnostic) | Scanner subunit state, separate from the printer's own status. |
 | Printhead alignment | sensor (diagnostic) | How the last alignment went. A **failed** alignment is a real fault — the printer is online and prints, but output can be skewed or banded — and no counter here would otherwise reveal it. The failure reason is attached as an attribute. Needs a human at the machine; this integration never triggers one. |
+| Printhead alignment in progress | sensor (diagnostic) | Where an alignment is *now*, in the device's own words, and the other half of the line above: that one is about the last completed run, this one about a run in flight. An alignment is a two-party job — the printer prints a pattern and then waits for it on the scanner glass — so without this the wait is invisible and a printer sitting on `ScanRequested` looks idle. LEDM only, and no options list: the vocabulary is unpublished, and an enum that silently dropped an unlisted state would report "no problem" on a printer stuck mid-alignment. |
 | Paper level | sensor | Remaining paper in the main input tray, as a percentage, read over IPP. Only the main sheet-feed tray is watched: a document feeder is excluded, because "low" on it means nothing. Absent on models that do not describe their tray. |
 | Paper low | binary_sensor | `on` when the tray is below the level the manufacturer defines as low. |
 | Paper present | binary_sensor | `on` when the main input tray holds media. |
@@ -183,6 +184,11 @@ device page.
 | Normal / Better / Draft quality pages | sensor (total_increasing) | Pages by the quality the job asked for. These are **sums across media types**, not the number the device reports for any one of them — `UsageByQuality` repeats each entry once per media type, and taking the first gives you only the plain-paper figure. |
 | Photo pages | sensor (total_increasing) | Photo impressions. |
 | Ink used | sensor (total_increasing) | Millilitres of ink the engine has drawn. The clearest available evidence that pages came from bottled refills. LEDM only. |
+| Ink drops printed | sensor (total_increasing) | Drops the printhead ejected, totalled across every station. |
+| Ink drops not recognised as HP | sensor (total_increasing) | **The firmer answer to "has this printer ever been fed third-party ink".** A clone chip reports the genuine part number, so a third-party cartridge presents as HP on every field the cartridge itself carries — and the printhead's own tally does not agree. Zero is the reassuring reading. |
+| Out-of-ink protection firings | sensor (total_increasing) | Times the head fired its low-ink protection. |
+| Ink drops printed in service | sensor (total_increasing, disabled by default) | Ejected during servicing rather than during printing. |
+| Pen-stall counters | attribute of the non-HP drops sensor | Eight raw carriage counters, keyed by the device's own bank and location names. **There is no total and no unit, because HP publishes none** — the values are large and monotonic, and summing them into a "stall time" would be a number this integration made up. |
 | Non-HP part count | sensor (diagnostic) | Times the device has seen a cartridge it could not authenticate. A record that this happened, not a verdict on any particular cartridge. |
 | Panel button presses | sensor (total_increasing) | Presses on the front panel. A jump between polls usually means someone was at the machine cancelling jobs — usually a paper problem the jam and mispick counters do not show. |
 | Panel cancel presses | sensor (total_increasing) | Presses specifically on cancel. |
@@ -263,7 +269,7 @@ type the printer reports.
 | Previous cartridge drum life | sensor (diagnostic, disabled by default) | Drum wear for the removed cartridge. |
 | Previous cartridge part number | sensor (diagnostic, disabled by default) | Part number of the removed cartridge. |
 | Problem | binary_sensor | `on` when the cartridge state is anything other than the healthy set (`ok`, `newgenuinehp`, `new`, `good`). |
-| Genuine | binary_sensor (diagnostic) | Whether the brand is HP or a clone.
+| Genuine | binary_sensor (diagnostic) | Whether the brand is HP or a clone. |
 | Previously used | binary_sensor (diagnostic) | `on` when the cartridge was already used in another printer. This is HP's **anti-transfer** flag, *not* a claim that the part is not genuine — the same document reports them separately. |
 | Refilled | binary_sensor (diagnostic) | `on` when the cartridge has been refilled. |
 
@@ -291,6 +297,7 @@ the existing counters would show it.
 | Entity | Type | Notes |
 |---|---|---|
 | Active alerts | sensor (diagnostic) | How many the device is raising now, with each one's category, severity and priority attached. `0` is suppressed rather than created, since "no alerts" is what a healthy printer looks like. |
+| Colours with a live alert | sensor (diagnostic) | **Which** colour, which the count above does not say. On LEDM the colour sits in a detail block nested inside the alert; on CDP it is a pointer into the supplies document. Either way it is the difference between a complaint you can act on and a category name you cannot. |
 | Most severe active alert | sensor (diagnostic, enum) | The device's own ordering, taken as-is rather than re-ranked. A document with no alerts is not the same as one whose worst alert is `information`. |
 | Carriage status | sensor (diagnostic, enum) | A mechanical state neither the print nor the scan status word covers: a printer can report itself ready with the carriage not ok. |
 | Internet connectivity | sensor (diagnostic, enum) | The printer's own connectivity test. Its timestamp is unusable — the model has no real-time clock. |
@@ -308,6 +315,7 @@ currently available, and a history in which every attempt failed.
 | Entity | Type | Notes |
 |---|---|---|
 | Last firmware update | sensor (diagnostic, enum) | Whether the last attempt succeeded. |
+| Why the last update failed | sensor (diagnostic, disabled by default) | The reason, which the line above does not carry. `manifestNotFound` means the printer cannot find any firmware to install — a different problem from a failed download, and with a different fix. The number of failed attempts and the length of the history are attached. |
 | Last firmware update failed | binary_sensor (diagnostic, problem) | `on` when it did not. |
 | Automatic firmware updates | binary_sensor (diagnostic, disabled by default) | Whether the printer will fetch and install updates on its own. |
 | Firmware available | sensor (diagnostic, disabled by default) | The version on offer, when there is one. |
@@ -327,6 +335,8 @@ something else entirely.
 | Pages printed over the network | sensor (diagnostic) | Wired. |
 | Pages printed over Wi-Fi | sensor (diagnostic) | The split against the wired figure is what shows which path is in use — and which one goes to zero when the radio is the problem. |
 | Web interface opens | sensor (diagnostic, disabled by default) | How often someone has opened the printer's own web page. |
+| Pages printed via the cloud | sensor (diagnostic) | A counter of its own, separate from the network and wireless figures. |
+| Pages printed on a subscription | sensor (diagnostic) | Instant Ink pages, likewise counted separately. |
 
 `JobDuration` and `PagesPerJob` are deliberately **not** exposed. The device
 reports them as buckets (`lessthanTwoMinutes`, `sixToTen`,
@@ -345,9 +355,11 @@ thing exposed", and nothing else here would let you see them.
 | SNMP accepts the public community | binary_sensor (diagnostic, safety) | `on` means any host on the network can read the printer's management data with a credential nobody has to guess. **Both models measured ship with this enabled.** |
 | Bluetooth beaconing | binary_sensor (diagnostic, disabled by default) | The printer broadcasts its presence continuously. |
 | Raw printing on port 9100 | binary_sensor (diagnostic, safety) | No driver, no job structure, no authentication. **Both** printers measured answer on it, and neither redirects HTTP to HTTPS. |
+| Wi-Fi encryption in use | sensor (diagnostic, disabled by default) | The cipher the radio allows, with the band, the authentication mode and the WPA version attached. `aesOrTkip` permits the legacy TKIP option, which is worth knowing whether or not it is in use. **The device also reports the network's name and its pass phrase in clear text; neither is read**, and neither appears in a state attribute or a diagnostics download. |
+| HTTP proxy configured | binary_sensor (diagnostic, safety, disabled by default) | `on` when the printer is told to reach the network through a proxy. |
 | HTTP redirects to HTTPS | binary_sensor (diagnostic, safety) | Off means the printer's own web interface answers plain HTTP, and the admin password crosses the network in the clear every time someone opens it. |
 | Duplexer fitted / Automatic duplex | binary_sensor (diagnostic, disabled by default) | Two different questions, and the machine measured answers them differently: a duplexer installed with 10,216 double-sided sheets printed, and an auto-duplex setting that reads disabled. |
-| Sign-in attempts left | sensor (diagnostic, disabled by default) | Failed web-interface attempts remaining before it locks — a password-guessing budget, and the reason the factory-default admin password is worth changing. |
+| Sign-in attempts left | sensor (diagnostic, disabled by default) | Both halves of the budget the device publishes, because one without the other is not a budget: failed web-interface attempts remaining before it locks — a password-guessing budget, and the reason the factory-default admin password is worth changing. |
 | Enabled print services | sensor (diagnostic, disabled by default) | Which protocols it answers on — AirPrint, IPP, WS-Print, and port 9100, the easiest of the lot to abuse. |
 | Network interface errors | sensor (diagnostic) | Error counters split per interface. The split is the point: an aggregate cannot tell a printer working over Wi-Fi from one whose cable is unplugged, because both report a small number. |
 | Web certificate expires | sensor (diagnostic, date, disabled by default) | The self-signed certificate the web interface is reached over is issued for ten years, and nothing warns when it runs out. |
@@ -369,6 +381,7 @@ off, in the printer's own web interface.
 | Resolution setting | sensor (diagnostic, disabled by default) | Same. Worth having because "the output got worse" is often a resolution somebody changed. |
 | Default copies | sensor (diagnostic, disabled by default) | Same. |
 | Default page orientation | sensor (diagnostic, disabled by default) | Portrait or Landscape, for a job whose driver says nothing. Also a setting. |
+| Paper loaded | sensor (diagnostic) | The size and type actually in each tray, per tray, with the resolution. This is what a user checks before a job goes wrong on the wrong paper. |
 | Current media | sensor (diagnostic, disabled by default) | The device's own vocabulary (`iso_a4_210x297mm`), kept verbatim so it matches what the printer's web page and the loaded paper both call it. |
 | Input trays / Output bins | sensor (diagnostic, disabled by default) | How many of each the machine has — which is what distinguishes a single-tray model without reading the list. |
 | Free memory / Total memory | sensor (diagnostic, disabled by default) | Kibibytes, as the device reports them. |
