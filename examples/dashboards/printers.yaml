@@ -211,6 +211,95 @@ views:
             sort:
               method: label
 
+      # ============================================================== 安全
+      # 每一项都是打印机自己开着的东西，能让网段里的别的东西找到它。
+      # 都不是故障——多数机型默认就是开的，机器也完全正常工作——但它们是
+      # 「这台东西暴露了吗」的唯一答案，集成里别的部分都看不到。
+      - type: entities
+        title: 安全
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key:
+                    - snmp_public
+                    - bluetooth_beaconing
+                    - auto_update_enabled
+            sort:
+              method: label
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - print_services
+                    - adapter_errors
+                    - certificate_expires
+            sort:
+              method: label
+
+      # ============================================================== 设置
+      # 开机设置清单。校准报 failed 时先看这里：pending 的那一步就是原因，
+      # 打印头没坏，是这一步从没做完。
+      - type: entities
+        title: 设置进度
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - setup_state
+                    - firmware_update_result
+                    - firmware_update_available
+            sort:
+              method: label
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: binary_sensor
+                entity:
+                  translation_key:
+                    - setup_incomplete
+                    - firmware_update_failed
+            sort:
+              method: label
+
+      # ============================================================== 告警
+      # 事件日志是历史，这个是当下。一条干净的事件日志配上活跃告警，
+      # 意味着机器没坏但正在抱怨——只看计数器组合是看不出来的。
+      - type: entities
+        title: 当前告警
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: sensor
+                entity:
+                  translation_key:
+                    - active_alert_count
+                    - active_alert_worst
+                    - carriage_status
+                    - internet_diagnostics
+
+      # ============================================================== 维护按钮
+      # 点一下才会跑。每次都烧墨和纸，所以只能是人点的。
+      - type: entities
+        title: 维护操作
+        show_header_toggle: false
+        entities:
+          - type: custom:auto-entities
+            filter:
+              - integration: hp_printers
+                domain: button
+
       # ============================================================== 排障
       - type: entities
         title: 诊断
