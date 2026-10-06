@@ -31,6 +31,29 @@ ENDPOINTS = (
     "/DevMgmt/IOConfigDyn.xml",
     "/DevMgmt/MediaHandlingDyn.xml",
     "/DevMgmt/DiscoveryTree.xml",
+    # Advertised by DiscoveryTree and never opened until now. The *Cap.xml
+    # pair is the device's own specification: each declares the type, range,
+    # step and access mode of every field its Dyn partner carries, which is
+    # the systematic way to find what the parser is not reading. The
+    # capability documents are half this list by count and most of its bytes.
+    "/DevMgmt/PrintConfigCap.xml",
+    "/DevMgmt/PrintConfigDyn.xml",
+    "/DevMgmt/MediaCap.xml",
+    "/DevMgmt/MediaDyn.xml",
+    "/DevMgmt/MediaHandlingCap.xml",
+    "/DevMgmt/NetAppsCap.xml",
+    "/DevMgmt/NetAppsDyn.xml",
+    "/DevMgmt/ProductConfigCap.xml",
+    "/DevMgmt/ProductStatusCap.xml",
+    "/DevMgmt/ProductUsageCap.xml",
+    "/DevMgmt/ConsumableConfigCap.xml",
+    "/DevMgmt/ProductLogsCap.xml",
+    "/DevMgmt/ProductServiceCap.xml",
+    "/DevMgmt/SecurityCap.xml",
+    # Carries the serial four times, none under a tag named SerialNumber.
+    # Adding it to this list is what put those four on the anonymizer's list
+    # -- see IDENTIFIER_TAGS in anonymize_ledm.py.
+    "/DevMgmt/ShopForSupplies.xml",
 )
 
 

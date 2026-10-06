@@ -420,12 +420,27 @@ class LEDMClient:
                 return None
             return str(document[key]).lower() == "true"
 
+        def _string(document: dict | None, key: str) -> str | None:
+            """Read a value out of a JSON document.
+
+            Deliberately not ``_text``: that one walks an ElementTree node and
+            reaches for ``.tag``, so passing it a decoded document raises
+            AttributeError on the first key. The mock-based tests never
+            reached this line, because a mock is happy to be anything and only
+            a real document from a real printer caught it.
+            """
+            if not document:
+                return None
+            value = document.get(key)
+            if not isinstance(value, str):
+                return None
+            return value.strip() or None
+
         quiet = _flag(quiet_doc, "quietPrintModeEnabled")
-        language = _text(panel_doc or {}, "deviceLanguage") if panel_doc else None
-        ink = _text(ink_doc or {}, "supplySubscriptionStatusCode") if ink_doc else None
+        language = _string(panel_doc, "deviceLanguage")
         # An empty string means "not enrolled in the programme", which is a
         # real answer and not the same as the device not having the feature.
-        return quiet, language, (ink or None) if ink is not None else None
+        return quiet, language, _string(ink_doc, "supplySubscriptionStatusCode")
 
     async def _fetch_cdp_optional(self, endpoint: str) -> dict | None:
         """GET one JSON document from a printer that otherwise speaks XML.

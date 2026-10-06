@@ -267,6 +267,109 @@ type the printer reports.
 | Previously used | binary_sensor (diagnostic) | `on` when the cartridge was already used in another printer. This is HP's **anti-transfer** flag, *not* a claim that the part is not genuine — the same document reports them separately. |
 | Refilled | binary_sensor (diagnostic) | `on` when the cartridge has been refilled. |
 
+## Setup progress, and what a failed alignment usually means
+
+A printer that has never been through first-time setup keeps a checklist and
+marks each step. The CDP model this integration was measured against reports
+four steps completed and **`actionSemiAutoCalibration` still pending** — so
+its *Printhead alignment* reading of `failed` is not a broken printhead. A
+setup step was never finished. Those call for opposite responses, and only
+the checklist says which one you have.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Setup state | sensor (diagnostic, enum) | First-time setup progress. The pending steps are attached as an attribute. |
+| Setup steps outstanding | binary_sensor (diagnostic, problem) | `on` while any step is outstanding. If the alignment result says failed and this is on, complete the setup rather than chasing a hardware fault. |
+
+## Alerts, and how they differ from the event log
+
+The event log is a record of what happened, cleared on reboot. **Active
+alerts** are what the machine is saying right now. A clean event log with a
+live alert is a printer that is fine and is complaining, and no combination of
+the existing counters would show it.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Active alerts | sensor (diagnostic) | How many the device is raising now, with each one's category, severity and priority attached. `0` is suppressed rather than created, since "no alerts" is what a healthy printer looks like. |
+| Most severe active alert | sensor (diagnostic, enum) | The device's own ordering, taken as-is rather than re-ranked. A document with no alerts is not the same as one whose worst alert is `information`. |
+| Carriage status | sensor (diagnostic, enum) | A mechanical state neither the print nor the scan status word covers: a printer can report itself ready with the carriage not ok. |
+| Internet connectivity | sensor (diagnostic, enum) | The printer's own connectivity test. Its timestamp is unusable — the model has no real-time clock. |
+
+Both machines measured currently have six informational alerts (four
+genuine-supplies notices, two used-supply prompts) and no critical or error
+alerts.
+
+## Firmware, and a thing the build date cannot say
+
+`Firmware date` is the build date, and it says nothing about whether an update
+ever worked. The model measured has automatic updates enabled, no update
+currently available, and a history in which every attempt failed.
+
+| Entity | Type | Notes |
+|---|---|---|
+| Last firmware update | sensor (diagnostic, enum) | Whether the last attempt succeeded. |
+| Last firmware update failed | binary_sensor (diagnostic, problem) | `on` when it did not. |
+| Automatic firmware updates | binary_sensor (diagnostic, disabled by default) | Whether the printer will fetch and install updates on its own. |
+| Firmware available | sensor (diagnostic, disabled by default) | The version on offer, when there is one. |
+
+## Security, and what is reachable from the network
+
+Each of these is something switched on in the printer's own settings that lets
+something else on the network reach it. None is a fault — most are on by
+default and the machine works perfectly — but they are the answers to "is this
+thing exposed", and nothing else here would let you see them.
+
+| Entity | Type | Notes |
+|---|---|---|
+| SNMP accepts the public community | binary_sensor (diagnostic, safety) | `on` means any host on the network can read the printer's management data with a credential nobody has to guess. **Both models measured ship with this enabled.** |
+| Bluetooth beaconing | binary_sensor (diagnostic, disabled by default) | The printer broadcasts its presence continuously. |
+| Enabled print services | sensor (diagnostic, disabled by default) | Which protocols it answers on — AirPrint, IPP, WS-Print, and port 9100, the easiest of the lot to abuse. |
+| Network interface errors | sensor (diagnostic) | Error counters split per interface. The split is the point: an aggregate cannot tell a printer working over Wi-Fi from one whose cable is unplugged, because both report a small number. |
+| Web certificate expires | sensor (diagnostic, date, disabled by default) | The self-signed certificate the web interface is reached over is issued for ten years, and nothing warns when it runs out. |
+
+The one worth acting on today is the first, and it is a printer setting rather
+than an integration feature: change the SNMP community string, or turn SNMP
+off, in the printer's own web interface.
+
+## Consumables and configuration
+
+| Entity | Type | Notes |
+|---|---|---|
+| Cartridges used in this slot | sensor (diagnostic) | How many cartridges this slot has held. The **maximum** across slots, since they are refilled independently — three slots holding two each is a machine on its second round, not one that has seen six. |
+| Region reset attempts left | sensor (diagnostic) | Attempts remaining under the device's region-reset scheme before it stops allowing them. |
+| Holo authentication | binary_sensor (diagnostic, disabled by default) | The cartridge authentication scheme in use. |
+| Service ID | sensor (diagnostic, disabled by default) | HP's service identifier. |
+| Model, SKU and region | sensor (diagnostic, disabled by default) | Model name with the SKU and region code appended, e.g. `Smart Tank 750 series:28B72A:0`. The identity document carries only the model half. |
+| Print quality setting | sensor (diagnostic, disabled by default) | A **setting**, not a measurement: what the machine is configured to do, not what came out of it. |
+| Resolution setting | sensor (diagnostic, disabled by default) | Same. Worth having because "the output got worse" is often a resolution somebody changed. |
+| Default copies | sensor (diagnostic, disabled by default) | Same. |
+| Current media | sensor (diagnostic, disabled by default) | The device's own vocabulary (`iso_a4_210x297mm`), kept verbatim so it matches what the printer's web page and the loaded paper both call it. |
+| Panel language | sensor (diagnostic, disabled by default) | The control panel's language. |
+| Instant ink programme | sensor (diagnostic, disabled by default) | Enrolment status where the model offers one; empty means never enrolled. |
+
+Two of these — **Panel language** and **Instant ink programme** — come from
+the small CDP layer an LEDM printer serves alongside its XML, because the XML
+side has no equivalent for either. Reporting them absent would be a different
+claim from "the printer has no such setting".
+
+## `*Cap.xml`: the device's own specification
+
+Every LEDM resource has a `Dyn` document carrying values and a `Cap` document
+carrying the schema. A `Cap` document declares each field's type, range, step,
+access mode and the XPath back to its value:
+
+```xml
+<mediacap2:Top typeof="dd:Int" elementXPath="dd:PrintableArea/dd:Top"
+                min="0" max="14" step="1" access="readOnly"></mediacap2:Top>
+```
+
+Nothing here parses them into entities — they are schema, not readings — but
+they are captured, and they are the answer to "what else is there to read".
+`ProductUsageCap.xml` alone declares 32 kB of counters, and the read side
+touches a fraction of them. **That gap is where a future addition should
+start**, rather than by inferring a field name and checking whether it happens
+to exist.
+
 ## Maintenance buttons
 
 The printer enumerates its own maintenance operations, and this turns the ones
@@ -413,13 +516,17 @@ available resources, and each is exposed as a paired `<Resource>Cap.xml` —
 describing types, access modes and legal values — and `<Resource>Dyn.xml`
 carrying current values. The device is, in effect, its own documentation.
 
-CDP has the same thing at `/cdm/servicesDiscovery`: 31 services, 90 links,
+CDP has the same thing at `/cdm/servicesDiscovery`: 31 services, 89 links,
 and each link carries the HTTP methods it accepts, so it is the authority on
 both which endpoints exist and how they are called. An earlier version of this
 README said no such document existed and that the endpoint list had been
 recovered by exhausting namespaces by hand. That was wrong, and it was wrong
 in a way that mattered — the same document is where the cleaning and alignment
-operations come from.
+operations come from, and the hand-built list was missing 76 of its 89 links.
+
+**Ask the device rather than guessing a path.** Both protocols publish what
+they have, neither requires authentication, and neither is a moving target:
+a guessed list can only contain what somebody thought to type.
 
 ### What is read, and what is not
 

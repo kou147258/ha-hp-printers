@@ -118,6 +118,21 @@ milliseconds. Use the right layer for the change:
 - `scripts/captures/` is git-ignored: raw captures contain the real serial
   number. Only the reviewed, anonymized copy under `tests/fixtures/`
   belongs in the repository.
+- **The capture order is load-bearing**: raw into `scripts/captures/`,
+  scrub, then copy the `-anon` directory into `tests/fixtures/`. Writing
+  raw captures straight into `tests/fixtures/` is how a real serial number
+  got one commit away from the repository.
+- **Adding an endpoint to a capture script means adding its identity fields
+  to the matching anonymizer in the same commit.** Both `ShopForSupplies`
+  and the self-signed certificate's `commonName` leaked for exactly this
+  reason -- neither field is named after what it holds. Verify by grepping
+  the capture for the values you actually saw, not for the ones you thought
+  of; every leak found this way was found by grep and none by reading.
+- **A non-parse exception in an anonymizer must stop the run.** The
+  command-line path once caught every exception, reported it as "not XML",
+  and copied the file through unmodified -- so a broken regex in a scrubber
+  shipped the identifier it was written to remove, under a message that said
+  the file was not XML. The catch is narrowed to a parse error.
 
 ## Capturing fixtures from a real printer
 
@@ -219,7 +234,32 @@ Two rules the anonymizer has already been bitten by:
   `/cdm/report/v1/reports`; the calibration body is the `calibrationType`
   from `availableCalibrations`, which follows the same convention but has
   not been confirmed against a live write. Treat that one as unverified.
-- HP LEDM is self-describing but undocumented; only create entities for values the device actually reports, otherwise the setup omits them.
+- **HP LEDM is self-describing but undocumented; only create entities for values the device actually reports, otherwise the setup omits them.**
+- **Ask the device what it advertises instead of guessing paths.** LEDM
+  publishes every resource in `DiscoveryTree.xml`; CDP publishes 89 links in
+  `/cdm/servicesDiscovery` together with the HTTP methods each accepts. Both
+  are self-describing and free to read. Guessing a path list is how the CDP
+  endpoint table was built before `/cdm/servicesDiscovery` turned up, and
+  it was missing 76 of them.
+- **The `*Cap.xml` documents are the device's own specification.** Each
+  declares the type, range, step and access mode of every field its `Dyn`
+  partner carries — `typeof="dd:Int" min="0" max="14" step="1"
+  access="readOnly"`, with an `elementXPath` back to the value. Reading them
+  is the systematic way to find a parse gap; the alternative is inferring
+  field names. `ProductUsageCap.xml` alone is 32 kB of declared counters.
+- **An LEDM printer also serves a handful of `/cdm/` documents**, and two of
+  them carry values LEDM has no equivalent for at all: the quiet-print flag
+  and the control panel's language. Read them on the model that has them.
+  Reporting them absent would be a different claim from "the printer has no
+  such setting", and only the second one would be true if they were missing.
+- **A field's name is not its meaning.** `GetCommunityNameConfig` is an
+  enumeration whose only declared values are `publicAllowed` and
+  `publicNotAllowed`, read from the device's own `NetAppsCap`. Neither
+  contains "enabled", so a generic on/off test describes a printer that
+  permits the default community string as having it switched off. Enums read
+  from a capability document are mapped explicitly, and an unrecognised
+  value is `None` — defaulting a security field to the safe-looking answer
+  is the one way it can be quietly wrong.
 - Printer HTTPS commonly uses a self-signed certificate and legacy static-RSA ciphers; use the existing `printer_ssl_context()` path rather than replacing it with default TLS settings.
 - The zeroconf-announced IPP port is not the LEDM web-server port; discovery deliberately uses the printer hostname with the configured HTTP/HTTPS web port.
 - Product and consumable fields can contain sentinel or historical values. Preserve the filtering and naming semantics in `api.py` and `models.py`, especially `PreviousCartridgeData`, which describes the cartridge removed from a slot rather than the installed cartridge.

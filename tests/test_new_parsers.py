@@ -24,6 +24,7 @@ from defusedxml import ElementTree as DefusedET
 import pytest
 
 from custom_components.hp_printers.api import (
+    LEDMClient,
     _parse_current_media,
     _parse_instant_ink,
     _parse_network_services,
@@ -32,6 +33,7 @@ from custom_components.hp_printers.api import (
     _strip_namespaces,
 )
 from custom_components.hp_printers.api_cdp import CDPClient
+from custom_components.hp_printers.models import PrinterData
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 CDP12 = FIXTURES / "st580_590"
@@ -95,6 +97,24 @@ def test_a_fully_set_up_device_has_no_pending_steps() -> None:
         "actionFillInTanks": {"status": "completed", "suggestedOrder": 2},
     }
     assert CDPClient._parse_setup_steps(document) == ()  # noqa: SLF001
+
+
+def test_a_printer_with_no_checklist_is_not_reported_as_setup_complete() -> None:
+    """Off reads as a positive answer, not as an absence of one.
+
+    An LEDM model publishes no setup document at all, so returning False
+    there would have the integration asserting that setup is finished on a
+    machine that never mentioned it.
+    """
+    assert PrinterData().setup_incomplete is None
+    assert PrinterData(setup_operation_state="idle").setup_incomplete is False
+    assert (
+        PrinterData(
+            setup_operation_state="actionPending",
+            setup_pending_steps=("SemiAutoCalibration",),
+        ).setup_incomplete
+        is True
+    )
 
 
 def test_pending_steps_come_back_in_the_devices_own_order() -> None:
@@ -392,6 +412,26 @@ def test_an_empty_subscription_code_is_no_enrolment_not_a_missing_document() -> 
         == ""
     )
     assert _parse_instant_ink(None, "")["instant_ink_status"] is None
+
+
+async def test_the_ledm_side_reads_its_json_layer_without_reaching_for_xml() -> None:
+    """A decoded JSON document must not be handed to the XML accessors.
+
+    ``_text`` walks an ElementTree node and reads ``.tag``, so passing it a
+    dict raises AttributeError on the first key. This line is reached only on
+    a live LEDM printer, and a mock is happy to be handed anything -- so the
+    only thing that caught it was running against the real machine.
+    """
+    client = LEDMClient.__new__(LEDMClient)
+    client._session = None  # noqa: SLF001
+    client._host = "printer.local"  # noqa: SLF001
+    client._port = 443  # noqa: SLF001
+    client._ssl = True  # noqa: SLF001
+    client._ssl_context = False  # noqa: SLF001
+
+    quiet, language, ink = await client._async_ledm_cdp()  # noqa: SLF001
+
+    assert (quiet, language, ink) == (None, None, None)
 
 
 # ------------------------------------------------------ no data, no crash

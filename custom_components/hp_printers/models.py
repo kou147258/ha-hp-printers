@@ -485,8 +485,17 @@ class PrinterData:
     full_model_string: str | None = None
 
     @property
-    def setup_incomplete(self) -> bool:
-        """Return whether the device is still waiting on a setup step."""
+    def setup_incomplete(self) -> bool | None:
+        """Return whether the device is still waiting on a setup step.
+
+        ``None`` when the device does not publish a checklist at all, which is
+        every LEDM model measured. Reporting False there would be the
+        integration asserting that setup is complete on a machine that never
+        said anything about it -- and "off" reads as a positive answer, not
+        as an absence of one.
+        """
+        if self.setup_operation_state is None and not self.setup_pending_steps:
+            return None
         return bool(self.setup_pending_steps)
 
     @property
