@@ -17,8 +17,10 @@ from unittest.mock import AsyncMock, MagicMock
 from aiohttp import ClientError
 import pytest
 
+from custom_components.hp_printers import api_cdp
 from custom_components.hp_printers.api import HPPrinterWriteError
 from custom_components.hp_printers.api_cdp import CDPClient
+from custom_components.hp_printers.const import CDP_REPORTS
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -319,17 +321,46 @@ async def test_a_transport_failure_during_a_write_is_reported_as_a_write_error()
         await client.async_run_report("cleaningPage")
 
 
-async def test_a_timeout_says_the_printer_may_still_be_running_it() -> None:
-    """A clean takes minutes; a client timeout does not cancel it."""
+async def test_a_timeout_is_resolved_by_asking_the_device_not_by_failing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A clean takes minutes; a client timeout does not cancel it.
+
+    This used to assert the opposite -- that a timed-out write raises
+    "may still be running it". That was the bug, not the contract: every
+    maintenance button on the 580-590 failed that way, because these devices
+    start a report by doing the work first and a diagnostic can outlast the
+    budget. Reporting it as a failure invites the user to press again, which
+    prints the report twice.
+
+    The honest question on a timeout is not "did it fail" but "is it still
+    going", and the device answers that on the URL the job was started on. The
+    mechanics of the confirmation live in test_cdp_write_timeout.py; what is
+    pinned here is that a report run consults it at all.
+    """
+    monkeypatch.setattr(api_cdp, "CDP_JOB_POLL_TIMEOUT_SECONDS", 0.05)
+    monkeypatch.setattr(api_cdp, "CDP_JOB_POLL_INTERVAL_SECONDS", 0.0)
+
     session = MagicMock()
     context = MagicMock()
     context.__aenter__ = AsyncMock(side_effect=TimeoutError)
     context.__aexit__ = AsyncMock(return_value=False)
     session.patch = MagicMock(return_value=context)
 
-    client = _client(session)
-    with pytest.raises(HPPrinterWriteError, match="may still be running"):
-        await client.async_run_report("cleaningPage")
+    client = _client(session, stub_reports=False)
+
+    # The reports lookup answers, then every job-state read says the device is
+    # still working on it, for as long as the confirmation keeps asking.
+    async def _fetch(endpoint: str) -> dict:
+        if endpoint == CDP_REPORTS:
+            return _reports_document()
+        return {"state": "processing", "reportId": "cleaningPage"}
+
+    client._fetch_optional = AsyncMock(side_effect=_fetch)  # noqa: SLF001
+
+    assert await client.async_run_report("cleaningPage") == {}
+    # And exactly one PATCH: the answer was read back, never re-asked.
+    assert session.patch.call_count == 1
 
 
 # ------------------------------------------------------ what the device offers

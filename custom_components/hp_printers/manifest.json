@@ -1,21 +1,21 @@
 {
   "domain": "hp_printers",
-  "name": "HP Printers",
+  "name": "hp-750",
   "codeowners": [
     "@kou147258"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/kou147258/ha-hp-printers-cn",
+  "documentation": "https://github.com/kou147258/hp-750",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/kou147258/ha-hp-printers-cn/issues",
+  "issue_tracker": "https://github.com/kou147258/hp-750/issues",
   "loggers": [
     "custom_components.hp_printers"
   ],
   "requirements": [
     "defusedxml>=0.7.1"
   ],
-  "version": "2026.10.2",
+  "version": "2026.10.3",
   "zeroconf": [
     {
       "type": "_ipp._tcp.local.",

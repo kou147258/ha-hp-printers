@@ -22,6 +22,7 @@ from datetime import datetime
 import json
 import logging
 import ssl
+import time
 from typing import Any
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
@@ -51,6 +52,8 @@ from .const import (
     CDP_FIRMWARE_STATUS,
     CDP_IDENTITY,
     CDP_INTERNET_DIAGNOSTICS,
+    CDP_JOB_POLL_INTERVAL_SECONDS,
+    CDP_JOB_POLL_TIMEOUT_SECONDS,
     CDP_MEDIA_CONFIG,
     CDP_PRINT_CONFIG,
     CDP_PRINT_SERVICES,
@@ -74,6 +77,7 @@ from .const import (
     CDP_SYSTEM_CONFIGURATION,
     CDP_SYSTEM_STATISTICS,
     CDP_WIRELESS_CONFIG,
+    CDP_WRITE_TIMEOUT_SECONDS,
     COLOR_NAMES,
 )
 from .models import (
@@ -89,6 +93,13 @@ from .models import (
 _LOGGER = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT = ClientTimeout(total=20)
+
+# A write gets its own budget rather than borrowing the read's, and the
+# difference is deliberate: on the CDP models the PATCH that starts a report
+# can outlast a read because the device is building the report before it
+# answers. See CDP_WRITE_TIMEOUT_SECONDS in const.py for the measurements, and
+# _confirm_after_timeout for what happens when even this is not enough.
+WRITE_TIMEOUT = ClientTimeout(total=CDP_WRITE_TIMEOUT_SECONDS)
 
 # The CDP print engine says "idle" where the EWS page says "ready", and
 # capitalises "Idle" on the scan service. Both fold onto the single "ready"
@@ -503,7 +514,13 @@ class CDPClient:
         """
         return {"Content-Type": "application/json"}
 
-    async def _patch(self, endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
+    async def _patch(
+        self,
+        endpoint: str,
+        body: dict[str, Any],
+        *,
+        job_endpoint: str | None = None,
+    ) -> dict[str, Any]:
         """PATCH one CDP document.
 
         Split from :meth:`_fetch` deliberately. The read path and the write
@@ -512,6 +529,13 @@ class CDPClient:
         reported to the person who pressed the button. Sharing one helper
         would mean every write inherited the reads' "carry on quietly"
         contract.
+
+        ``job_endpoint`` is the URL the device publishes the state of *this*
+        job on -- the same URL the PATCH went to, for both the report and the
+        calibration services. It is only consulted when the PATCH itself times
+        out, and it is what turns "the answer did not arrive" into "the printer
+        is still working on it". Without it a slow report is indistinguishable
+        from a failed one, and the user presses the button again.
         """
         url = f"{self.base_url}{endpoint}"
         payload = json.dumps(body)
@@ -523,18 +547,33 @@ class CDPClient:
             async with self._session.patch(
                 url,
                 data=payload.encode(),
-                timeout=REQUEST_TIMEOUT,
+                timeout=WRITE_TIMEOUT,
                 ssl=self._ssl_context,
                 headers=self._auth_header(),
             ) as response:
                 status = response.status
                 raw = await response.text()
         except TimeoutError as err:
+            # The device accepts a report by starting to build it, and the
+            # response comes back when it feels like it. Measured: a status
+            # page in 3.1s, and a report that is doing real work first takes
+            # longer than the budget. The write is very probably running, so
+            # the question is not "did it fail" but "is it still going".
+            if job_endpoint is not None:
+                return await self._confirm_after_timeout(endpoint, job_endpoint, err)
             raise HPPrinterWriteError(
                 f"Timeout writing {endpoint}; the printer may still be running it"
             ) from err
         except ClientError as err:
-            raise HPPrinterWriteError(f"Error writing {endpoint}: {err}") from err
+            # A dropped connection is genuinely ambiguous, and it is said so
+            # rather than dressed up as a clean failure: the request may have
+            # reached the device before the connection went. What must not
+            # happen is a message that reads as "nothing happened", because
+            # that is the message a person acts on by pressing again.
+            raise HPPrinterWriteError(
+                f"Error writing {endpoint}: {err}. The printer may still be "
+                "running it -- check the printer before pressing again."
+            ) from err
 
         if status in (401, 403):
             # Measured: a CDP write answers 400 for a body it will not accept,
@@ -550,6 +589,20 @@ class CDPClient:
             raise HPPrinterWriteError(
                 f"This printer does not offer {endpoint} (HTTP 404)"
             )
+        if status == 409:
+            # Measured: 0.06s, and an *empty* body, and only ever while another
+            # job is running. The generic handler below would render that as
+            # "HTTP 409, no detail given" -- a status code where the user needs
+            # a sentence. Where a firmware variant does put something in the
+            # body, that is the device explaining itself and it is kept.
+            detail = raw.strip()[:200] if raw.strip() else ""
+            message = (
+                "The printer is already running another job. Wait for it to "
+                "finish, then press this again."
+            )
+            if detail:
+                message = f"{message} The device says: {detail}"
+            raise HPPrinterWriteError(message)
         if status >= 400:
             # The body is the only place the reason appears, and it is the
             # difference between "busy" and "no paper". On the CDP model
@@ -568,6 +621,66 @@ class CDPClient:
             # non-JSON body; that is not a failure of the write.
             return {}
         return document if isinstance(document, dict) else {}
+
+    async def _confirm_after_timeout(
+        self, endpoint: str, job_endpoint: str, err: Exception
+    ) -> dict[str, Any]:
+        """Decide what a timed-out write actually meant, by asking the device.
+
+        A write is never retried here, and that is the whole point. The device
+        does not answer "did you get that?" separately from the work itself,
+        so a second PATCH is not a confirmation -- on the report service it is
+        answered with 409, or on a machine that has finished the first one
+        already, a second copy. The only safe way to find out is to read the
+        job state the device publishes.
+
+        The state machine is the one in the printer's own web application
+        (te.Job2's JSON branch, mirrored exactly):
+
+            state == "processing"                        keep waiting
+            state == "idle" and lastResult == "success"  done
+            lastResult in ("failure", "failed")          failed, with a reason
+            state == "intervention"                      failed, needs a person
+
+        Three outcomes are possible and only two are failures. A job still
+        running when the budget runs out is **success**: the person asked for a
+        report, the report is coming, and telling them it failed is the one
+        answer that makes things worse.
+        """
+        deadline = time.monotonic() + CDP_JOB_POLL_TIMEOUT_SECONDS
+        last_seen = "unknown"
+        while time.monotonic() < deadline:
+            job = await self._fetch_optional(job_endpoint)
+            if job is None:
+                # The read dropped; the device drops connections under load and
+                # that is not evidence about the job. Wait and ask again.
+                await asyncio.sleep(CDP_JOB_POLL_INTERVAL_SECONDS)
+                continue
+
+            state = str(job.get("state", "")).lower()
+            result = str(job.get("lastResult", "")).lower()
+            last_seen = state or last_seen
+
+            if result in ("failure", "failed") or state == "intervention":
+                reason = _text(job, "failureReason") or state
+                raise HPPrinterWriteError(
+                    f"The printer started {endpoint} and stopped: {reason}"
+                ) from err
+            if state == "idle" and result == "success":
+                _LOGGER.debug(
+                    "Write to %s timed out but the job reports success", endpoint
+                )
+                return {}
+            await asyncio.sleep(CDP_JOB_POLL_INTERVAL_SECONDS)
+
+        _LOGGER.warning(
+            "Write to %s timed out and the job was still '%s' after %ss; the "
+            "printer is still working on it",
+            endpoint,
+            last_seen,
+            CDP_JOB_POLL_TIMEOUT_SECONDS,
+        )
+        return {}
 
     async def async_get_reports(self) -> dict[str, bool]:
         """Return ``{reportId: printable}`` for the reports this model offers.
@@ -635,6 +748,11 @@ class CDPClient:
         return await self._patch(
             CDP_REPORT_PRINT,
             {"state": "processing", "version": version, "reportId": report_id},
+            # The report service publishes the running job on the URL it was
+            # started on, which is why /cdm/report/v1/print answers both GET and
+            # PATCH in servicesDiscovery. Handing that URL over is what lets a
+            # slow report be recognised as slow rather than as failed.
+            job_endpoint=CDP_REPORT_PRINT,
         )
 
     async def async_run_calibration(self, calibration_type: str) -> dict[str, Any]:
@@ -660,6 +778,10 @@ class CDPClient:
         return await self._patch(
             f"{CDP_CALIBRATION_TRIGGER}/{calibration_type}",
             {"calibrationType": calibration_type, "operationType": "calibration"},
+            # Same shape as the report service: the alignment job is published
+            # on the member URL it was started on, so that is where its state
+            # is read from.
+            job_endpoint=f"{CDP_CALIBRATION_TRIGGER}/{calibration_type}",
         )
 
     async def async_get_product_info(self) -> ProductInfo:

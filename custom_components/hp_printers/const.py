@@ -134,6 +134,47 @@ CDP_PROXY_CONFIG: Final = "/cdm/network/v1/proxyConfig"
 CDP_SLOW_RETRY_DELAY_SECONDS: Final = 2.0
 
 
+# --- Write timing, measured on the Smart Tank 580-590 -----------------------
+#
+# A read and a write are not the same kind of request, and giving a write the
+# read's budget is what made every maintenance button on this model fail.
+#
+# Measured on a 580-590, one at a time on an idle device:
+#
+#   PATCH with a reportId the device does not list   -> 400 in 0.02-0.17s
+#   PATCH while a report is already running          -> 409 in 0.06s
+#   PATCH for the Printer Status Report              -> 204 in 3.1s
+#   that report's job, GET /cdm/report/v1/print      -> processing, then idle
+#                                                       about 15-20s later
+#
+# None of those is twenty seconds, and none of them slows down when a
+# 26-request poll is running beside them. So a timeout at the read budget is not
+# a slow network: it is a report the device takes longer to *accept* than a
+# status page does, because it is doing work first. The print quality report is
+# the obvious one -- it is a diagnostic, not a page.
+#
+# The printer's own web application settles what to do about that, because it
+# never waits on the PATCH at all. /webApps/PrintReports/PrintReports.js hands
+# the job to te.Job2.InternalPrint, whose success callback goes straight to
+# pollJobState; the PATCH is fired and forgotten. The poll GETs the same URL
+# every 3000ms, allows 15000ms per request, and gives the job 300000ms overall.
+# Those three numbers are what is mirrored here.
+#
+# A write that times out is therefore *not* a failed write. It is a write whose
+# answer has not come back yet, and the device may well be doing exactly what
+# was asked. Reporting that as a failure is worse than useless: the user reads
+# it, presses the button again, and prints the report twice.
+#
+# The write budget is longer than the read's, and for one reason: waiting a
+# little longer before asking "is it still going?" means the answer is more
+# often a definite one. A read that takes twenty seconds is a hung device; a
+# write that takes twenty seconds is a report being built, and the two deserve
+# different treatment.
+CDP_WRITE_TIMEOUT_SECONDS: Final = 45.0
+CDP_JOB_POLL_INTERVAL_SECONDS: Final = 3.0
+CDP_JOB_POLL_TIMEOUT_SECONDS: Final = 120.0
+
+
 # An LEDM printer answers a handful of /cdm/ documents alongside its XML, and
 # two of them carry values LEDM itself does not expose: the quiet-print flag
 # and the control panel's language. Fetching them on an LEDM printer is not a

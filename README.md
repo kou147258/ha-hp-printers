@@ -494,6 +494,18 @@ that hides the choice.
 - **A press is not a completion.** The printer acknowledges the request and
   runs the cycle on its own; a clean takes minutes. The button confirms the
   request was *accepted*. Watch the printer's own status for when it is done.
+- **A slow report is confirmed, not retried, and not called a failure.** These
+  printers start a report by doing the work first, so a diagnostic like the
+  print quality report can take longer to be *accepted* than a status page
+  does. Rather than wait and risk nothing, or give up and print it twice, a
+  press that gets no answer in time is resolved the way the printer's own web
+  page resolves it: the job state is read back until the device reports an
+  outcome. A job still running when the budget runs out is a **success** — the
+  report is coming. The write is never sent twice either way.
+- **"Already printing something" gets a sentence, not a status code.** One
+  job at a time: a second press while a report is running is refused by the
+  device in about a tenth of a second, and is reported as *wait for the
+  current job*, not as `HTTP 409`.
 - **The printer's reason for refusing is passed through** — where it gives
   one. Busy, no paper and a wrong operation all arrive as an error, and the
   device is the only thing that can tell them apart. Note that on a CDP
