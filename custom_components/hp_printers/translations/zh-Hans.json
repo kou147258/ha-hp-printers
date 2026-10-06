@@ -542,6 +542,72 @@
       },
       "instant_ink_status": {
         "name": "即时墨订阅状态"
+      },
+      "print_jobs": {
+        "name": "打印作业数",
+        "unit_of_measurement": "次",
+        "description": "打印引擎接过的作业数。作业被计数不等于打印成功，所以它和「已打印页数」不是一回事。"
+      },
+      "job_failures": {
+        "name": "失败的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_successes": {
+        "name": "完成的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_cancelled": {
+        "name": "取消的作业",
+        "unit_of_measurement": "次"
+      },
+      "job_skipped": {
+        "name": "跳过的作业",
+        "unit_of_measurement": "次"
+      },
+      "network_printed_pages": {
+        "name": "网络打印页数",
+        "unit_of_measurement": "页",
+        "description": "走有线网络送来的页数。和无线那个一对比，才知道实际在用哪条路。"
+      },
+      "wireless_printed_pages": {
+        "name": "无线打印页数",
+        "unit_of_measurement": "页"
+      },
+      "ews_accesses": {
+        "name": "网页界面打开次数",
+        "unit_of_measurement": "次"
+      },
+      "memory_available": {
+        "name": "可用内存",
+        "unit_of_measurement": "kB",
+        "description": "可用内存，单位 KiB，按设备自己报的数值。"
+      },
+      "memory_total": {
+        "name": "总内存",
+        "unit_of_measurement": "kB"
+      },
+      "input_trays": {
+        "name": "进纸器数量",
+        "unit_of_measurement": "个"
+      },
+      "output_bins": {
+        "name": "出纸盒数量",
+        "unit_of_measurement": "个"
+      },
+      "country_region": {
+        "name": "国家 / 地区"
+      },
+      "device_language": {
+        "name": "设备语言"
+      },
+      "default_orientation": {
+        "name": "默认页面方向",
+        "description": "驱动没指定时作业采用的页面方向。这是设置，不是对输出结果的测量。"
+      },
+      "failed_attempts_remaining": {
+        "name": "剩余登录尝试次数",
+        "unit_of_measurement": "次",
+        "description": "网页界面在锁定前还剩几次登录失败机会。出厂默认密码值得改，就是因为这个。"
       }
     },
     "binary_sensor": {
@@ -604,6 +670,22 @@
       },
       "holo_enabled": {
         "name": "Holo 防伪认证"
+      },
+      "port_9100_enabled": {
+        "name": "9100 端口原始打印",
+        "description": "打开表示打印机接受 9100 端口的原始打印作业——没有驱动、没有作业结构、没有认证。"
+      },
+      "https_redirection": {
+        "name": "HTTP 重定向到 HTTPS",
+        "description": "关闭表示打印机自己的网页界面用明文 HTTP 应答，管理员密码每次打开都在网上明文过一遍。"
+      },
+      "duplexer_installed": {
+        "name": "装有双面器",
+        "description": "是否装了双面器。这和「自动双面」不是同一个问题——装了双面器的机器也可能把自动双面关着。"
+      },
+      "auto_duplex_enabled": {
+        "name": "自动双面",
+        "description": "自动双面这个设置。装了双面器、关着自动双面、却打过几千张双面页的机器是真实存在的。"
       }
     },
     "button": {

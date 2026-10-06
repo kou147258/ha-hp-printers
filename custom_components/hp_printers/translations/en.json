@@ -542,6 +542,72 @@
       },
       "instant_ink_status": {
         "name": "Instant ink programme"
+      },
+      "print_jobs": {
+        "name": "Print jobs",
+        "unit_of_measurement": "jobs",
+        "description": "Jobs the print engine has taken. A job can be counted here and still have failed, so this is not the same as pages printed."
+      },
+      "job_failures": {
+        "name": "Jobs failed",
+        "unit_of_measurement": "jobs"
+      },
+      "job_successes": {
+        "name": "Jobs completed",
+        "unit_of_measurement": "jobs"
+      },
+      "job_cancelled": {
+        "name": "Jobs cancelled",
+        "unit_of_measurement": "jobs"
+      },
+      "job_skipped": {
+        "name": "Jobs skipped",
+        "unit_of_measurement": "jobs"
+      },
+      "network_printed_pages": {
+        "name": "Pages printed over the network",
+        "unit_of_measurement": "pages",
+        "description": "Pages that arrived over the wired network. The split against the wireless figure is what shows which path is actually being used."
+      },
+      "wireless_printed_pages": {
+        "name": "Pages printed over Wi-Fi",
+        "unit_of_measurement": "pages"
+      },
+      "ews_accesses": {
+        "name": "Web interface opens",
+        "unit_of_measurement": "opens"
+      },
+      "memory_available": {
+        "name": "Free memory",
+        "unit_of_measurement": "kB",
+        "description": "Free memory in kibibytes, as the device reports it."
+      },
+      "memory_total": {
+        "name": "Total memory",
+        "unit_of_measurement": "kB"
+      },
+      "input_trays": {
+        "name": "Input trays",
+        "unit_of_measurement": "trays"
+      },
+      "output_bins": {
+        "name": "Output bins",
+        "unit_of_measurement": "bins"
+      },
+      "country_region": {
+        "name": "Country and region"
+      },
+      "device_language": {
+        "name": "Device language"
+      },
+      "default_orientation": {
+        "name": "Default page orientation",
+        "description": "The orientation a job gets when the driver says nothing. A setting, not a measurement of what came out."
+      },
+      "failed_attempts_remaining": {
+        "name": "Sign-in attempts left",
+        "unit_of_measurement": "attempts",
+        "description": "Failed web-interface sign-in attempts left before it locks. This is why a factory-default admin password is worth changing."
       }
     },
     "binary_sensor": {
@@ -604,6 +670,22 @@
       },
       "holo_enabled": {
         "name": "Holo authentication"
+      },
+      "port_9100_enabled": {
+        "name": "Raw printing on port 9100",
+        "description": "On means the printer accepts raw printing jobs on port 9100 — no driver, no job structure, no authentication."
+      },
+      "https_redirection": {
+        "name": "HTTP redirects to HTTPS",
+        "description": "Off means the printer's own web interface answers plain HTTP, so the admin password crosses the network in the clear."
+      },
+      "duplexer_installed": {
+        "name": "Duplexer fitted",
+        "description": "Whether a duplexer is fitted. Not the same question as automatic duplex, which is a setting and can be off on a machine that has one."
+      },
+      "auto_duplex_enabled": {
+        "name": "Automatic duplex",
+        "description": "The auto-duplex setting. A machine with a duplexer can have this off and still have printed thousands of double-sided sheets."
       }
     },
     "button": {

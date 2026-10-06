@@ -159,14 +159,22 @@ def test_translation_is_not_left_in_english(path: Path) -> None:
     """Every value that has words of its own is actually translated.
 
     Copy-paste leaves a value equal to the English source, which passes the
-    key and placeholder checks above and still renders as English. Every
-    string here is prose rather than a name, a code or a format, so a
-    translated value with no CJK in it is always a mistake.
+    key and placeholder checks above and still renders as English.
+
+    Excluded by key rather than by recognising the string: a
+    ``unit_of_measurement`` is an SI symbol that Home Assistant registers in
+    English and that the recorder matches on. "kB" and "pages" have letters, so
+    a has-prose test would demand Chinese characters of them -- and a
+    translation that cannot exist, because "千字节" is not a unit the registry
+    knows and the history would stop being graphable against every other
+    sensor in the system.
     """
     untranslated = {
         key: value
         for key, value in _load(path).items()
-        if _is_prose(value) and not CJK.search(value)
+        if not key.endswith(".unit_of_measurement")
+        and _is_prose(value)
+        and not CJK.search(value)
     }
 
     assert not untranslated, f"left in English: {untranslated}"
@@ -281,6 +289,24 @@ def test_translation_declares_a_unit_for_every_counter() -> None:
         "cartridge_changes",
         "default_copies",
         "region_reset_remaining",
+        # From the LEDM gap analysis. A bare number is not obviously a count
+        # when it reads "3", and "7039" without a unit could be pages, jobs
+        # or both -- which is the whole point of declaring one.
+        "print_jobs",
+        "job_successes",
+        "job_failures",
+        "job_cancelled",
+        "job_skipped",
+        "network_printed_pages",
+        "wireless_printed_pages",
+        "ews_accesses",
+        "input_trays",
+        "output_bins",
+        "failed_attempts_remaining",
+        # Memory is declared in KiB, matching what the device reports rather
+        # than a rounded SI prefix it never used.
+        "memory_available",
+        "memory_total",
     }
     expected = (
         page_counters

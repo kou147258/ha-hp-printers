@@ -121,6 +121,45 @@ PRINTER_BINARY_SENSORS: tuple[HPPrinterBinarySensorDescription, ...] = (
         entity_registry_enabled_default=False,
         value_fn=lambda data, _info: data.holo_enabled,
     ),
+    # --- LEDM exposure -------------------------------------------------
+    # The same attack surface the CDP side reports as print services, read
+    # from the LEDM spelling. Both printers measured answer raw printing on
+    # port 9100, and neither redirects HTTP to HTTPS.
+    HPPrinterBinarySensorDescription(
+        key="port_9100_enabled",
+        translation_key="port_9100_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.SAFETY,
+        # Raw printing: no driver, no job structure, no authentication.
+        value_fn=lambda data, _info: data.port_9100_enabled,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="https_redirection",
+        translation_key="https_redirection",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.SAFETY,
+        # Off means the printer's own web interface answers plain HTTP, and
+        # the admin password crosses the network in the clear every time
+        # someone opens it.
+        value_fn=lambda data, _info: data.https_redirection_enabled,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="duplexer_installed",
+        translation_key="duplexer_installed",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        # Hardware, and it is not the same question as auto-duplex below: the
+        # machine measured has an installed duplexer with ten thousand
+        # double-sided sheets printed while its auto-duplex setting is off.
+        value_fn=lambda data, info: info.duplexer_installed,
+    ),
+    HPPrinterBinarySensorDescription(
+        key="auto_duplex_enabled",
+        translation_key="auto_duplex_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, info: info.auto_duplex_enabled,
+    ),
     HPPrinterBinarySensorDescription(
         key="paper_low",
         translation_key="paper_low",

@@ -37,6 +37,7 @@ from .const import (
     STATUS_OPTIONS,
 )
 from .models import (
+    ActiveAlert,
     Consumable,
     EventLogEntry,
     JobEntry,
@@ -312,6 +313,7 @@ class LEDMClient:
             shutdown_delay=_text(root, "ShutDownDelay"),
             auto_off_time=_text(root, "AutoOffTime"),
             quiet_mode=_enabled(_text(root, "QuietPrintMode")),
+            **_parse_product_config(root),
         )
 
     async def async_get_data(self) -> PrinterData:
@@ -385,7 +387,19 @@ class LEDMClient:
             **_parse_print_configuration(print_config),
             **_parse_current_media(media_dyn),
             **_parse_network_services(net_apps),
+            **_parse_ledm_trays(media_doc),
+            **_parse_ledm_exposure(net_apps),
+            **_parse_ledm_jobs(usage_doc),
             **_parse_instant_ink(shop_for_supplies, instant_ink),
+            # An LEDM printer reports its own live alerts, so they land on the
+            # same field the CDP side fills. Without this the LEDM side would
+            # report "no alerts" on a machine that publishes an AlertTable,
+            # which is a different claim from having none.
+            #
+            # Its setup phase does NOT come here: OobePhase lives in the
+            # product configuration, read on the slow cadence, so it lands on
+            # ProductInfo and the sensor reads both.
+            active_alerts=tuple(_parse_ledm_alerts(status_doc)),
             quiet_print_mode=quiet_mode,
             panel_language=panel_language,
         )
@@ -849,6 +863,194 @@ def as_diagnostics(data: Any) -> Any:
     return data
 
 
+def _parse_ledm_alerts(status_doc: Element | None) -> list[ActiveAlert]:
+    """Build the alerts the device is raising right now.
+
+    LEDM keeps them in an ``AlertTable``, one ``Alert`` per entry, and the
+    vocabulary is its own: ``Info`` where CDP says ``information``. The case is
+    folded so the two protocols present the same state under the same name,
+    and a word this function has not seen before is passed through lowercased
+    rather than dropped -- an alert whose severity is unknown is still an
+    alert, and hiding it would make the count wrong.
+    """
+    if status_doc is None:
+        return []
+    table = _find(status_doc, "AlertTable")
+    if table is None:
+        return []
+    alerts: list[ActiveAlert] = []
+    for entry in table.iter("Alert"):
+        severity = _text(entry, "Severity")
+        category = _text(entry, "ProductStatusAlertID")
+        if severity is None and category is None:
+            continue
+        alerts.append(
+            ActiveAlert(
+                category=category,
+                severity=severity.strip().lower() if severity else None,
+                priority=_int(entry, "AlertPriority"),
+                sequence=_int(entry, "SequenceNumber"),
+            )
+        )
+    return alerts
+
+
+def _parse_ledm_jobs(usage_doc: Element | None) -> dict[str, Any]:
+    """Return the job counters from the printer subunit.
+
+    Read from ``PrinterSubunit`` rather than the document root: the usage
+    document repeats the same counter names under every subunit, and the
+    scanner's ``JobCount`` is a different thing from the printer's.
+    """
+    if usage_doc is None:
+        return {}
+    subunit = _find(usage_doc, "PrinterSubunit")
+    if subunit is None:
+        return {}
+    return {
+        "print_job_count": _int(subunit, "JobCount"),
+        "job_successes": _int(subunit, "SuccessCount"),
+        "job_failures": _int(subunit, "FailureCount"),
+        "job_cancelled": _int(subunit, "CancelledCount"),
+        "job_skipped": _int(subunit, "SkippedCount"),
+        "network_printed_pages": _int(subunit, "NetworkImpressions"),
+        "wireless_printed_pages": _int(subunit, "WirelessNetworkImpressions"),
+        "subscription_printed_pages": _int(subunit, "SubscriptionImpressions"),
+        "ews_access_count": _int(subunit, "EWSAccessCount"),
+    }
+
+
+def _parse_product_config(config_doc: Element | None) -> dict[str, Any]:
+    """Return the hardware, identity and exposure facts from the product config.
+
+    Every field here is read from the subtree its capability document points
+    at, which is not always where the name suggests. ``Sides`` is the
+    instructive one: it looks like a printing setting and is in fact a
+    descriptor of a memory module, and the Cap document is the only thing that
+    says so. ``Duplex`` is the other: it reads "disabled" on a machine with an
+    installed duplexer that has printed ten thousand double-sided sheets,
+    because it is the auto-duplex *setting* while ``DuplexUnit`` is the
+    hardware. Surfacing either without reading both would be wrong.
+
+    These live on ProductInfo rather than PrinterData because the document is
+    already read there on the slow cadence, and none of them changes between
+    polls.
+    """
+    if config_doc is None:
+        return {
+            "available_memory_kb": None,
+            "total_memory_kb": None,
+            "country_region": None,
+            "device_language": None,
+            "product_derivative_number": None,
+            "setup_phase": None,
+            "duplexer_installed": None,
+            "auto_duplex_enabled": None,
+            "failed_attempts_remaining": None,
+        }
+    information = _find(config_doc, "ProductInformation")
+    settings = _find(config_doc, "ProductSettings")
+    memory = _find(config_doc, "Memory")
+    # Failed sign-in attempts live under a RegionInformation block inside
+    # ProductInformation, not beside the product identity fields. Reading them
+    # from ProductInformation directly returns None silently, which is how
+    # three of these fields came back empty on the first run.
+    region = (
+        _find(information, "RegionInformation") if information is not None else None
+    )
+    # And the device's own language is one level down again.
+    language = _find(settings, "ProductLanguage") if settings is not None else None
+
+    # The out-of-box setup phase lives here, not in the status document. It
+    # says setupComplete on the machine measured, which is why its printhead
+    # alignment is not the pending-step failure the CDP model reports.
+    phase = _text(config_doc, "OobePhase")
+    normalized = phase.strip().lower() if phase is not None else ""
+    setup_phase = None
+    if phase is not None:
+        if "complete" in normalized:
+            setup_phase = "complete"
+        elif "inprogress" in normalized or "in_progress" in normalized:
+            setup_phase = "inProgress"
+        elif "pending" in normalized or "action" in normalized:
+            setup_phase = "actionPending"
+        else:
+            setup_phase = "idle"
+
+    duplexer = _text(information, "DuplexUnit")
+    return {
+        "available_memory_kb": _int(memory, "AvailableMemory")
+        if memory is not None
+        else None,
+        "total_memory_kb": _int(memory, "TotalMemory") if memory is not None else None,
+        "country_region": _text(settings, "CountryAndRegionName"),
+        "device_language": _text(language, "DeviceLanguage"),
+        "product_derivative_number": _text(information, "ProductDerivativeNumber"),
+        "setup_phase": setup_phase,
+        # "Installed" is the word the device uses for fitted hardware; anything
+        # else, including an absent field, is not an installed duplexer.
+        "duplexer_installed": (
+            duplexer.strip().lower() == "installed" if duplexer is not None else None
+        ),
+        "auto_duplex_enabled": _enabled(_text(settings, "Duplex")),
+        "failed_attempts_remaining": _int(region, "FailedAttemptsRemaining"),
+    }
+
+
+def _parse_ledm_trays(media_doc: Element | None) -> dict[str, Any]:
+    """Return the tray and bin counts, and which ones are the defaults.
+
+    The per-tray list is already exposed by ``_parse_media_handling``; what
+    was missing is the shape -- how many trays and bins the machine has, which
+    is what tells you a single-tray model from a two-tray one without reading
+    the list.
+    """
+    if media_doc is None:
+        return {
+            "input_tray_count": None,
+            "output_bin_count": None,
+            "default_input_tray": None,
+            "default_output_bin": None,
+        }
+    return {
+        "input_tray_count": _int(media_doc, "NumOfInputTrays"),
+        "output_bin_count": _int(media_doc, "NumOfOutputBins"),
+        "default_input_tray": _text(media_doc, "DefaultInputTray"),
+        "default_output_bin": _text(media_doc, "DefaultOutputBin"),
+    }
+
+
+def _parse_ledm_exposure(net_doc: Element | None) -> dict[str, Any]:
+    """Return which network services are switched on, as flags.
+
+    The LEDM spelling of what the CDP side calls print services, and the
+    answer on the machine measured is the same one: raw printing on port 9100
+    is on, and HTTPS redirection is off, so the web interface answers plain
+    HTTP. Both are things a user can only find by opening the printer's own
+    settings page.
+
+    ``WebScan`` is read from the document root and not from
+    ``WebServicesConfig``: the two exist side by side and disagree, with
+    ``WSScan`` reading "enabled" while ``WebScan`` reads "disabled" on the same
+    printer. The second is the setting a user would go and change.
+    """
+    if net_doc is None:
+        return {
+            "port_9100_enabled": None,
+            "direct_print_enabled": None,
+            "https_redirection_enabled": None,
+            "web_scan_enabled": None,
+            "llmnr_enabled": None,
+        }
+    return {
+        "port_9100_enabled": _enabled(_text(net_doc, "Port9100PrintingSupport")),
+        "direct_print_enabled": _enabled(_text(net_doc, "DirectPrint")),
+        "https_redirection_enabled": _enabled(_text(net_doc, "HTTPSRedirection")),
+        "web_scan_enabled": _enabled(_text(net_doc, "WebScan")),
+        "llmnr_enabled": _enabled(_text(net_doc, "LLMNR")),
+    }
+
+
 def _parse_print_configuration(config_doc: Element | None) -> dict[str, Any]:
     """Return the print settings the device is configured with.
 
@@ -862,12 +1064,17 @@ def _parse_print_configuration(config_doc: Element | None) -> dict[str, Any]:
             "print_quality": None,
             "resolution_setting": None,
             "default_copies": None,
+            "default_orientation": None,
             "borderless_printing": None,
         }
     return {
         "print_quality": _text(config_doc, "PrintQuality"),
         "resolution_setting": _text(config_doc, "ResolutionSetting"),
         "default_copies": _int(config_doc, "DefaultPrintCopies"),
+        # Portrait or Landscape: the orientation a job gets when the driver
+        # says nothing. A settings value, not a measurement of what came out,
+        # and it lives here rather than in the product config.
+        "default_orientation": _text(config_doc, "DefaultPDLInterpreterOrientation"),
         "borderless_printing": _enabled(_text(config_doc, "BorderlessPrinting")),
     }
 

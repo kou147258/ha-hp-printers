@@ -44,6 +44,31 @@ class ProductInfo:
     auto_off_time: str | None = None
     quiet_mode: bool | None = None
 
+    # --- LEDM product configuration -----------------------------------
+    #
+    # Read from the document already fetched on the slow cadence, and kept
+    # here rather than on PrinterData so that a 60-second poll does not have
+    # to re-read a configuration that does not change.
+    available_memory_kb: int | None = None
+    total_memory_kb: int | None = None
+    country_region: str | None = None
+    device_language: str | None = None
+    product_derivative_number: str | None = None
+    # The out-of-box setup phase, folded onto CDP's vocabulary so that one
+    # sensor means one thing on either protocol. On the machine measured this
+    # reads "complete", which is why its printhead alignment is not the
+    # pending-step failure the CDP model reports.
+    setup_phase: str | None = None
+    # Fitted hardware and a setting, kept apart because they disagree on a
+    # real machine: the Smart Tank 750 measured has an installed duplexer with
+    # ten thousand double-sided sheets printed, while its auto-duplex setting
+    # reads "disabled". One field would report a duplexer that does not exist.
+    duplexer_installed: bool | None = None
+    auto_duplex_enabled: bool | None = None
+    # Failed sign-in attempts left before the EWS locks: a password-guessing
+    # budget, and the reason a factory-default admin password matters.
+    failed_attempts_remaining: int | None = None
+
 
 @dataclass(frozen=True, slots=True)
 class Consumable:
@@ -483,6 +508,69 @@ class PrinterData:
     # model half, and the region code is what makes two otherwise identical
     # machines distinguishable in a device list.
     full_model_string: str | None = None
+
+    # ------------------------------------------------------------------
+    # LEDM: jobs.
+    #
+    # The usage document counts jobs per subunit and breaks each one into an
+    # outcome. ``JobDuration`` and ``PagesPerJob`` are not numbers at all --
+    # the device reports a bucket ("lessthanTwoMinutes", "sixToTen") -- so
+    # they are left as the device's own words rather than turned into a mean
+    # that the distribution does not support.
+    # ------------------------------------------------------------------
+    print_job_count: int | None = None
+    job_successes: int | None = None
+    job_failures: int | None = None
+    job_cancelled: int | None = None
+    job_skipped: int | None = None
+    # How pages reached the printer. The split matters when someone asks
+    # whether the wireless path is actually being used.
+    network_printed_pages: int | None = None
+    wireless_printed_pages: int | None = None
+    subscription_printed_pages: int | None = None
+    # How many times the printer's own web interface has been opened.
+    ews_access_count: int | None = None
+
+    # ------------------------------------------------------------------
+    # LEDM: hardware and identity, from the product configuration.
+    #
+    # On ProductInfo, not PrinterData: the document is already read there on
+    # the slow cadence and none of these changes between polls.
+    # ------------------------------------------------------------------
+    # Kilobytes, as the device reports them.
+    available_memory_kb: int | None = None
+    total_memory_kb: int | None = None
+    country_region: str | None = None
+    device_language: str | None = None
+    product_derivative_number: str | None = None
+    # The duplexer being fitted is a hardware fact; auto-duplex being on is a
+    # setting. They are separate fields because they disagree on a real
+    # machine: the Smart Tank 750 measured has an installed duplexer with
+    # 10,216 double-sided sheets printed, while its auto-duplex setting reads
+    # "disabled". Collapsing them would report a duplexer that does not exist.
+    duplexer_installed: bool | None = None
+    auto_duplex_enabled: bool | None = None
+    # Failed sign-in attempts still remaining before the EWS locks. A
+    # password-guessing budget, and the reason the factory default matters.
+    failed_attempts_remaining: int | None = None
+
+    # ------------------------------------------------------------------
+    # LEDM: trays and what else is switched on that another host can reach.
+    # ------------------------------------------------------------------
+    # Portrait or Landscape: the orientation a job gets when the driver says
+    # nothing. A settings value, not a measurement of what came out.
+    default_orientation: str | None = None
+    input_tray_count: int | None = None
+    output_bin_count: int | None = None
+    default_input_tray: str | None = None
+    default_output_bin: str | None = None
+    # The LEDM spelling of the exposure the CDP side reports as print
+    # services. Both printers measured answer raw printing on port 9100.
+    port_9100_enabled: bool | None = None
+    direct_print_enabled: bool | None = None
+    https_redirection_enabled: bool | None = None
+    web_scan_enabled: bool | None = None
+    llmnr_enabled: bool | None = None
 
     @property
     def setup_incomplete(self) -> bool | None:

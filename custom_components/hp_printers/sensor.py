@@ -452,7 +452,11 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorDeviceClass.ENUM,
         options=["idle", "actionPending", "inProgress", "complete"],
-        value_fn=lambda data, _info: data.setup_operation_state,
+        # The two protocols put this in different documents -- CDP in
+        # deviceSetup, read every poll; LEDM in the product configuration, read
+        # on the slow cadence. One entity reading both is what stops the LEDM
+        # side reporting "not supported" for something it does publish.
+        value_fn=lambda data, info: data.setup_operation_state or info.setup_phase,
         attrs_fn=lambda data: {
             "pending_steps": list(data.setup_pending_steps),
             "setup_complete": not data.setup_pending_steps,
@@ -653,6 +657,138 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda data, _info: data.instant_ink_status,
+    ),
+    # --- LEDM: jobs ------------------------------------------------------
+    # A whole category the integration had no part of. The outcome counters
+    # are per subunit and are read from the printer's own, because the usage
+    # document repeats the same names under every subunit and the scanner's
+    # JobCount is a different thing from the printer's.
+    HPPrinterSensorDescription(
+        key="print_jobs",
+        translation_key="print_jobs",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.print_job_count,
+    ),
+    HPPrinterSensorDescription(
+        key="job_failures",
+        translation_key="job_failures",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.job_failures,
+    ),
+    HPPrinterSensorDescription(
+        key="job_successes",
+        translation_key="job_successes",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.job_successes,
+    ),
+    HPPrinterSensorDescription(
+        key="job_cancelled",
+        translation_key="job_cancelled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.job_cancelled,
+    ),
+    HPPrinterSensorDescription(
+        key="job_skipped",
+        translation_key="job_skipped",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.job_skipped,
+    ),
+    # How pages reached the printer. The split is the point: it answers
+    # whether the wireless path is actually being used, which the single
+    # printed-page total cannot.
+    HPPrinterSensorDescription(
+        key="network_printed_pages",
+        translation_key="network_printed_pages",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.network_printed_pages,
+    ),
+    HPPrinterSensorDescription(
+        key="wireless_printed_pages",
+        translation_key="wireless_printed_pages",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda data, _info: data.wireless_printed_pages,
+    ),
+    HPPrinterSensorDescription(
+        key="ews_accesses",
+        translation_key="ews_accesses",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.ews_access_count,
+    ),
+    # --- LEDM: hardware and exposure -------------------------------------
+    HPPrinterSensorDescription(
+        key="memory_available",
+        translation_key="memory_available",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        device_class=SensorDeviceClass.DATA_SIZE,
+        # The unit lives in the translations, not here: a translated unit is
+        # ignored while the description also defines one, and the translation
+        # carries KiB for both of these.
+        value_fn=lambda data, info: info.available_memory_kb,
+    ),
+    HPPrinterSensorDescription(
+        key="memory_total",
+        translation_key="memory_total",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        device_class=SensorDeviceClass.DATA_SIZE,
+        value_fn=lambda data, info: info.total_memory_kb,
+    ),
+    HPPrinterSensorDescription(
+        key="input_trays",
+        translation_key="input_trays",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.input_tray_count,
+    ),
+    HPPrinterSensorDescription(
+        key="output_bins",
+        translation_key="output_bins",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.output_bin_count,
+    ),
+    HPPrinterSensorDescription(
+        key="country_region",
+        translation_key="country_region",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, info: info.country_region,
+    ),
+    HPPrinterSensorDescription(
+        key="device_language",
+        translation_key="device_language",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, info: info.device_language,
+    ),
+    HPPrinterSensorDescription(
+        key="default_orientation",
+        translation_key="default_orientation",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        state_class=SensorDeviceClass.ENUM,
+        options=["Portrait", "Landscape"],
+        value_fn=lambda data, _info: data.default_orientation,
+    ),
+    HPPrinterSensorDescription(
+        key="failed_attempts_remaining",
+        translation_key="failed_attempts_remaining",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        state_class=SensorStateClass.MEASUREMENT,
+        # A password-guessing budget, and the reason a factory-default admin
+        # password is worth changing before anything else on this list.
+        value_fn=lambda data, info: info.failed_attempts_remaining,
     ),
     # --- diagnostics: network health ---
     # The one entity of this group that is on by default: a single number to
