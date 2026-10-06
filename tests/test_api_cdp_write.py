@@ -141,15 +141,22 @@ async def test_without_a_password_the_write_is_refused_before_any_request() -> N
     session.patch.assert_not_called()
 
 
-async def test_a_rejected_password_is_reported_as_a_write_failure() -> None:
-    """401 means the password is wrong, which is not a connectivity problem.
+async def test_a_rejected_write_does_not_blame_the_password() -> None:
+    """A 401 must not be reported as a wrong password.
 
-    Reporting this as a connection error would send the user to check their
-    network, which is not where the fault is.
+    Measured on the CDP model: every document is served with no credential,
+    and adding a correct Basic header turns working 200s into 401s. So a 401
+    means the *mechanism* is wrong, not the secret. "Wrong password" would
+    send the user to re-enter a credential that is already correct, and they
+    would never find the real problem.
     """
     client = _client(_session(status=401, body=""))
-    with pytest.raises(HPPrinterWriteError, match="admin password"):
+    with pytest.raises(HPPrinterWriteError) as caught:
         await client.async_run_report("cleaningPage")
+
+    message = str(caught.value)
+    assert "CDP token" in message
+    assert "admin password" not in message
 
 
 async def test_a_printer_without_the_resource_says_so() -> None:

@@ -297,15 +297,25 @@ class CDPClient:
         return bool(self._password)
 
     def _auth_header(self) -> dict[str, str]:
-        """Return the Authorization header the EWS expects.
+        """Return the Authorization header for a write.
 
-        HTTP Basic, user ``admin``. This is not a guess: the EWS application
-        bundle served by the printer contains
-        ``setAjaxAuthUserIdPw("admin", ...)`` and attaches
-        ``"Basic " + base64(...)`` to its own requests, and an
-        unauthenticated GET of a gated page comes back 403 with no
-        application body -- i.e. a missing Basic header, not an
-        application-level refusal.
+        **Known wrong for CDP, and deliberately still here.** Measured on the
+        Smart Tank 580-590: every CDP document is served with no credential at
+        all, and adding a Basic header turns working 200s into 401s. So CDP
+        does not use HTTP Basic, and the password is not what a CDP write
+        authenticates with.
+
+        The mechanism CDP does advertise is
+        ``/cdm/remoteAuthentication/v1/tokens`` (``delete,post``). How to ask
+        for a token, and what carries it afterwards, is not readable from any
+        document the device serves -- it cannot be discovered without issuing
+        a POST, which is a write to the printer and therefore not something to
+        do unasked.
+
+        So the header is sent as-is and the resulting 401 is reported as what
+        it is -- an authentication this client does not have -- rather than as
+        a wrong password, which is the reading the user would otherwise take
+        and which would send them to re-enter a credential that is correct.
         """
         token = base64.b64encode(f"admin:{self._password}".encode()).decode()
         return {"Authorization": f"Basic {token}", "Content-Type": "application/json"}
@@ -347,8 +357,15 @@ class CDPClient:
             raise HPPrinterWriteError(f"Error writing {endpoint}: {err}") from err
 
         if status in (401, 403):
+            # Deliberately not "wrong password". Measured on the CDP model, a
+            # correct Basic header turns working documents into 401s, so a 401
+            # here means the credential mechanism is not one this client has,
+            # not that the user typed something wrong. Saying otherwise would
+            # send them to re-enter a password that is already correct.
             raise HPPrinterWriteError(
-                f"Printer rejected the admin password (HTTP {status})"
+                f"Printer refused the request (HTTP {status}). CDP does not "
+                "authenticate with the EWS password and this client holds no "
+                "CDP token, so the write was not authorised."
             )
         if status == 404:
             raise HPPrinterWriteError(
