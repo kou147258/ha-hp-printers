@@ -225,11 +225,17 @@ async def test_optional_fetch_swallows_failure() -> None:
 async def test_validate_refuses_a_device_with_no_serial() -> None:
     """Setup cannot key an entry without a serial, so this must raise."""
     client = _client()
-    # async_get_product_info fetches the identity and the security document
-    # concurrently, so the stub answers twice -- and it answers with raw
-    # documents, because that is what the client parses.
+    # async_get_product_info reads the identity document plus seven optional
+    # ones on the same gather, so both are stubbed: the identity through
+    # _fetch, which is the one that has to answer, and the rest through
+    # _fetch_optional, which must not be left running against a MagicMock
+    # session. The identity document is a model with no serial, which is the
+    # whole point of the test.
     client._fetch = AsyncMock(  # noqa: SLF001
-        side_effect=[{"makeAndModel": {"name": "x"}}, {"passwordSet": "false"}]
+        side_effect=[{"makeAndModel": {"name": "x"}}]
+    )
+    client._fetch_optional = AsyncMock(  # noqa: SLF001
+        side_effect=lambda endpoint: {}
     )
     with pytest.raises(HPPrinterParseError):
         await client.async_validate()

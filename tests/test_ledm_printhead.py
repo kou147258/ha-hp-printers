@@ -181,12 +181,9 @@ def test_no_total_stall_value_is_exposed() -> None:
     verified, sitting on a dashboard looking authoritative.
     """
     description = next(d for d in PRINTER_SENSORS if d.key == "printhead_non_hp_drops")
-    data = PrinterData(
-        printhead_non_hp_drops=0,
-        pen_stalls=tuple(sorted(_parse_pen_stalls(_usage()).items())),
-    )
+    data = PrinterData(pen_stalls=tuple(sorted(_parse_pen_stalls(_usage()).items())))
 
-    attributes = description.attrs_fn(data)
+    attributes = description.attrs_fn(data, ProductInfo())
 
     assert len(attributes) == 8
     assert not any("total" in key or "time" in key for key in attributes)
@@ -196,7 +193,7 @@ def test_no_stalls_is_an_empty_mapping_rather_than_none() -> None:
     """A template iterating it gets nothing, not a missing key."""
     description = next(d for d in PRINTER_SENSORS if d.key == "printhead_non_hp_drops")
 
-    assert description.attrs_fn(PrinterData()) == {}
+    assert description.attrs_fn(PrinterData(), ProductInfo()) == {}
 
 
 # ------------------------------------------------------------- the other two

@@ -63,6 +63,7 @@ from .const import (
     CDP_SECURITY_CONFIG,
     CDP_SERVICE_CONFIG,
     CDP_SETUP_STATUS,
+    CDP_SLOW_RETRY_DELAY_SECONDS,
     CDP_SNMP_CONFIG,
     CDP_SUPPLIES,
     CDP_SUPPLY_ALERTS,
@@ -662,27 +663,99 @@ class CDPClient:
         )
 
     async def async_get_product_info(self) -> ProductInfo:
-        """Read static device information.
+        """Read everything about this printer that does not change on a poll.
 
         The security document is folded in here rather than in
         ``async_get_data`` because it is static: the admin password is set
         once and never changes on its own, and a config entry keeps this
         object for the whole life of the printer.
+
+        The same reasoning brought six more documents here, and on this
+        protocol it is not a preference. Read in ``async_get_data`` they made
+        the poll six requests wider, and the CDP models fail the TLS handshake
+        under concurrent connections -- so the facts were not wrong, they were
+        *absent*, on a varying fraction of refreshes: measured at zero to three
+        of six per run, with no error anywhere, because ``_fetch_optional``
+        turns a connection failure into an empty document. A poll is already
+        twenty-six requests wide and the device is already at its limit; these
+        six change when a person reconfigures the printer or loads paper, which
+        is not a minute-to-minute event.
+
+        The cost is staleness: up to six hours between reads. That is the right
+        trade for "the wireless cipher is aesOrTkip", "the paper loaded is A4"
+        and "the last firmware update failed with manifestNotFound", and the
+        wrong one for anything that moves. Nothing here does.
+
+        They are fetched with one retry each, and that is the part that
+        actually works. Moving them here changed nothing on its own -- measured
+        at zero to one of six per refresh, the same as on the poll path -- and
+        neither did splitting the gather. The constraint is not which method
+        they are read by, it is how many TLS handshakes the device is being
+        asked for at once, and the poll is already twenty-six wide. A slow
+        refresh that lands while a poll is in flight loses the race whichever
+        method it uses, and so does a setup that runs straight after one.
+
+        The same six documents answer 200 five times out of five when fetched
+        one at a time with no other traffic, which is what makes a retry the
+        right answer rather than more reshuffling: the request is fine, the
+        device was busy. A path that runs twice a day can afford one retry
+        per document; a poll that runs every minute cannot, which is why this
+        is here and not in _fetch_optional.
         """
-        document, security = await asyncio.gather(
-            self._fetch(CDP_IDENTITY),
-            self._fetch_optional(CDP_SECURITY_CONFIG),
-        )
+        document = await self._fetch_retrying(CDP_IDENTITY)
+        security = await self._fetch_retrying(CDP_SECURITY_CONFIG)
+        wireless_doc = await self._fetch_retrying(CDP_WIRELESS_CONFIG)
+        media_config = await self._fetch_retrying(CDP_MEDIA_CONFIG)
+        system_config = await self._fetch_retrying(CDP_SYSTEM_CONFIGURATION)
+        proxy_doc = await self._fetch_retrying(CDP_PROXY_CONFIG)
+        supply_alerts = await self._fetch_retrying(CDP_SUPPLY_ALERTS)
+        firmware_history = await self._fetch_retrying(CDP_FIRMWARE_HISTORY)
         info = self._parse_product_info(document)
-        if security is None:
-            return info
+        if security is not None:
+            info = replace(
+                info,
+                # As on LEDM this gates writes only; every read this client
+                # makes stays open either way, which is why the integration
+                # needs no credentials.
+                password_set=_bool(security, "passwordSet"),
+            )
         return replace(
             info,
-            # As on LEDM this gates writes only; every read this client makes
-            # stays open either way, which is why the integration needs no
-            # credentials.
-            password_set=_bool(security, "passwordSet"),
+            http_proxy_enabled=_bool(
+                (proxy_doc or {}).get("httpProxy") or {}, "enabled"
+            ),
+            **_parse_wireless_security(wireless_doc),
+            **_parse_cdp_media(media_config),
+            **_parse_cdp_system(system_config),
+            **_parse_supply_alert_subjects(supply_alerts),
+            **_parse_firmware_history(firmware_history),
         )
+
+    async def _fetch_retrying(self, endpoint: str) -> dict[str, Any] | None:
+        """Fetch one static document, once more if the device drops the request.
+
+        ``_fetch_optional`` already turns a failure into an empty document,
+        which is right for a poll and wrong here: on the slow path a dropped
+        handshake means the facts are absent for six hours rather than for one
+        cycle, and a user who sets the printer up during a busy moment would
+        get no wireless, media or firmware-history entities at all until the
+        next refresh.
+
+        The retry is deliberately one, not a loop. Two is the most that can be
+        justified by evidence -- the same documents answer 200 five times out
+        of five when nothing else is being asked of the device -- and a third
+        would be guessing at a device that is refusing for a reason the
+        integration cannot see.
+        """
+        for attempt in range(2):
+            document = await self._fetch_optional(endpoint)
+            if document is not None:
+                return document
+            if attempt == 0:
+                # Long enough for the device to finish the burst that
+                # dropped it, short enough not to matter twice a day.
+                await asyncio.sleep(CDP_SLOW_RETRY_DELAY_SECONDS)
+        return None
 
     @staticmethod
     def _parse_product_info(document: dict[str, Any]) -> ProductInfo:
@@ -795,42 +868,6 @@ class CDPClient:
             )
         )
 
-        # Their own gather, and not one more entry in the wave above.
-        #
-        # Measured, not assumed: adding these six to that gather took it from
-        # seventeen concurrent requests to twenty-three, and the entities went
-        # from present to absent across refreshes. The cause is on the device
-        # and not in this code -- under concurrent connections the embedded
-        # HTTPS stack fails the handshake with BAD_SIGNATURE, which
-        # _fetch_optional swallows into None. The same six documents answer
-        # 200 five times out of five when fetched one at a time.
-        #
-        # Splitting the gather is the mitigation available here and it is not
-        # a complete fix: it measured five, five, five, zero, zero across
-        # consecutive refreshes. The real fix is to stop asking for them every
-        # poll -- all six change rarely -- and that is a larger change than
-        # this one. Recorded rather than hidden.
-        (
-            supply_alerts,
-            firmware_history,
-            wireless_doc,
-            media_config,
-            system_config,
-            proxy_doc,
-        ) = await asyncio.gather(
-            *(
-                self._fetch_optional(path)
-                for path in (
-                    CDP_SUPPLY_ALERTS,
-                    CDP_FIRMWARE_HISTORY,
-                    CDP_WIRELESS_CONFIG,
-                    CDP_MEDIA_CONFIG,
-                    CDP_SYSTEM_CONFIGURATION,
-                    CDP_PROXY_CONFIG,
-                )
-            )
-        )
-
         return PrinterData(
             status=_status(_text(status_doc, "printerState")),
             status_message=self._state_message(status_doc),
@@ -887,14 +924,6 @@ class CDPClient:
             snmp_public_allowed=self._parse_snmp(snmp_doc, "readOnlyPublicAllowed"),
             bluetooth_beaconing=_bool(bluetooth_doc or {}, "currentBeaconingEnabled"),
             service_id=_text(service_config or {}, "serviceId"),
-            **_parse_wireless_security(wireless_doc),
-            **_parse_supply_alert_subjects(supply_alerts),
-            **_parse_firmware_history(firmware_history),
-            **_parse_cdp_media(media_config),
-            **_parse_cdp_system(system_config),
-            http_proxy_enabled=_bool(
-                (proxy_doc or {}).get("httpProxy") or {}, "enabled"
-            ),
         )
 
     @staticmethod

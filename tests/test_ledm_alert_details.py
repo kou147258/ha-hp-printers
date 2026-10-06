@@ -33,7 +33,7 @@ from defusedxml import ElementTree as DefusedET
 import pytest
 
 from custom_components.hp_printers.api import _parse_ledm_alerts, _strip_namespaces
-from custom_components.hp_printers.models import PrinterData
+from custom_components.hp_printers.models import PrinterData, ProductInfo
 from custom_components.hp_printers.sensor import PRINTER_SENSORS
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "st750-ledm"
@@ -185,7 +185,7 @@ def test_the_alert_attributes_expose_the_detail() -> None:
     )
 
     assert description.value_fn(data, None) == len(data.active_alerts)
-    attributes = description.attrs_fn(data)
+    attributes = description.attrs_fn(data, ProductInfo())
     first = attributes["alerts"][0]
 
     assert "marker_color" in first
@@ -199,4 +199,4 @@ def test_the_colour_list_is_empty_rather_than_absent_when_no_alert_has_one() -> 
     data = PrinterData(active_alerts=())
     description.value_fn(data, None)
 
-    assert description.attrs_fn(data)["marker_colors"] == []
+    assert description.attrs_fn(data, ProductInfo())["marker_colors"] == []

@@ -124,6 +124,15 @@ CDP_MEDIA_CONFIG: Final = "/cdm/media/v1/configuration"
 CDP_SYSTEM_CONFIGURATION: Final = "/cdm/system/v1/configuration"
 CDP_PROXY_CONFIG: Final = "/cdm/network/v1/proxyConfig"
 
+# Pause before retrying a static document that came back empty.
+#
+# The CDP models fail the TLS handshake with BAD_SIGNATURE when too many
+# handshakes overlap, and _fetch_optional turns that into an empty document
+# rather than an error -- so on the slow path, where a miss costs six hours,
+# the request is worth repeating once. The pause is long enough for the burst
+# that dropped it to finish. See _fetch_retrying in api_cdp.py.
+CDP_SLOW_RETRY_DELAY_SECONDS: Final = 2.0
+
 
 # An LEDM printer answers a handful of /cdm/ documents alongside its XML, and
 # two of them carry values LEDM itself does not expose: the quiet-print flag

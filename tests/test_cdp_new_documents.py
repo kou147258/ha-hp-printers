@@ -39,7 +39,7 @@ from custom_components.hp_printers.const import (
     CDP_SUPPLY_ALERTS,
     CDP_WIRELESS_CONFIG,
 )
-from custom_components.hp_printers.models import PrinterData
+from custom_components.hp_printers.models import PrinterData, ProductInfo
 from custom_components.hp_printers.sensor import PRINTER_SENSORS, _media_summary
 
 HOST = "192.168.9.12"
@@ -243,11 +243,16 @@ def test_the_region_is_read_and_where_the_printer_sits_is_not() -> None:
 
 
 async def test_the_six_documents_are_actually_requested() -> None:
-    """Through the public refresh, because a parse test cannot see a missing fetch.
+    """Through the slow-cadence read, not through the poll.
 
-    "Fetched but nothing reads it" is the shape this integration had for
-    months, and only a test that watches the requests can tell it from a
-    working one.
+    A parse test cannot see a missing fetch, and "fetched but nothing reads
+    it" is the shape this integration had for months.
+
+    The method matters as much as the URLs: these belong to
+    ``async_get_product_info`` and not to ``async_get_data``. A poll is
+    already twenty-six requests wide and the CDP models fail the TLS handshake
+    under concurrent connections, so putting them on the poll made the facts
+    absent on a varying fraction of refreshes rather than wrong.
     """
     requested: list[str] = []
 
@@ -261,9 +266,40 @@ async def test_the_six_documents_are_actually_requested() -> None:
             return _fixture("updateHistory.json")
         if endpoint == CDP_MEDIA_CONFIG:
             return _fixture("mediaConfiguration.json")
-        # An empty document rather than None: the refresh reads four documents
-        # unconditionally and the parsers walk into them, so "absent" is only
-        # true of the optional ones.
+        return {}
+
+    client = CDPClient(MagicMock(), "printer.local", 443, True, False)
+    client._fetch = AsyncMock(side_effect=fake_fetch)  # noqa: SLF001
+    client._fetch_optional = AsyncMock(side_effect=fake_fetch)  # noqa: SLF001
+
+    info = await client.async_get_product_info()
+
+    for endpoint in (
+        CDP_WIRELESS_CONFIG,
+        CDP_SUPPLY_ALERTS,
+        CDP_FIRMWARE_HISTORY,
+        CDP_MEDIA_CONFIG,
+    ):
+        assert endpoint in requested, f"{endpoint} was never fetched"
+
+    # And the values actually landed on the object the entities read from.
+    assert info.wifi_encryption == "aesOrTkip"
+    assert info.supply_alert_colors == ("C", "CMY", "K", "M", "Y")
+    assert info.media_trays
+    assert info.firmware_update_failure_reason == "manifestNotFound"
+
+
+async def test_the_six_documents_are_not_on_the_poll_path() -> None:
+    """The regression this move exists to prevent.
+
+    Asserted negatively and on the poll path specifically, because the failure
+    it guards against is invisible: nothing raises, the documents just come
+    back empty on some refreshes, and the entities flicker.
+    """
+    requested: list[str] = []
+
+    async def fake_fetch(endpoint: str):
+        requested.append(endpoint)
         return {}
 
     client = CDPClient(MagicMock(), "printer.local", 443, True, False)
@@ -278,12 +314,14 @@ async def test_the_six_documents_are_actually_requested() -> None:
         CDP_FIRMWARE_HISTORY,
         CDP_MEDIA_CONFIG,
     ):
-        assert endpoint in requested, f"{endpoint} was never fetched"
+        assert endpoint not in requested, (
+            f"{endpoint} is static and does not belong on the poll path"
+        )
 
 
 def test_the_media_entity_reads_as_a_sentence_not_a_count() -> None:
     """A user opening this wants to know what paper is in the machine."""
-    data = PrinterData(
+    info = ProductInfo(
         media_trays=(
             {
                 "id": "main",
@@ -294,14 +332,14 @@ def test_the_media_entity_reads_as_a_sentence_not_a_count() -> None:
         )
     )
 
-    assert _media_summary(data) == "main / iso_a4_210x297mm / stationery"
-    assert _media_summary(PrinterData()) is None
+    assert _media_summary(info) == "main / iso_a4_210x297mm / stationery"
+    assert _media_summary(ProductInfo()) is None
 
 
 def test_the_wifi_entity_publishes_no_name_or_phrase() -> None:
     """Checked on the rendered entity, which is where it would leak."""
     description = next(d for d in PRINTER_SENSORS if d.key == "wifi_encryption")
-    data = PrinterData(
+    info = ProductInfo(
         wifi_band="band2pt4Ghz",
         wifi_authentication="wpaPersonal",
         wifi_encryption="aesOrTkip",
@@ -310,8 +348,8 @@ def test_the_wifi_entity_publishes_no_name_or_phrase() -> None:
 
     # The cipher is the entity's state, the rest of the radio's shape is its
     # attributes, and neither carries the network's name.
-    attributes = description.attrs_fn(data)
-    rendered = json.dumps([description.value_fn(data, None), attributes])
+    attributes = description.attrs_fn(PrinterData(), info)
+    rendered = json.dumps([description.value_fn(PrinterData(), info), attributes])
 
     assert "aesOrTkip" in rendered
     assert SSID_PLACEHOLDER not in rendered

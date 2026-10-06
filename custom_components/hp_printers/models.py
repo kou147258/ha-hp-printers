@@ -50,6 +50,12 @@ class ProductInfo:
     # Read from the document already fetched on the slow cadence, and kept
     # here rather than on PrinterData so that a 60-second poll does not have
     # to re-read a configuration that does not change.
+    #
+    # Region matters here for a reason specific to ink-tank printers: a
+    # cartridge bought for one region is refused by a machine set to another,
+    # and CDP says so only in its system configuration document. The printer's
+    # free-text deviceLocation is read by nobody -- where a machine physically
+    # is is not a fact a printer should publish into a dashboard.
     available_memory_kb: int | None = None
     total_memory_kb: int | None = None
     country_region: str | None = None
@@ -74,6 +80,48 @@ class ProductInfo:
     # used out of fifty" were indistinguishable -- and the second is the one
     # that says how much of a guessing run is left.
     successful_attempts_remaining: int | None = None
+
+    # ------------------------------------------------------------------
+    # Slow-cadence facts. Everything above changes when firmware or a
+    # language pack is installed; everything below changes when a person
+    # reconfigures something. None of it moves on the order of a poll, and
+    # asking for it every poll is not free: the CDP models fail the TLS
+    # handshake under concurrent connections, so a wider poll costs data
+    # rather than just time. These are read every six hours instead, on the
+    # same path as the admin password above, which is static for the same
+    # reason.
+    # ------------------------------------------------------------------
+
+    # The radio's shape and nothing about the network. The document this comes
+    # from carries the SSID and the pass phrase in clear text and neither is
+    # read: an SSID is the user's network name and a pass phrase is a
+    # credential, and what this integration reads ends up in state attributes
+    # and in diagnostics downloads that get pasted into issues. What is left
+    # is the security posture, and ``aesOrTkip`` allowing the legacy cipher is
+    # worth knowing whether or not it is in use.
+    wifi_band: str | None = None
+    wifi_authentication: str | None = None
+    wifi_encryption: str | None = None
+    wifi_wpa_version: str | None = None
+    http_proxy_enabled: bool | None = None
+
+    # What paper is loaded, which this interface reported not at all until the
+    # media document was opened.
+    media_default_source: str | None = None
+    media_trays: tuple[dict[str, Any], ...] = ()
+    output_bins: tuple[str, ...] = ()
+
+    # How the firmware update attempts ended, as opposed to the fact that one
+    # did. ``manifestNotFound`` -- the printer cannot find firmware to install
+    # -- is a different problem from a failed download.
+    firmware_update_failure_reason: str | None = None
+    firmware_update_attempts_failed: int | None = None
+    firmware_update_history_count: int | None = None
+
+    # Which slots the live supply alerts are about. On this protocol that is a
+    # pointer inside each alert's data array rather than prose, and without it
+    # the alert is the same subjectless complaint the LEDM side had.
+    supply_alert_colors: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -523,39 +571,6 @@ class PrinterData:
     # ------------------------------------------------------------------
     # Security and health facts that have no other home.
     #
-    # The radio's shape and nothing about the network it is attached to. The
-    # document this comes from carries the SSID and the pass phrase in clear
-    # text and neither is read: an SSID is the user's network name and a pass
-    # phrase is a credential, and what this integration reads ends up in state
-    # attributes and in diagnostics downloads that get pasted into issues.
-    # What is left is the security posture, and ``aesOrTkip`` allowing the
-    # legacy cipher is worth knowing whether or not it is in use.
-    # ------------------------------------------------------------------
-    wifi_band: str | None = None
-    wifi_authentication: str | None = None
-    wifi_encryption: str | None = None
-    wifi_wpa_version: str | None = None
-    http_proxy_enabled: bool | None = None
-
-    # Which slots the live supply alerts are about. The CDP side of the same
-    # subjectless complaint the LEDM side had: the alert names a category and
-    # the colour is a pointer inside its data array.
-    supply_alert_colors: tuple[str, ...] = ()
-
-    # How the firmware update attempts ended, as opposed to the fact that one
-    # did. ``manifestNotFound`` -- the printer cannot find firmware to install
-    # -- is a different problem from a failed download.
-    firmware_update_failure_reason: str | None = None
-    firmware_update_attempts_failed: int | None = None
-    firmware_update_history_count: int | None = None
-
-    # Media, which this interface reported not at all until the media document
-    # was opened. A tray's loaded size and type is what a user checks before a
-    # job goes wrong on the wrong paper.
-    media_default_source: str | None = None
-    media_trays: tuple[dict[str, Any], ...] = ()
-    output_bins: tuple[str, ...] = ()
-
     # ------------------------------------------------------------------
     # Security and health facts that have no other home.
     # ------------------------------------------------------------------

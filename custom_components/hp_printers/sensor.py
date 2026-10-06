@@ -29,7 +29,7 @@ class HPPrinterSensorDescription(SensorEntityDescription):
     """Describes a printer-level sensor."""
 
     value_fn: Callable[[PrinterData, ProductInfo], StateType | date]
-    attrs_fn: Callable[[PrinterData], dict[str, Any]] | None = None
+    attrs_fn: Callable[[PrinterData, ProductInfo], dict[str, Any]] | None = None
     # When set, the entity is attached to a sub-device rather than the printer.
     subunit: str | None = None
 
@@ -42,7 +42,7 @@ class HPConsumableSensorDescription(SensorEntityDescription):
     attrs_fn: Callable[[Consumable], dict[str, Any]] | None = None
 
 
-def _media_summary(data: PrinterData) -> str | None:
+def _media_summary(source: Any) -> str | None:
     """One line naming what is loaded, for the state and a line for each tray.
 
     The entity's own value rather than a count: a user opening this wants to
@@ -50,7 +50,7 @@ def _media_summary(data: PrinterData) -> str | None:
     asked.
     """
     parts = []
-    for tray in data.media_trays:
+    for tray in source.media_trays:
         bits = [b for b in (tray.get("id"), tray.get("size"), tray.get("type")) if b]
         if bits:
             parts.append(" / ".join(str(b) for b in bits))
@@ -150,7 +150,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         value_fn=lambda data, _info: (
             data.status if data.status in STATUS_OPTIONS else None
         ),
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "raw_status": data.status,
             "message": data.status_message,
         },
@@ -163,7 +163,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="paper_level",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data, _info: _paper_value(data),
-        attrs_fn=lambda data: (
+        attrs_fn=lambda data, _info: (
             {
                 "tray": tray.name,
                 "tray_type": tray.type,
@@ -300,7 +300,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="marking_agent_used",
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda data, _info: data.marking_agent_used_ml,
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "shipped_with_cartridge_ml": data.marking_agent_inserted_ml,
         },
     ),
@@ -326,7 +326,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="scanner_status",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data, _info: data.scanner_status,
-        attrs_fn=lambda data: {"scanner_error": data.scanner_error},
+        attrs_fn=lambda data, _info: {"scanner_error": data.scanner_error},
     ),
     # --- the settings and counters a device reports but used to be ignored ---
     HPPrinterSensorDescription(
@@ -378,7 +378,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
             if data.calibration_last_result in ("passed", "failed", "cancelled")
             else "unknown"
         ),
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "status": data.calibration_status,
             "failure_reason": data.calibration_failure_reason,
         },
@@ -450,7 +450,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         # The whole log is attached so a fault history is one click away.
         # Codes are dotted families: 10.x supply memory, 13.x paper jams,
         # 41.x media mismatch, 49.x firmware faults.
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "events": [
                 {
                     "sequence": event.sequence,
@@ -490,7 +490,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         # on the slow cadence. One entity reading both is what stops the LEDM
         # side reporting "not supported" for something it does publish.
         value_fn=lambda data, info: data.setup_operation_state or info.setup_phase,
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "pending_steps": list(data.setup_pending_steps),
             "setup_complete": not data.setup_pending_steps,
         },
@@ -506,7 +506,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data, _info: len(data.active_alerts) or None,
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "alerts": [
                 {
                     "category": alert.category,
@@ -580,7 +580,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_registry_enabled_default=False,
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda data, _info: data.certificate_expires,
-        attrs_fn=lambda data: {"valid_from": data.certificate_valid_from},
+        attrs_fn=lambda data, _info: {"valid_from": data.certificate_valid_from},
     ),
     # --- network, per interface ---
     # The LEDM side reports one aggregate set of counters. Split by interface
@@ -596,7 +596,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
             if data.adapter_stats
             else None
         ),
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             adapter.name: {
                 "received_bytes": adapter.received_bytes,
                 "transmitted_packets": adapter.transmitted_packets,
@@ -817,14 +817,14 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         # both: LEDM carries region in the static product configuration, CDP
         # only in its system configuration document. Whichever answers first
         # is the same answer, and a second entity would be the alternative.
-        value_fn=lambda data, info: data.country_region or info.country_region,
+        value_fn=lambda _data, info: info.country_region,
     ),
     HPPrinterSensorDescription(
         key="device_language",
         translation_key="device_language",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data, info: data.device_language or info.device_language,
+        value_fn=lambda _data, info: info.device_language,
     ),
     HPPrinterSensorDescription(
         key="default_orientation",
@@ -877,7 +877,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         # keyed by the device's own bank/location names: HP publishes no unit,
         # so there is no total to put here and inventing one would put a
         # fabricated "stall time" on a dashboard.
-        attrs_fn=lambda data: dict(data.pen_stalls),
+        attrs_fn=lambda data, _info: dict(data.pen_stalls),
     ),
     HPPrinterSensorDescription(
         key="printhead_ooi_drops",
@@ -916,11 +916,11 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="wifi_encryption",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data, _info: data.wifi_encryption,
-        attrs_fn=lambda data: {
-            "band": data.wifi_band,
-            "authentication": data.wifi_authentication,
-            "wpa_version": data.wifi_wpa_version,
+        value_fn=lambda _data, info: info.wifi_encryption,
+        attrs_fn=lambda _data, info: {
+            "band": info.wifi_band,
+            "authentication": info.wifi_authentication,
+            "wpa_version": info.wifi_wpa_version,
         },
     ),
     HPPrinterSensorDescription(
@@ -929,7 +929,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         device_class=SensorDeviceClass.ENUM,
-        value_fn=lambda data, _info: data.http_proxy_enabled,
+        value_fn=lambda data, info: info.http_proxy_enabled,
     ),
     # Why the last firmware update failed, which updateStatus does not say.
     HPPrinterSensorDescription(
@@ -937,10 +937,10 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="firmware_update_failure_reason",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data, _info: data.firmware_update_failure_reason,
-        attrs_fn=lambda data: {
-            "failed_attempts": data.firmware_update_attempts_failed,
-            "entries_in_history": data.firmware_update_history_count,
+        value_fn=lambda _data, info: info.firmware_update_failure_reason,
+        attrs_fn=lambda _data, info: {
+            "failed_attempts": info.firmware_update_attempts_failed,
+            "entries_in_history": info.firmware_update_history_count,
         },
     ),
     # Which colour the live supply alerts are about. On this protocol that is
@@ -951,7 +951,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="supply_alert_colors",
         translation_key="supply_alert_colors",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data, _info: ", ".join(data.supply_alert_colors) or None,
+        value_fn=lambda data, info: ", ".join(info.supply_alert_colors) or None,
     ),
     # What is loaded in the tray. This interface reported no media at all
     # before, because the media document was never opened.
@@ -959,11 +959,11 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="media_loaded",
         translation_key="media_loaded",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data, _info: _media_summary(data),
-        attrs_fn=lambda data: {
-            "default_source": data.media_default_source,
-            "trays": [dict(t) for t in data.media_trays],
-            "output_bins": list(data.output_bins),
+        value_fn=lambda data, info: _media_summary(info),
+        attrs_fn=lambda _data, info: {
+            "default_source": info.media_default_source,
+            "trays": [dict(t) for t in info.media_trays],
+            "output_bins": list(info.output_bins),
         },
     ),
     # --- diagnostics: network health ---
@@ -977,7 +977,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda data, _info: data.network.total_errors,
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             **data.network.error_counts,
             "port_type": data.network.port_type,
             "link_mode": data.network.link_mode,
@@ -989,7 +989,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda data, _info: data.network.link_mode,
-        attrs_fn=lambda data: {"port_type": data.network.port_type},
+        attrs_fn=lambda data, _info: {"port_type": data.network.port_type},
     ),
     _network_counter(
         "network_bad_packets", "network_bad_packets", lambda n: n.bad_packets_received
@@ -1030,7 +1030,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         value_fn=lambda data, _info: (
             data.last_job.application_id if data.last_job else None
         ),
-        attrs_fn=lambda data: {
+        attrs_fn=lambda data, _info: {
             "user": data.last_job.user_id if data.last_job else None,
             "name": data.last_job.name if data.last_job else None,
             "pages": data.last_job.total_impressions if data.last_job else None,
@@ -1240,7 +1240,9 @@ class HPPrinterSensor(HPPrinterEntity, SensorEntity):
         """Return supplementary detail, where the sensor defines any."""
         if self.entity_description.attrs_fn is None:
             return None
-        return self.entity_description.attrs_fn(self.coordinator.data)
+        return self.entity_description.attrs_fn(
+            self.coordinator.data, self.coordinator.product_info
+        )
 
 
 class HPSubunitSensor(HPSubunitEntity, SensorEntity):
