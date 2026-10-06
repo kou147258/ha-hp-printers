@@ -92,6 +92,57 @@ BUTTONS: tuple[HPMaintenanceButtonDescription, ...] = (
         translation_key="calibrate_printhead",
         calibration_type="penAlignSemiauto",
     ),
+    # --- printable diagnostic reports ---------------------------------
+    #
+    # Same endpoint as the cleaning cycles, and far more useful: when a
+    # printer is misbehaving these are how you get it to tell you why
+    # without opening a browser. Each is created only for a report the
+    # device actually lists and marks printable.
+    HPMaintenanceButtonDescription(
+        key="print_quality_report",
+        translation_key="print_quality_report",
+        report_id="printQualityTestReport",
+    ),
+    HPMaintenanceButtonDescription(
+        key="status_report",
+        translation_key="status_report",
+        report_id="configurationReport",
+    ),
+    HPMaintenanceButtonDescription(
+        key="diagnostics_report",
+        translation_key="diagnostics_report",
+        report_id="diagnosticsReport",
+    ),
+    HPMaintenanceButtonDescription(
+        key="event_log_report",
+        translation_key="event_log_report",
+        report_id="eventLog",
+    ),
+    HPMaintenanceButtonDescription(
+        key="network_config_report",
+        translation_key="network_config_report",
+        report_id="networkConfigurationReport",
+    ),
+    HPMaintenanceButtonDescription(
+        key="network_summary_report",
+        translation_key="network_summary_report",
+        report_id="networkSummaryPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="self_test_page",
+        translation_key="self_test_page",
+        report_id="extendedConfigurationPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="wireless_test_page",
+        translation_key="wireless_test_page",
+        report_id="wirelessNetworkPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="privacy_report",
+        translation_key="privacy_report",
+        report_id="privacyLog",
+    ),
 )
 
 

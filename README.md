@@ -443,6 +443,22 @@ it reports into buttons:
 | Clean rib smear | Wipes the printhead surface where a smear builds up. | Small. |
 | Align printhead | Re-runs the printhead alignment. **Needs paper in the input tray** — it prints a test pattern to align against. | A page or two of ink. |
 
+Alongside the five cleaning cycles, the printer also offers a set of
+**printable diagnostic reports**, and this turns those into buttons as well:
+print quality, status, full diagnostics, event log, network configuration and
+summary, extended self test, wireless test, and the security-and-privacy
+report. They cost a sheet of paper and no ink, and they are the way to get a
+misbehaving printer to say what is wrong with it without opening a browser.
+
+**Firmware update is deliberately not here.** The endpoints exist and accept
+writes, but on the model measured there is no firmware available to install
+(`availableVersion` is empty), the install path requires a recovery-mode
+reboot, and every entry in the update history is a failure. A button that
+pushes firmware onto a consumer printer whose update path is already failing
+risks a machine that does not come back, and Home Assistant cannot recover
+that. If a firmware is ever offered and the failures are understood, this is
+worth revisiting.
+
 The three ink strengths and the two mechanism-specific cycles are separate
 operations on separate systems. A paper-feed clean does nothing for a smear on
 the printhead, so they are separate buttons rather than one "clean" button

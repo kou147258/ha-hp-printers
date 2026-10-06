@@ -706,6 +706,37 @@
       },
       "calibrate_printhead": {
         "name": "Align printhead (needs paper)"
+      },
+      "print_quality_report": {
+        "name": "Print print-quality report",
+        "description": "Has the printer print its own print-quality diagnostic. Cheaper and more reliable than guessing from a photo of a page."
+      },
+      "status_report": {
+        "name": "Print status report",
+        "description": "The printer's status report: configuration, firmware, consumables and counters, on paper."
+      },
+      "diagnostics_report": {
+        "name": "Print diagnostics report",
+        "description": "The full diagnostic report. This is the one to read when a machine is misbehaving and you want it to tell you why."
+      },
+      "event_log_report": {
+        "name": "Print event log"
+      },
+      "network_config_report": {
+        "name": "Print network configuration"
+      },
+      "network_summary_report": {
+        "name": "Print network summary"
+      },
+      "self_test_page": {
+        "name": "Print extended self test"
+      },
+      "wireless_test_page": {
+        "name": "Print wireless test page"
+      },
+      "privacy_report": {
+        "name": "Print security and privacy report",
+        "description": "The security and privacy report: what the printer is reachable by and what it stores."
       }
     }
   }

@@ -706,6 +706,37 @@
       },
       "calibrate_printhead": {
         "name": "校准打印头（需要放纸）"
+      },
+      "print_quality_report": {
+        "name": "打印打印质量报告",
+        "description": "让打印机自己打一份打印质量诊断。比拍张纸的照片再猜要靠谱得多。"
+      },
+      "status_report": {
+        "name": "打印状态报告",
+        "description": "打印机状态报告：配置、固件、耗材、计数器，打成纸质的。"
+      },
+      "diagnostics_report": {
+        "name": "打印诊断报告",
+        "description": "完整诊断报告。机器不对劲又说不清原因时，该看的就是这份。"
+      },
+      "event_log_report": {
+        "name": "打印事件日志"
+      },
+      "network_config_report": {
+        "name": "打印网络配置报告"
+      },
+      "network_summary_report": {
+        "name": "打印网络摘要页"
+      },
+      "self_test_page": {
+        "name": "打印扩展自检页"
+      },
+      "wireless_test_page": {
+        "name": "打印无线测试页"
+      },
+      "privacy_report": {
+        "name": "打印安全与隐私报告",
+        "description": "安全与隐私报告：打印机能被谁访问、存了什么。"
       }
     }
   }

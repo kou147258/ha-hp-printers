@@ -29,11 +29,17 @@ import types
 
 import pytest
 
+# Imported rather than parsed: button.py has relative imports, so it cannot be
+# loaded by file path the way const.py can, and a button key with no name fails
+# no count anywhere else.
+from custom_components.hp_printers import button as button_platform
+
 COMPONENT = Path(__file__).resolve().parent.parent / "custom_components" / "hp_printers"
 STRINGS = COMPONENT / "strings.json"
 TRANSLATIONS = COMPONENT / "translations"
 CONST = COMPONENT / "const.py"
 SENSOR = COMPONENT / "sensor.py"
+BUTTON = COMPONENT / "button.py"
 
 # Every other language is discovered from the directory rather than listed, so
 # a translation added later is checked without this file being edited.
@@ -53,6 +59,23 @@ def _flatten(tree: dict, prefix: str = "") -> dict[str, str]:
         else:
             flat[path] = value
     return flat
+
+
+def test_every_button_key_has_a_name() -> None:
+    """A button whose translation_key has no name renders as "None".
+
+    Its own test because the button platform is not a sensor: a missing name
+    there fails no count anywhere, and the card simply shows a control with
+    nothing on it. Read out of the module rather than a list here, so a button
+    added later is checked without editing this file.
+    """
+    used = {d.translation_key for d in button_platform.BUTTONS}
+    defined = set(
+        json.loads(STRINGS.read_text(encoding="utf-8"))["entity"].get("button", {})
+    )
+
+    assert used, "no buttons declared at all"
+    assert used <= defined, f"buttons with no name: {sorted(used - defined)}"
 
 
 def _load(path: Path) -> dict[str, str]:
