@@ -47,6 +47,8 @@
   tag instead of reading it, so every attribute behind one decoded as an
   unknown type and came back as raw bytes. The uncovered line was
   `index += 4` -- a line that looked obviously correct in isolation.
+  `button.py` arrived at 97% because its tests are mostly about the paths
+  that *refuse* to send, which is where the risk in a write path is.
 
 ## Architecture
 
@@ -153,7 +155,48 @@ Two rules the anonymizer has already been bitten by:
 
 ## Device/API Traps
 
-- The integration never writes to the printer. Preserve read-only `GET` behavior.
+- **Every read is a `GET`. There is no exception to that, and a read that
+  needs a credential is a bug.** All data on both protocols is served
+  unauthenticated, and a read gated on the admin password would fail setup on
+  a printer whose password was changed. The admin password is used for
+  nothing except the maintenance buttons.
+- **Writes exist, and they are a deliberate exception to the read-only
+  design — not a drift from it.** The user asked for cleaning and printhead
+  alignment as buttons they press themselves, on the grounds that these
+  operations spend ink and paper and therefore have to be somebody's
+  decision. Four rules keep that decision the user's:
+  1. No write is reachable from the coordinator. Not from a poll, a restart,
+     a reload, or a repair. Only from `ButtonEntity.async_press`.
+  2. A button exists only for an operation the device lists in its own
+     reports document, and only when a password is configured. A visible
+     button that cannot work is worse than none, because the user cannot
+     tell it from a broken feature.
+  3. Refuse before sending whenever the device has told us something that
+     would waste the cycle — the calibration type is not offered, the input
+     tray reports empty.
+  4. Log every write at warning level with the endpoint and body. That line
+     is the audit trail for a request that costs ink and paper. It must
+     never contain the credential.
+- **The only supported write path is CDP.** A model that speaks LEDM gets
+  no buttons, because its maintenance surface is behind the EWS web
+  application rather than in a documented LEDM resource — `DiscoveryTree.xml`
+  on the measured LEDM model lists 24 resources and none of them is a
+  maintenance endpoint, and the `MaintenanceManifest.xml` paths its own
+  JavaScript bundle references all answer 404. Do not infer a write path from
+  the EWS bundle: that bundle is shared across HP's whole product line and
+  contains code for features the hardware does not have.
+- **The CDP request shape comes from the device, not from a guess.**
+  `/cdm/servicesDiscovery` is the CDP equivalent of LEDM's
+  `DiscoveryTree.xml`: 31 services, 90 links, each with the HTTP methods that
+  link accepts, and it answers without authentication. It is the authority on
+  which endpoints exist and how they are called. Anything added to
+  `const.py`'s CDP list should be checkable against it.
+- `GET /cdm/calibration/v1/calibration` answers **400**, so the calibration
+  request body cannot be read back from the device the way the report body
+  can. The report body is the `reportId` the device itself publishes in
+  `/cdm/report/v1/reports`; the calibration body is the `calibrationType`
+  from `availableCalibrations`, which follows the same convention but has
+  not been confirmed against a live write. Treat that one as unverified.
 - HP LEDM is self-describing but undocumented; only create entities for values the device actually reports, otherwise the setup omits them.
 - Printer HTTPS commonly uses a self-signed certificate and legacy static-RSA ciphers; use the existing `printer_ssl_context()` path rather than replacing it with default TLS settings.
 - The zeroconf-announced IPP port is not the LEDM web-server port; discovery deliberately uses the printer hostname with the configured HTTP/HTTPS web port.

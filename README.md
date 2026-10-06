@@ -1,12 +1,17 @@
 # HP Printers for Home Assistant
 
 Local integration for HP printers. Reads the printer over HTTP/HTTPS — no
-cloud, no account, no credentials, no writes.
+cloud, no account, no writes on any polling path.
 
 Newer HP models no longer serve **LEDM**, the XML interface this integration
 originally targeted; they serve a JSON API instead (**CDP**), and report paper
 level over **IPP**. All three are supported, and which one a given printer
 speaks is worked out at setup — there is no protocol setting to fill in.
+
+An optional EWS admin password enables buttons for the cleaning and printhead
+alignment operations the printer itself offers. Those spend ink and paper, so
+they are buttons you press, never something a poll or an automation fires on
+its own. Everything else works without the password.
 
 ## What you get
 
@@ -86,6 +91,7 @@ everything else works without it.
 | **Host** | Prefer the printer's mDNS name over its IP — HP sets one from the MAC, such as `NPI2E7F3D.local` (you'll find it on the printer's Network Summary page, or in the TLS certificate's common name). It resolves to a MAC-derived IPv6 address that cannot change on a lease renewal, so no DHCP reservation is needed. An IP works too; entries are keyed on serial number, so an address change will not orphan your entities either way. |
 | **Name** | Optional. Drives the device name and every entity ID. Leave blank to use the model name. |
 | **Port / HTTPS** | Under *Advanced settings*. Defaults to port 80. Printers serve a self-signed certificate, which is not verified. |
+| **Admin password** | Under *Advanced settings*, and optional. It is used by the [maintenance buttons](#maintenance-buttons) and by nothing else — no sensor, no status, no counter needs it. Leave it blank and those buttons are simply not created. |
 
 Polling defaults to **60 seconds** and is adjustable under *Configure*. Printers
 sleep between jobs and polling wakes them, so slower is gentler on the hardware.
@@ -260,6 +266,49 @@ type the printer reports.
 | Previously used | binary_sensor (diagnostic) | `on` when the cartridge was already used in another printer. This is HP's **anti-transfer** flag, *not* a claim that the part is not genuine — the same document reports them separately. |
 | Refilled | binary_sensor (diagnostic) | `on` when the cartridge has been refilled. |
 
+## Maintenance buttons
+
+If you enter the EWS admin password under *Advanced settings*, the printer
+grows buttons for the maintenance operations **it reports itself as having**.
+On a CDP model that is six:
+
+| Button | What it runs | Cost |
+|---|---|---|
+| Clean ink paths (light / medium / strong) | Three escalating purge strengths. A smear or banding usually only needs the weakest. | Each level is a longer purge. Level 3 is the expensive one — do not reach for it first. |
+| Clean paper feed | Clears the path that paper travels, not the printhead. | Small. This is the one for repeated misfeeds. |
+| Clean rib smear | Wipes the printhead surface where a smear builds up. | Small. |
+| Align printhead | Re-runs the printhead alignment. **Needs paper in the input tray** — it prints a test pattern to align against. | A page or two of ink. |
+
+The three ink strengths and the two mechanism-specific cycles are separate
+operations on separate systems. A paper-feed clean does nothing for a smear on
+the printhead, so they are separate buttons rather than one "clean" button
+that hides the choice.
+
+### What these buttons will and will not do
+
+- **They only exist for operations your printer lists.** The list is read
+  from the printer's own service document at setup. A model with no
+  level-3 purge gets no level-3 button, because the alternative is a button
+  that answers "this printer does not offer that".
+- **They only exist if a password is configured.** Without one the write
+  cannot succeed, and a visible button that quietly does nothing is worse
+  than no button — you cannot tell it from a broken feature.
+- **They never fire on their own.** No poll, restart, reload, or repair can
+  reach them. They run when you press them, which is the point: each one
+  spends ink and paper, and that should be a decision rather than a
+  schedule.
+- **A press is not a completion.** The printer acknowledges the request and
+  runs the cycle on its own; a clean takes minutes. The button confirms the
+  request was *accepted*. Watch the printer's own status for when it is done.
+- **The printer's reason for refusing is passed through.** Busy, no paper and
+  a wrong password all arrive as an error, and only the device can tell them
+  apart — so its message is what you see.
+
+Alignment is refused up front if the printer reports its input tray empty. A
+printer that reports no paper level at all is not treated as empty, because
+that would leave the button permanently unpressable on exactly the machines
+where an alignment is most likely to have failed.
+
 ## Dashboard
 
 `examples/dashboards/printers.yaml` is a ready-made view. It builds itself
@@ -331,28 +380,44 @@ Developed and tested against real hardware, not just fixtures:
 Both consumer models have a refillable ink tank with no level sensor, so
 **neither reports usable ink level**; the tank sensors read a fixed 100. This
 is a hardware fact, not a parsing gap, and no amount of querying will change
-it. Their printheads *are* reported as `inkCartridge` and do carry a real
-percentage — which is life, not ink.
+it — the CDP model states it outright, with
+`isMediaElectronicLevelSensingSupported: false`. Their printheads *are*
+reported as `inkCartridge` and do carry a real percentage — which is life,
+not ink.
+
+The maintenance buttons need a CDP model. An LEDM model does not get them:
+its `DiscoveryTree.xml` lists 24 resources and none of them is a maintenance
+endpoint, and the `MaintenanceManifest.xml` paths that its own web interface
+references all answer 404.
 
 Reports of other models working (or not) are welcome.
 
 ## A note on LEDM and CDP
 
 HP publishes no specification for either. The endpoint map here was derived by
-reading live devices: for LEDM, `/DevMgmt/DiscoveryTree.xml` enumerates the
+reading live devices. For LEDM, `/DevMgmt/DiscoveryTree.xml` enumerates the
 available resources, and each is exposed as a paired `<Resource>Cap.xml` —
 describing types, access modes and legal values — and `<Resource>Dyn.xml`
 carrying current values. The device is, in effect, its own documentation.
 
-CDP has no equivalent discovery document, so its endpoint list was established
-by exhaustively enumerating the `supply` and `ink` namespaces and keeping only
-those that return data on real hardware. That is why the CDP client reads 24
-fixed documents rather than walking a tree: there is nothing to walk.
+CDP has the same thing at `/cdm/servicesDiscovery`: 31 services, 90 links,
+and each link carries the HTTP methods it accepts, so it is the authority on
+both which endpoints exist and how they are called. An earlier version of this
+README said no such document existed and that the endpoint list had been
+recovered by exhausting namespaces by hand. That was wrong, and it was wrong
+in a way that mattered — the same document is where the cleaning and alignment
+operations come from.
 
-All access is read-only (`GET`). This integration never writes to your printer.
-That is a deliberate constraint rather than a limitation of the interfaces —
-it means the integration cannot start a print, clear a queue, or run a
-printhead cleaning cycle, and that is the trade it makes.
+### What is read, and what is not
+
+Every read is a `GET`, and no read requires a credential. The only non-`GET`
+requests this integration can make are the [maintenance buttons](#maintenance-buttons),
+and those are reachable only when a person presses one.
+
+The devices publish considerably more than is used here. 47 of the 90 links
+the CDP model advertises accept `post`, `patch`, `put` or `delete`, including
+factory reset, firmware upload, Wi-Fi reconfiguration, certificate management
+and the password-change endpoint. None of it is touched.
 
 ## Contributing
 
