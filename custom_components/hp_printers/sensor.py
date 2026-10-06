@@ -483,7 +483,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="setup_state",
         translation_key="setup_state",
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         options=["idle", "actionPending", "inProgress", "complete"],
         # The two protocols put this in different documents -- CDP in
         # deviceSetup, read every poll; LEDM in the product configuration, read
@@ -542,7 +542,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="active_alert_worst",
         translation_key="active_alert_worst",
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         # The device orders its own alerts by priority, so the first is the
         # one it considers most urgent. The severity words are its own
         # vocabulary, taken from alert/v1/capabilities.
@@ -558,7 +558,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="firmware_update_result",
         translation_key="firmware_update_result",
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         options=["succeeded", "failed", "cancelled", "inProgress", "unknown"],
         value_fn=lambda data, _info: data.firmware_update_result,
     ),
@@ -611,7 +611,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="internet_diagnostics",
         translation_key="internet_diagnostics",
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         options=["connected", "disconnected", "unknown", "notTested"],
         value_fn=lambda data, _info: data.internet_diagnostics_result,
     ),
@@ -620,7 +620,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         key="carriage_status",
         translation_key="carriage_status",
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         options=["ok", "notOk", "unknown"],
         value_fn=lambda data, _info: data.carriage_status,
     ),
@@ -831,7 +831,7 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="default_orientation",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        state_class=SensorDeviceClass.ENUM,
+        device_class=SensorDeviceClass.ENUM,
         options=["Portrait", "Landscape"],
         value_fn=lambda data, _info: data.default_orientation,
     ),

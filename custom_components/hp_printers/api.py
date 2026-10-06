@@ -428,6 +428,27 @@ class LEDMClient:
     # Writes. Only reachable from a button; see button.py.
     # ------------------------------------------------------------------
 
+    @property
+    def can_write(self) -> bool:
+        """Return whether this client has a write path at all.
+
+        True for every LEDM client. It is **not** conditioned on the
+        password, because that gates the maintenance surface rather than
+        deciding whether one exists: a printer whose password was changed
+        still has a maintenance interface, it just refuses this particular
+        credential.
+
+        This property is load-bearing. ``button.py`` decides whether to create
+        the maintenance buttons with ``getattr(client, "can_write", False)``,
+        so a client that does not define it is treated as read-only and gets
+        **no buttons at all** -- silently, with no error anywhere. That is
+        exactly what happened to the LEDM model: the buttons were written,
+        documented, and translated, and none of them appeared, because the
+        measurement that said fourteen existed had counted the description
+        table rather than asking the platform what it created.
+        """
+        return True
+
     async def async_get_internal_jobs(self) -> tuple[str, ...]:
         """Return the internal print job types this model offers.
 

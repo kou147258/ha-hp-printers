@@ -328,12 +328,18 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     client = coordinator.client
 
-    # No write path on this client: an LEDM model, whose maintenance surface
-    # is not a documented LEDM resource. Either way there is nothing honest
-    # to put on the card.
+    # No write path on this client. Both protocols have one -- LEDM through
+    # its internal-print and calibration manifests, CDP through its report
+    # and calibration services -- and both say so via `can_write`, so reaching
+    # this branch means a client that does not declare one. It is checked with
+    # getattr and a false default on purpose: a client missing the property
+    # gets no buttons rather than buttons that cannot work, and the log line
+    # below is the only sign that it happened.
     if not getattr(client, "can_write", False):
-        _LOGGER.debug(
-            "No write path for %s; maintenance buttons not created", entry.title
+        _LOGGER.warning(
+            "%s uses a client that does not declare a write path; "
+            "maintenance buttons not created",
+            entry.title,
         )
         return
 
