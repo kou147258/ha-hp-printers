@@ -635,6 +635,25 @@
       },
       "subscription_printed_pages": {
         "name": "订阅打印页数（即时墨）"
+      },
+      "wifi_encryption": {
+        "name": "无线加密方式",
+        "description": "打印机无线连接允许的加密方式。设备同时以明文返回网络名称和密码，本集成两者都不读取，这里和诊断下载里都不会出现。"
+      },
+      "http_proxy_enabled": {
+        "name": "已配置 HTTP 代理"
+      },
+      "firmware_update_failure_reason": {
+        "name": "上次固件更新失败原因",
+        "description": "更新状态只说失败不说原因，而原因才是诊断本身：manifestNotFound 表示打印机根本找不到可安装的固件，这和下载失败是两个不同的问题。"
+      },
+      "supply_alert_colors": {
+        "name": "正在告警的耗材颜色",
+        "description": "告警本身只给类别，颜色藏在它的数据指针里。没有这一项，告警就是一句没有主语的抱怨。"
+      },
+      "media_loaded": {
+        "name": "已装纸张",
+        "description": "每个纸盒当前装载的尺寸与类型，此前本接口完全没读介质文档。"
       }
     },
     "binary_sensor": {

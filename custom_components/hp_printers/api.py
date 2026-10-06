@@ -1251,7 +1251,9 @@ def _parse_ledm_jobs(usage_doc: Element | None) -> dict[str, Any]:
         "wireless_printed_pages": _int(subunit, "WirelessNetworkImpressions"),
         "subscription_printed_pages": _int(subunit, "SubscriptionImpressions"),
         "cloud_printed_pages": _int(
-            _find(usage_doc, "PrintApplicationSubunit") if usage_doc else None,
+            _find(usage_doc, "PrintApplicationSubunit")
+            if usage_doc is not None
+            else None,
             "CloudPrintImpressions",
         ),
         "ews_access_count": _int(subunit, "EWSAccessCount"),

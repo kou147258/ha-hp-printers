@@ -635,6 +635,25 @@
       },
       "subscription_printed_pages": {
         "name": "Subscription-printed pages (Instant Ink)"
+      },
+      "wifi_encryption": {
+        "name": "Wi-Fi encryption in use",
+        "description": "The cipher the printer's Wi-Fi allows. The device also reports the network's name and its pass phrase in clear text; neither is read by this integration and neither will appear here or in a diagnostics download."
+      },
+      "http_proxy_enabled": {
+        "name": "HTTP proxy configured"
+      },
+      "firmware_update_failure_reason": {
+        "name": "Why the last firmware update failed",
+        "description": "The update status says the attempt failed but not why, and the reason is the diagnosis: 'manifestNotFound' means the printer cannot find any firmware to install, which is a different problem from a failed download."
+      },
+      "supply_alert_colors": {
+        "name": "Colours with a live supply alert",
+        "description": "The alert names a category; the colour is a pointer inside its data rather than prose. Without this an alert is a complaint with no subject."
+      },
+      "media_loaded": {
+        "name": "Paper loaded",
+        "description": "The size and type currently loaded in each tray, from the media document this interface was not reading before."
       }
     },
     "binary_sensor": {

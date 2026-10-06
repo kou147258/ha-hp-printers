@@ -47,13 +47,16 @@ from .const import (
     CDP_EVENTS,
     CDP_FIRMWARE_CHECK,
     CDP_FIRMWARE_CONFIG,
+    CDP_FIRMWARE_HISTORY,
     CDP_FIRMWARE_STATUS,
     CDP_IDENTITY,
     CDP_INTERNET_DIAGNOSTICS,
+    CDP_MEDIA_CONFIG,
     CDP_PRINT_CONFIG,
     CDP_PRINT_SERVICES,
     CDP_PRINT_SETUP_STATUS,
     CDP_PRINT_STATUS,
+    CDP_PROXY_CONFIG,
     CDP_REPORT_PRINT,
     CDP_REPORTS,
     CDP_SCAN_STATUS,
@@ -62,11 +65,14 @@ from .const import (
     CDP_SETUP_STATUS,
     CDP_SNMP_CONFIG,
     CDP_SUPPLIES,
+    CDP_SUPPLY_ALERTS,
     CDP_SUPPLY_CONFIG,
     CDP_SUPPLY_CONFIG_PRIVATE,
     CDP_SUPPLY_LIFETIME,
     CDP_SUPPLY_REGION_RESET,
+    CDP_SYSTEM_CONFIGURATION,
     CDP_SYSTEM_STATISTICS,
+    CDP_WIRELESS_CONFIG,
     COLOR_NAMES,
 )
 from .models import (
@@ -211,6 +217,152 @@ def _status(value: str | None) -> str | None:
         return None
     mapped = _STATUS_ALIASES.get(value.strip().lower(), "unknown")
     return mapped if mapped in _VALID_STATUS else "unknown"
+
+
+def _parse_wireless_security(wireless_doc: dict[str, Any] | None) -> dict[str, Any]:
+    """Return the radio's security posture, and nothing about the network.
+
+    The document carries the SSID and the pass phrase in clear text. Neither
+    is read, and that is a decision rather than an oversight: an SSID is the
+    user's network name, a pass phrase is a credential, and this integration
+    puts what it reads into state attributes and diagnostics downloads that
+    get pasted into issue trackers. What is worth having is the shape of the
+    link -- ``aesOrTkip`` allows the legacy cipher, and that is a finding
+    whether or not the printer is currently using it.
+
+    The values live under a profile named by ``preferredProfile`` rather than
+    at the top level, so a device with several configured networks needs the
+    pointer followed rather than a fixed key.
+    """
+    if not wireless_doc:
+        return {}
+    profile_name = _text(wireless_doc, "preferredProfile")
+    profile = wireless_doc.get(profile_name) if profile_name else None
+    if not isinstance(profile, dict):
+        return {}
+    return {
+        "wifi_band": _text(wireless_doc, "band"),
+        "wifi_authentication": _text(profile, "authenticationMode"),
+        "wifi_encryption": _text(profile, "encryptionType"),
+        "wifi_wpa_version": _text(profile, "wpaVersionPreference"),
+    }
+
+
+def _parse_supply_alert_subjects(
+    supply_alerts: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Return which slot each live supply alert is about.
+
+    CDP's supply alerts do not say what they are complaining about in prose.
+    They carry a ``data`` array of pointers into the supplies document, and
+    one of those pointers names the colour -- ``/suppliesList/2/colors`` with
+    the value ``K``. Without it an alert is the same subjectless complaint the
+    LEDM side had, on the other protocol.
+
+    Returned as one set rather than per alert: a user wants "which colour", and
+    the alert list itself is already published as an attribute.
+    """
+    if not supply_alerts:
+        return {}
+    colors: set[str] = set()
+    for alert in supply_alerts.get("alerts") or []:
+        if not isinstance(alert, dict):
+            continue
+        for item in alert.get("data") or []:
+            if not isinstance(item, dict):
+                continue
+            if not str(item.get("propertyPointer", "")).endswith("/colors"):
+                continue
+            value = item.get("value")
+            text = value.get("seValue") if isinstance(value, dict) else None
+            if isinstance(text, str) and text.strip():
+                colors.add(text.strip())
+    return {"supply_alert_colors": tuple(sorted(colors))}
+
+
+def _parse_firmware_history(history_doc: dict[str, Any] | None) -> dict[str, Any]:
+    """Return the most recent firmware update attempt and how it ended.
+
+    ``updateStatus`` says the last update failed. It does not say why, and the
+    reason is the whole diagnosis: the model measured fails with
+    ``manifestNotFound`` -- the printer cannot find any firmware to install,
+    which is a different problem from a failed download and has a different
+    fix. So the newest entry wins and the reason travels with it.
+
+    Newest by the device's own ordering, which is chronological with the most
+    recent last. Not sorted on the timestamp: the model measured reports 1970
+    dates because its clock has never been set, and a date this useless must
+    not be allowed to reorder a list.
+    """
+    if not history_doc:
+        return {}
+    updates = history_doc.get("updates")
+    if not isinstance(updates, list) or not updates:
+        return {}
+    entries = [u for u in updates if isinstance(u, dict)]
+    # The most recent entry that actually carries a reason, not simply the
+    # most recent entry. The model measured has five attempts, all failed, and
+    # only one of them records why -- so taking the last one reports nothing
+    # and loses the only useful sentence in the document.
+    with_reason = [u for u in entries if _text(u, "failureReason")]
+    newest = with_reason[-1] if with_reason else (entries[-1] if entries else {})
+    return {
+        "firmware_update_history_count": len(updates),
+        "firmware_update_failure_reason": _text(newest, "failureReason"),
+        "firmware_update_attempts_failed": sum(
+            1 for u in entries if _text(u, "lastUpdateResult") == "failed"
+        ),
+    }
+
+
+def _parse_cdp_media(media_doc: dict[str, Any] | None) -> dict[str, Any]:
+    """Return what is loaded in each tray and where output goes.
+
+    The one thing this interface was completely missing: ``.12`` reports no
+    media at all, because LEDM has a media document and CDP's equivalent was
+    never opened. The current size and type per tray is the fact a user wants
+    before a job goes wrong on the wrong paper.
+    """
+    if not media_doc:
+        return {}
+    trays: list[dict[str, Any]] = []
+    for entry in media_doc.get("inputs") or []:
+        if not isinstance(entry, dict):
+            continue
+        trays.append(
+            {
+                "id": _text(entry, "mediaSourceId"),
+                "size": _text(entry, "currentMediaSize"),
+                "type": _text(entry, "currentMediaType"),
+                "resolution_dpi": _int(entry, "currentResolution"),
+            }
+        )
+    return {
+        "media_default_source": _text(media_doc, "defaultMediaSource"),
+        "media_trays": tuple(trays),
+        "output_bins": tuple(
+            _text(entry, "outputType")
+            for entry in media_doc.get("outputs") or []
+            if isinstance(entry, dict) and _text(entry, "outputType")
+        ),
+    }
+
+
+def _parse_cdp_system(system_doc: dict[str, Any] | None) -> dict[str, Any]:
+    """Return the region and language the machine is configured for.
+
+    Region matters here for a reason specific to ink-tank printers: a cartridge
+    bought for one region is refused by a machine set to another, and the
+    machine does not say so anywhere else. ``deviceLocation`` is read by
+    nobody -- it is free-text placement, i.e. where the printer physically is,
+    which is not a fact a printer should be publishing into a dashboard.
+    """
+    if not system_doc:
+        return {}
+    return {
+        "country_region": _text(system_doc, "countryRegion"),
+        "device_language": _text(system_doc, "deviceLanguage"),
+    }
 
 
 class CDPClient:
@@ -619,6 +771,12 @@ class CDPClient:
             supply_private,
             region_reset,
             print_setup,
+            supply_alerts,
+            firmware_history,
+            wireless_doc,
+            media_config,
+            system_config,
+            proxy_doc,
         ) = await asyncio.gather(
             *(
                 self._fetch_optional(path)
@@ -639,6 +797,12 @@ class CDPClient:
                     CDP_SUPPLY_CONFIG_PRIVATE,
                     CDP_SUPPLY_REGION_RESET,
                     CDP_PRINT_SETUP_STATUS,
+                    CDP_SUPPLY_ALERTS,
+                    CDP_FIRMWARE_HISTORY,
+                    CDP_WIRELESS_CONFIG,
+                    CDP_MEDIA_CONFIG,
+                    CDP_SYSTEM_CONFIGURATION,
+                    CDP_PROXY_CONFIG,
                 )
             )
         )
@@ -699,6 +863,14 @@ class CDPClient:
             snmp_public_allowed=self._parse_snmp(snmp_doc, "readOnlyPublicAllowed"),
             bluetooth_beaconing=_bool(bluetooth_doc or {}, "currentBeaconingEnabled"),
             service_id=_text(service_config or {}, "serviceId"),
+            **_parse_wireless_security(wireless_doc),
+            **_parse_supply_alert_subjects(supply_alerts),
+            **_parse_firmware_history(firmware_history),
+            **_parse_cdp_media(media_config),
+            **_parse_cdp_system(system_config),
+            http_proxy_enabled=_bool(
+                (proxy_doc or {}).get("httpProxy") or {}, "enabled"
+            ),
         )
 
     @staticmethod

@@ -42,6 +42,21 @@ class HPConsumableSensorDescription(SensorEntityDescription):
     attrs_fn: Callable[[Consumable], dict[str, Any]] | None = None
 
 
+def _media_summary(data: PrinterData) -> str | None:
+    """One line naming what is loaded, for the state and a line for each tray.
+
+    The entity's own value rather than a count: a user opening this wants to
+    know what paper is in the machine, and "1" would answer a question nobody
+    asked.
+    """
+    parts = []
+    for tray in data.media_trays:
+        bits = [b for b in (tray.get("id"), tray.get("size"), tray.get("type")) if b]
+        if bits:
+            parts.append(" / ".join(str(b) for b in bits))
+    return "; ".join(parts) or None
+
+
 def _counter(
     key: str,
     translation_key: str,
@@ -798,14 +813,18 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         translation_key="country_region",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data, info: info.country_region,
+        # Two copies of the same fact on two protocols, so the entity reads
+        # both: LEDM carries region in the static product configuration, CDP
+        # only in its system configuration document. Whichever answers first
+        # is the same answer, and a second entity would be the alternative.
+        value_fn=lambda data, info: data.country_region or info.country_region,
     ),
     HPPrinterSensorDescription(
         key="device_language",
         translation_key="device_language",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data, info: info.device_language,
+        value_fn=lambda data, info: data.device_language or info.device_language,
     ),
     HPPrinterSensorDescription(
         key="default_orientation",
@@ -887,6 +906,65 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
         "subscription_printed_pages",
         "subscription_printed_pages",
         lambda d: d.subscription_printed_pages,
+    ),
+    # --- radio posture, and nothing about the network ---
+    # The document behind these carries the SSID and the pass phrase in clear
+    # text. Neither is read, and that is the point worth stating on the entity:
+    # the link's shape is a security fact, the network's name is not.
+    HPPrinterSensorDescription(
+        key="wifi_encryption",
+        translation_key="wifi_encryption",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.wifi_encryption,
+        attrs_fn=lambda data: {
+            "band": data.wifi_band,
+            "authentication": data.wifi_authentication,
+            "wpa_version": data.wifi_wpa_version,
+        },
+    ),
+    HPPrinterSensorDescription(
+        key="http_proxy_enabled",
+        translation_key="http_proxy_enabled",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        device_class=SensorDeviceClass.ENUM,
+        value_fn=lambda data, _info: data.http_proxy_enabled,
+    ),
+    # Why the last firmware update failed, which updateStatus does not say.
+    HPPrinterSensorDescription(
+        key="firmware_update_failure_reason",
+        translation_key="firmware_update_failure_reason",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data, _info: data.firmware_update_failure_reason,
+        attrs_fn=lambda data: {
+            "failed_attempts": data.firmware_update_attempts_failed,
+            "entries_in_history": data.firmware_update_history_count,
+        },
+    ),
+    # Which colour the live supply alerts are about. On this protocol that is
+    # a pointer inside each alert's data array rather than prose, and without
+    # it the alert is a complaint with no subject -- the same gap the LEDM
+    # side had.
+    HPPrinterSensorDescription(
+        key="supply_alert_colors",
+        translation_key="supply_alert_colors",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: ", ".join(data.supply_alert_colors) or None,
+    ),
+    # What is loaded in the tray. This interface reported no media at all
+    # before, because the media document was never opened.
+    HPPrinterSensorDescription(
+        key="media_loaded",
+        translation_key="media_loaded",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: _media_summary(data),
+        attrs_fn=lambda data: {
+            "default_source": data.media_default_source,
+            "trays": [dict(t) for t in data.media_trays],
+            "output_bins": list(data.output_bins),
+        },
     ),
     # --- diagnostics: network health ---
     # The one entity of this group that is on by default: a single number to

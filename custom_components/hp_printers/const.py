@@ -106,6 +106,24 @@ CDP_SUPPLY_CONFIG_PRIVATE: Final = "/cdm/supply/v1/configPrivate"
 CDP_SUPPLY_REGION_RESET: Final = "/cdm/supply/v1/regionReset"
 CDP_PRINT_SETUP_STATUS: Final = "/cdm/print/v2/setupStatus"
 
+# --- CDP documents that were served and never opened ------------------------
+#
+# Each of these answers 200 on the model measured and was not in the list
+# above, because the list was built from what the integration already needed
+# rather than from what the device offers. They are grouped by what they add.
+#
+# The wireless configuration is the one to read carefully. It carries the
+# network's SSID and its pass phrase in clear text, and neither is read here:
+# an SSID is the user's network name and a pass phrase is a credential, and
+# neither belongs in a state attribute or a diagnostics download. What is read
+# from it is the security posture -- band, authentication and encryption mode.
+CDP_SUPPLY_ALERTS: Final = "/cdm/supply/v1/alerts"
+CDP_FIRMWARE_HISTORY: Final = "/cdm/firmwareUpdate/v2/updateHistory"
+CDP_WIRELESS_CONFIG: Final = "/cdm/ioConfig/v2/wirelessConfig"
+CDP_MEDIA_CONFIG: Final = "/cdm/media/v1/configuration"
+CDP_SYSTEM_CONFIGURATION: Final = "/cdm/system/v1/configuration"
+CDP_PROXY_CONFIG: Final = "/cdm/network/v1/proxyConfig"
+
 # An LEDM printer answers a handful of /cdm/ documents alongside its XML, and
 # two of them carry values LEDM itself does not expose: the quiet-print flag
 # and the control panel's language. Fetching them on an LEDM printer is not a
