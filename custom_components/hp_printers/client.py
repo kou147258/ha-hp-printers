@@ -50,18 +50,16 @@ def _construct(
     ssl_context: ssl.SSLContext | None,
     password: str | None,
 ) -> LEDMClient | CDPClient:
-    """Build a client, passing the password only to the one that takes it.
+    """Build a client, passing the password to whichever one takes it.
 
-    LEDMClient has no write path -- the maintenance surface on a LEDM model
-    lives behind the EWS web application rather than in a documented LEDM
-    resource, and nothing here pretends otherwise. Handing it a sixth
-    positional argument would raise a TypeError at setup on every LEDM
-    printer, which is the worst possible moment to discover the difference
-    between the two protocols.
+    Both clients take the password, for opposite reasons. CDP's write path
+    is the unauthenticated one and ignores it entirely -- sending one turns
+    working reads into 401s. LEDM's internal-print jobs require it. Handing it
+    to only one would be the way to get a signature wrong, so it goes to both.
     """
     if factory is CDPClient:
         return factory(session, host, port, use_ssl, ssl_context, password=password)
-    return factory(session, host, port, use_ssl, ssl_context)
+    return factory(session, host, port, use_ssl, ssl_context, password=password)
 
 
 async def async_build_client(

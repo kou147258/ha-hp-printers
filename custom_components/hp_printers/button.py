@@ -43,14 +43,16 @@ _LOGGER = logging.getLogger(__name__)
 class HPMaintenanceButtonDescription(ButtonEntityDescription):
     """A button that starts one maintenance operation.
 
-    ``report_id`` is the device's own identifier, taken from the ``reports``
-    document rather than invented here: the request body has to name the
-    report the device knows, and the only trustworthy source for that name is
-    the device.
+    The identifier comes from the device, not from here: a CDP printer names
+    the operation in its own reports document under ``report_id`` or
+    ``calibration_type``, and an LEDM printer names it in its internal-print
+    capability document under ``job_type``. Keeping the three apart is what
+    lets one description serve both protocols.
     """
 
     report_id: str | None = None
     calibration_type: str | None = None
+    job_type: str | None = None
 
 
 # The cleaning cycles, weakest first, with the consequence named in the
@@ -143,6 +145,77 @@ BUTTONS: tuple[HPMaintenanceButtonDescription, ...] = (
         translation_key="privacy_report",
         report_id="privacyLog",
     ),
+    # --- LEDM: the same operations, named by InternalPrintCap.xml --------
+    #
+    # A different vocabulary for the same physical cycles, and a different
+    # protocol entirely: a POST with an XML body to a resource that answers
+    # 404 to a GET. Discovered by reading the code the printer ships to its own
+    # browser, which is the only place either request is written down.
+    HPMaintenanceButtonDescription(
+        key="ledm_clean_ink_light",
+        translation_key="ledm_clean_ink_light",
+        job_type="cleaningPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_clean_ink_medium",
+        translation_key="ledm_clean_ink_medium",
+        job_type="cleaningPageLevel2",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_clean_ink_strong",
+        translation_key="ledm_clean_ink_strong",
+        job_type="cleaningPageLevel3",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_clean_rib_smear",
+        translation_key="ledm_clean_rib_smear",
+        job_type="ribSmearCleaningPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_clean_verification",
+        translation_key="ledm_clean_verification",
+        job_type="cleaningVerificationPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_print_quality_report",
+        translation_key="ledm_print_quality_report",
+        job_type="pqDiagnosticsPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_status_report",
+        translation_key="ledm_status_report",
+        job_type="configurationPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_diagnostics_report",
+        translation_key="ledm_diagnostics_report",
+        job_type="diagnosticsPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_event_log_report",
+        translation_key="ledm_event_log_report",
+        job_type="eventLogReport",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_network_summary",
+        translation_key="ledm_network_summary",
+        job_type="networkSummary",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_self_test_page",
+        translation_key="ledm_self_test_page",
+        job_type="extendedConfigurationPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_wireless_test_page",
+        translation_key="ledm_wireless_test_page",
+        job_type="wirelessNetworkPage",
+    ),
+    HPMaintenanceButtonDescription(
+        key="ledm_privacy_report",
+        translation_key="ledm_privacy_report",
+        job_type="privacyReport",
+    ),
 )
 
 
@@ -214,6 +287,10 @@ class HPMaintenanceButton(HPPrinterEntity, ButtonEntity):
                 await client.async_run_report(description.report_id)
                 return
 
+            if description.job_type is not None:
+                await client.async_run_internal_job(description.job_type)
+                return
+
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="maintenance_unavailable",
@@ -247,20 +324,38 @@ async def async_setup_entry(
         )
         return
 
-    reports = await client.async_get_reports()
-    if not reports:
+    reports = (
+        await client.async_get_reports() if hasattr(client, "async_get_reports") else {}
+    )
+    capabilities = (
+        await client.async_get_calibration_capabilities()
+        if hasattr(client, "async_get_calibration_capabilities")
+        else {}
+    )
+    # The LEDM side names its jobs in a different document, at a different
+    # path, over a different protocol. A client with neither is a client with
+    # no write path at all.
+    internal_jobs = (
+        await client.async_get_internal_jobs()
+        if hasattr(client, "async_get_internal_jobs")
+        else ()
+    )
+
+    if not reports and not internal_jobs:
         _LOGGER.debug(
-            "%s lists no reports; maintenance buttons not created", entry.title
+            "%s lists no maintenance operations; buttons not created", entry.title
         )
         return
 
-    capabilities = await client.async_get_calibration_capabilities()
     available_calibrations = capabilities.get("availableCalibrations") or []
 
     created: list[HPMaintenanceButton] = []
     for description in BUTTONS:
         if description.report_id is not None:
             if description.report_id not in reports:
+                continue
+        elif description.job_type is not None:
+            if description.job_type not in internal_jobs:
                 continue
         elif description.calibration_type is not None:
             if description.calibration_type not in available_calibrations:

@@ -8,6 +8,7 @@ available resources, and each resource is exposed as a paired
 """
 
 import asyncio
+import base64
 from datetime import datetime
 import json
 import logging
@@ -24,6 +25,8 @@ from .const import (
     CDP_LEDM_QUIET_MODE,
     COLOR_NAMES,
     ENDPOINT_CONSUMABLE_CONFIG,
+    ENDPOINT_INTERNAL_PRINT_CAP,
+    ENDPOINT_INTERNAL_PRINT_DYN,
     ENDPOINT_IO_CONFIG,
     ENDPOINT_MEDIA_DYN,
     ENDPOINT_MEDIA_HANDLING,
@@ -208,6 +211,8 @@ class LEDMClient:
         port: int,
         use_ssl: bool,
         ssl_context: ssl.SSLContext | None = None,
+        *,
+        password: str | None = None,
     ) -> None:
         """Initialize the client.
 
@@ -223,6 +228,11 @@ class LEDMClient:
         self._port = port
         self._ssl = use_ssl
         self._ssl_context: ssl.SSLContext | bool = ssl_context or False
+        # Only the internal-print jobs need it. Every read on this protocol
+        # is served without a credential, and the maintenance surface refuses
+        # a request without one -- the opposite arrangement to CDP, where the
+        # write is the unauthenticated one and sending a password breaks it.
+        self._password = password or ""
 
     @property
     def host(self) -> str:
@@ -361,7 +371,7 @@ class LEDMClient:
         # of them carry values LEDM does not expose anywhere: the quiet-print
         # flag and the control panel's language. Read on a model that has
         # them rather than reported absent, because "absent" would be a lie.
-        quiet_mode, panel_language, instant_ink = await self._async_ledm_cdp()
+        quiet_mode, panel_language, instant_ink = await self.async_ledm_cdp()
 
         return PrinterData(
             status=status,
@@ -404,7 +414,95 @@ class LEDMClient:
             panel_language=panel_language,
         )
 
-    async def _async_ledm_cdp(self) -> tuple[bool | None, str | None, str | None]:
+    # ------------------------------------------------------------------
+    # Writes. Only reachable from a button; see button.py.
+    # ------------------------------------------------------------------
+
+    async def async_get_internal_jobs(self) -> tuple[str, ...]:
+        """Return the internal print job types this model offers.
+
+        Read from ``InternalPrintCap.xml``, which is where the printer's own
+        web page looks before it draws a button -- so the list is the device's,
+        not a constant that drifts. This document is not in DiscoveryTree.xml,
+        which is the only reason it went unread for so long: the maintenance
+        interface is reachable by exactly one documented path, and it is not
+        the discovery one.
+        """
+        root = await self._fetch_optional(ENDPOINT_INTERNAL_PRINT_CAP)
+        if root is None:
+            return ()
+        return tuple(
+            (node.text or "").strip()
+            for node in root.iter()
+            if _localname(node.tag) == "JobType" and (node.text or "").strip()
+        )
+
+    async def async_run_internal_job(self, job_type: str) -> None:
+        """Start one internal print job by the type the capability document names.
+
+        The body is XML carrying a single element, and the request is a POST
+        to a resource that answers 404 to a GET -- so a client that only
+        probes with GET concludes the interface does not exist, which is
+        exactly what happened here for a while.
+
+        The device answers the POST with a ``Location`` header pointing at the
+        job's state resource. It is returned so a caller can follow progress;
+        this integration does not, because the print is what the user asked for
+        and the job finishes on its own schedule.
+        """
+        if not job_type:
+            raise HPPrinterWriteError("No job type given")
+        if job_type not in await self.async_get_internal_jobs():
+            raise HPPrinterWriteError(
+                f"This printer does not offer an internal print job called {job_type}"
+            )
+
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            "<ipdyn:InternalPrintDyn "
+            'xmlns:ipdyn="http://www.hp.com/schemas/imaging/con/ledm/internalprintdyn/2008/03/21">'
+            f"<ipdyn:JobType>{job_type}</ipdyn:JobType>"
+            "</ipdyn:InternalPrintDyn>"
+        ).encode()
+
+        url = f"{self.base_url}{ENDPOINT_INTERNAL_PRINT_DYN}"
+        try:
+            async with self._session.post(
+                url,
+                data=body,
+                timeout=REQUEST_TIMEOUT,
+                ssl=self._ssl_context,
+                headers={
+                    "Content-Type": "text/xml; charset=utf-8",
+                    "Authorization": "Basic "
+                    + base64.b64encode(f"admin:{self._password}".encode()).decode(),
+                },
+            ) as response:
+                status = response.status
+                location = response.headers.get("Location", "")
+                detail = (await response.text())[:200]
+        except TimeoutError as err:
+            raise HPPrinterWriteError(
+                f"Timeout starting {job_type}; the printer may still be running it"
+            ) from err
+        except ClientError as err:
+            raise HPPrinterWriteError(f"Error starting {job_type}: {err}") from err
+
+        # Logged with the job and the resulting state resource, never the
+        # credential, for the same reason the CDP side does not send one.
+        _LOGGER.warning(
+            "User-requested write: POST %s job=%s -> %s",
+            ENDPOINT_INTERNAL_PRINT_DYN,
+            job_type,
+            location or "(no Location)",
+        )
+        if status >= 400:
+            raise HPPrinterWriteError(
+                f"Printer refused {job_type}: HTTP {status} "
+                f"{detail.strip() or 'no detail given'}"
+            )
+
+    async def async_ledm_cdp(self) -> tuple[bool | None, str | None, str | None]:
         """Read the three CDP documents an LEDM printer also answers.
 
         This is not a fallback path. On the LEDM models measured, these are

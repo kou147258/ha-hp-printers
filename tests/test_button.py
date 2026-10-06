@@ -32,12 +32,31 @@ CALIBRATION = {
     "requiresMedia": "true",
 }
 
+# The LEDM printer names its jobs in a different document, at a different
+# path, over a different verb. This is the list it actually returns.
+INTERNAL_JOBS = (
+    "cleaningPage",
+    "cleaningPageLevel2",
+    "cleaningPageLevel3",
+    "cleaningVerificationPage",
+    "configurationPage",
+    "diagnosticsPage",
+    "extendedConfigurationPage",
+    "networkSummary",
+    "eventLogReport",
+    "pqDiagnosticsPage",
+    "ribSmearCleaningPage",
+    "wirelessNetworkPage",
+    "privacyReport",
+)
+
 
 def _coordinator(
     can_write: bool = True,
     reports: dict | None = None,
     calibration: dict | None = None,
     paper_present: bool | None = None,
+    internal_jobs: tuple | None = None,
 ) -> MagicMock:
     client = MagicMock()
     client.can_write = can_write
@@ -45,11 +64,17 @@ def _coordinator(
     client.async_get_reports = AsyncMock(
         return_value=REPORTS if reports is None else reports
     )
+    # The LEDM side has its own capability document and its own verb, and a
+    # client that has one does not have the other.
+    client.async_get_internal_jobs = AsyncMock(
+        return_value=() if internal_jobs is None else internal_jobs
+    )
     client.async_get_calibration_capabilities = AsyncMock(
         return_value=CALIBRATION if calibration is None else calibration
     )
     client.async_run_report = AsyncMock(return_value={})
     client.async_run_calibration = AsyncMock(return_value={})
+    client.async_run_internal_job = AsyncMock(return_value=None)
 
     coordinator = MagicMock()
     coordinator.client = client
@@ -286,3 +311,62 @@ async def test_the_busy_flag_is_released_even_when_the_write_fails() -> None:
     coordinator.client.async_run_report = AsyncMock(return_value={})
     await entity.async_press()
     assert coordinator.client.async_run_report.await_count == 1
+
+
+# --------------------------------------------------------- the LEDM protocol
+
+
+async def test_the_ledm_printer_gets_its_own_buttons() -> None:
+    """A different document, a different verb, and a different vocabulary.
+
+    The LEDM printer names thirteen of them, all read from the capability
+    document the device itself publishes. It gets no CDP buttons and the CDP
+    printer gets none of these, because neither document mentions the other.
+    """
+    coordinator = _coordinator(reports={}, internal_jobs=INTERNAL_JOBS, calibration={})
+    keys = await _collect(coordinator)
+
+    assert "ledm_clean_ink_light" in keys
+    assert "ledm_clean_ink_strong" in keys
+    assert "ledm_clean_rib_smear" in keys
+    assert "ledm_print_quality_report" in keys
+    # The CDP-only names must not appear: this printer does not list them.
+    assert not [k for k in keys if not k.startswith("ledm_")]
+
+
+async def test_the_ledm_printer_gets_no_calibration_button() -> None:
+    """Its internal-print document lists no alignment.
+
+    The Smart Tank 750 measured offers cleaning cycles and reports and no
+    calibration, so a button would be offered for something it cannot do.
+    """
+    coordinator = _coordinator(reports={}, internal_jobs=INTERNAL_JOBS, calibration={})
+    keys = await _collect(coordinator)
+
+    assert "calibrate_printhead" not in keys
+
+
+async def test_pressing_an_ledm_clean_uses_the_ledm_verb() -> None:
+    """It must not go through the report path, which is a different protocol.
+
+    The two share a description and a translation table and nothing else:
+    different document, different verb, different body format. A button that
+    reached for the CDP endpoint on an LEDM printer would produce an error
+    with nothing to act on.
+    """
+    coordinator = _coordinator(reports={}, internal_jobs=INTERNAL_JOBS, calibration={})
+    entity = HPMaintenanceButton(coordinator, _description("ledm_clean_ink_medium"))
+
+    await entity.async_press()
+
+    coordinator.client.async_run_internal_job.assert_awaited_once_with(
+        "cleaningPageLevel2"
+    )
+    coordinator.client.async_run_report.assert_not_awaited()
+    coordinator.client.async_run_calibration.assert_not_awaited()
+
+
+async def test_a_printer_with_neither_document_gets_no_buttons() -> None:
+    """Absent from both is the same as offering nothing."""
+    coordinator = _coordinator(reports={}, internal_jobs=())
+    assert await _collect(coordinator) == []

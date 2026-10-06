@@ -494,13 +494,30 @@ where an alignment is most likely to have failed.
 
 ### Which printers get buttons
 
-A CDP printer that reports at least one of the operations above. An **LEDM
-printer does not**, and this is measured rather than assumed: its
-`DiscoveryTree.xml` lists 24 resources and none is a maintenance endpoint, its
-`MaintenanceManifest.xml` paths answer 404, and its own CDP service document —
-8 services, 28 links — carries no report, calibration or supply service at
-all. On such a model the cleaning and alignment controls exist only as
-physical buttons on the machine.
+A printer that lists maintenance operations in one of the two places it can
+name them:
+
+| | Where the printer lists them | How a job is started |
+|---|---|---|
+| **CDP printer** | `/cdm/report/v1/reports` and the calibration capabilities | `PATCH`, JSON body, no credential |
+| **LEDM printer** | `/DevMgmt/InternalPrintCap.xml` | `POST`, XML body, admin password |
+
+Both lists are read from the device, so a model offering fewer gets fewer and
+a button is never created for something the printer cannot do.
+
+The LEDM maintenance interface is worth a note, because it is reachable by
+**exactly one path** and is invisible on both of the obvious ones. It is not
+in `DiscoveryTree.xml`, and the web page that uses it lives at
+`/webApps/DevServ/`, which answers 403 even with the correct password. The only
+way in is the manifest — and the only way to find the manifest was to read the
+code the printer ships to its own browser. A client that only probes with GET
+sees a resource that answers 404 with an empty body and concludes the
+interface does not exist.
+
+Its capability document lists nineteen job types on the model measured: three
+cleaning strengths, a rib-smear clean, a cleaning verification page, and a
+dozen reports. It lists **no alignment**, so the LEDM printer gets cleaning and
+report buttons and no calibration button.
 
 ## Dashboard
 

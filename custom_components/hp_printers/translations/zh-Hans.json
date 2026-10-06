@@ -737,6 +737,45 @@
       "privacy_report": {
         "name": "打印安全与隐私报告",
         "description": "安全与隐私报告：打印机能被谁访问、存了什么。"
+      },
+      "ledm_clean_ink_light": {
+        "name": "清洁墨路（轻度）"
+      },
+      "ledm_clean_ink_medium": {
+        "name": "清洁墨路（中度）"
+      },
+      "ledm_clean_ink_strong": {
+        "name": "清洁墨路（强力）"
+      },
+      "ledm_clean_rib_smear": {
+        "name": "清洁色带"
+      },
+      "ledm_clean_verification": {
+        "name": "打印清洁验证页"
+      },
+      "ledm_print_quality_report": {
+        "name": "打印打印质量报告"
+      },
+      "ledm_status_report": {
+        "name": "打印状态报告"
+      },
+      "ledm_diagnostics_report": {
+        "name": "打印诊断报告"
+      },
+      "ledm_event_log_report": {
+        "name": "打印事件日志"
+      },
+      "ledm_network_summary": {
+        "name": "打印网络摘要页"
+      },
+      "ledm_self_test_page": {
+        "name": "打印扩展自检页"
+      },
+      "ledm_wireless_test_page": {
+        "name": "打印无线测试页"
+      },
+      "ledm_privacy_report": {
+        "name": "打印安全与隐私报告"
       }
     }
   }

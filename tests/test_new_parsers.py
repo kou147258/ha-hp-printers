@@ -429,7 +429,7 @@ async def test_the_ledm_side_reads_its_json_layer_without_reaching_for_xml() -> 
     client._ssl = True  # noqa: SLF001
     client._ssl_context = False  # noqa: SLF001
 
-    quiet, language, ink = await client._async_ledm_cdp()  # noqa: SLF001
+    quiet, language, ink = await client.async_ledm_cdp()
 
     assert (quiet, language, ink) == (None, None, None)
 

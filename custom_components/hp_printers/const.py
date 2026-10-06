@@ -125,6 +125,20 @@ ENDPOINT_PRINT_CONFIG: Final = "/DevMgmt/PrintConfigDyn.xml"
 ENDPOINT_MEDIA_DYN: Final = "/DevMgmt/MediaDyn.xml"
 ENDPOINT_NET_APPS: Final = "/DevMgmt/NetAppsDyn.xml"
 ENDPOINT_SHOP_FOR_SUPPLIES: Final = "/DevMgmt/ShopForSupplies.xml"
+
+# --- the LEDM maintenance interface ---------------------------------------
+#
+# Not in DiscoveryTree.xml, not in the web application's own paths, and the
+# only way it was found: the page the printer ships to its browser reads the
+# capability document from here before it offers a button. The document
+# itself enumerates the 19 job types this model supports, three of which are
+# cleaning cycles and one of which is the printhead clean.
+#
+# GET on the Dyn resource answers 404 with an empty body -- it exists and it
+# only accepts the write. The client's own bundle POSTs here with an XML body
+# whose single element names the job.
+ENDPOINT_INTERNAL_PRINT_CAP: Final = "/DevMgmt/InternalPrintCap.xml"
+ENDPOINT_INTERNAL_PRINT_DYN: Final = "/DevMgmt/InternalPrintDyn.xml"
 ENDPOINT_USAGE_CAP: Final = "/DevMgmt/ProductUsageCap.xml"
 ENDPOINT_CONSUMABLE_CAP: Final = "/DevMgmt/ConsumableConfigCap.xml"
 

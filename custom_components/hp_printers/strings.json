@@ -737,6 +737,45 @@
       "privacy_report": {
         "name": "Print security and privacy report",
         "description": "The security and privacy report: what the printer is reachable by and what it stores."
+      },
+      "ledm_clean_ink_light": {
+        "name": "Clean ink paths (light)"
+      },
+      "ledm_clean_ink_medium": {
+        "name": "Clean ink paths (medium)"
+      },
+      "ledm_clean_ink_strong": {
+        "name": "Clean ink paths (strong)"
+      },
+      "ledm_clean_rib_smear": {
+        "name": "Clean rib smear"
+      },
+      "ledm_clean_verification": {
+        "name": "Print cleaning verification page"
+      },
+      "ledm_print_quality_report": {
+        "name": "Print print-quality report"
+      },
+      "ledm_status_report": {
+        "name": "Print status report"
+      },
+      "ledm_diagnostics_report": {
+        "name": "Print diagnostics report"
+      },
+      "ledm_event_log_report": {
+        "name": "Print event log"
+      },
+      "ledm_network_summary": {
+        "name": "Print network summary"
+      },
+      "ledm_self_test_page": {
+        "name": "Print extended self test"
+      },
+      "ledm_wireless_test_page": {
+        "name": "Print wireless test page"
+      },
+      "ledm_privacy_report": {
+        "name": "Print security and privacy report"
       }
     }
   }
