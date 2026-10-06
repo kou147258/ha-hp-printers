@@ -1,4 +1,4 @@
-# Agent Instructions
+﻿# Agent Instructions
 
 ## Scope
 
@@ -18,7 +18,7 @@
 - The suite requires Python 3.14, which that package's Home Assistant pin also requires.
 - `ruff_ha.toml` is extracted from Home Assistant core but **diverges deliberately in one place**: `known-first-party` is `["custom_components", "tests", "scripts"]`, not `["homeassistant"]`. Core builds the `homeassistant` package; here it is a dependency. Left as core had it, isort groups `custom_components` with third-party imports and CI fails on ordering. Re-apply this if the file is ever re-extracted.
 - `.pre-commit-config.yaml` runs the same lint, format, test and JSON-parse checks against this venv. Install with `./.venv/bin/uv pip install --python .venv/bin/python pre-commit && ./.venv/bin/pre-commit install`. The hooks are `repo: local` on purpose: the upstream Ruff mirror pins its own Ruff version, which would disagree with the one CI uses.
-- Lint and format **`scripts` as well as `custom_components/hp_printers` and `tests`** — CI does, and a check that omits a directory hides real errors in it.
+- Lint and format **`scripts` as well as `custom_components/hp_printers` and `tests`** 鈥?CI does, and a check that omits a directory hides real errors in it.
 
 ## Test Policy
 
@@ -32,7 +32,7 @@
   alongside it.
 - Do not delete a test to make a change pass. If a test is wrong, fix the
   test and explain why in the commit message.
-- Coverage was 99% before the CDP and IPP clients landed. It is **97%**
+- Coverage was 99% before the CDP and IPP clients landed. It is **96%**
   now, and `quality_scale.yaml` records that next to its `test-coverage`
   claim so the number is checkable rather than remembered. Measure with
   `./.venv/bin/python -m pytest -q --cov=custom_components/hp_printers
@@ -176,7 +176,7 @@ Two rules the anonymizer has already been bitten by:
   a printer whose password was changed. The admin password is used for
   nothing except the maintenance buttons.
 - **Writes exist, and they are a deliberate exception to the read-only
-  design — not a drift from it.** The user asked for cleaning and printhead
+  design 鈥?not a drift from it.** The user asked for cleaning and printhead
   alignment as buttons they press themselves, on the grounds that these
   operations spend ink and paper and therefore have to be somebody's
   decision. Four rules keep that decision the user's:
@@ -187,14 +187,14 @@ Two rules the anonymizer has already been bitten by:
      because the alternative is a button that answers "this printer does not
      offer that".
   3. Refuse before sending whenever the device has told us something that
-     would waste the cycle — the calibration type is not offered, the input
+     would waste the cycle 鈥?the calibration type is not offered, the input
      tray reports empty.
   4. Log every write at warning level with the endpoint and body. That line
      is the audit trail for a request that costs ink and paper.
 - **CDP writes do not authenticate, and the admin password is never sent.**
   Measured on the Smart Tank 580-590: every CDP document is served with no
   credential, and attaching a *correct* HTTP Basic header turns working 200s
-  into 401s. `/AuthChk` does not discriminate — the right password, a wrong
+  into 401s. `/AuthChk` does not discriminate 鈥?the right password, a wrong
   one, and none at all all answer 300 on that model (on a *LEDM* model the
   same endpoint does discriminate: 200 with the right password, 300 without).
   So `_auth_header` sends no Authorization header, and the password stays in
@@ -204,7 +204,7 @@ Two rules the anonymizer has already been bitten by:
 - **`/cdm/remoteAuthentication/v1` is the cartridge-bay PIN, not EWS admin
   auth.** Its capabilities report `pinLabelLocation: "cartridgeAccessArea"`
   and `pushbuttonSupported: true`. POSTing to its `tokens` endpoint answers
-  409, or 500 for an empty object, with an empty body — for every body shape
+  409, or 500 for an empty object, with an empty body 鈥?for every body shape
   tried, including the obvious `username`/`password`. It reveals nothing and
   is not the answer to "how does a CDP write authenticate".
 - **The request body for a report is the `reportId` the device publishes** in
@@ -216,7 +216,7 @@ Two rules the anonymizer has already been bitten by:
   pressing the button is what will confirm it.
 - **The only supported write path is CDP.** A model that speaks LEDM gets
   no buttons, because its maintenance surface is behind the EWS web
-  application rather than in a documented LEDM resource — `DiscoveryTree.xml`
+  application rather than in a documented LEDM resource 鈥?`DiscoveryTree.xml`
   on the measured LEDM model lists 24 resources and none of them is a
   maintenance endpoint, and the `MaintenanceManifest.xml` paths its own
   JavaScript bundle references all answer 404. Do not infer a write path from
@@ -229,7 +229,7 @@ Two rules the anonymizer has already been bitten by:
   its XML; the whole maintenance interface, in
   `/DevMgmt/InternalPrintCap.xml`, which is in neither `DiscoveryTree.xml`
   nor any path the web page itself is mounted at; and the firmware update
-  page, reachable *only* through the web app — every firmware manifest path
+  page, reachable *only* through the web app 鈥?every firmware manifest path
   answers 404, and the page path answers 403. **Do not conclude that a
   feature is absent from what the data interfaces return.** Check the
   bundle the printer ships its own browser, and check the paths the
@@ -239,11 +239,11 @@ Two rules the anonymizer has already been bitten by:
   guess fails silently. The only source that has ever worked is the code the
   printer ships to its own browser: it is where both the CDP report and
   calibration bodies came from, and both were wrong when guessed. Where no
-  such code exists — the firmware check endpoint — say so rather than
+  such code exists 鈥?the firmware check endpoint 鈥?say so rather than
   guessing, because a guessed body that lands on firmware is a different
   proposition from one that lands on a cleaning cycle.
   not from the discovery document.** `/cdm/servicesDiscovery` names the
-  endpoints and the methods and says nothing about the body — and the device
+  endpoints and the methods and says nothing about the body 鈥?and the device
   answers every malformed body with a 400 and an **empty** body, so probing
   cannot recover it. The body is written down in the JavaScript the printer
   ships to its own browser (`/framework/Unified.js`, unauthenticated, ~650 kB),
@@ -251,9 +251,9 @@ Two rules the anonymizer has already been bitten by:
 
   - report: `PATCH /cdm/report/v1/print` with
     `{state: "processing", version: <from the reports document>, reportId: <id>}`
-    — the version is echoed from the device, so it is read, never hardcoded.
+    鈥?the version is echoed from the device, so it is read, never hardcoded.
   - calibration: `PATCH /cdm/calibration/v1/calibration/<type>` with
-    `{calibrationType: <type>, operationType: "calibration"}` — the **member**
+    `{calibrationType: <type>, operationType: "calibration"}` 鈥?the **member**
     path, not the collection, plus a second field beside the type.
 
   Both were wrong in the first version, in ways that raised nothing. Read the
@@ -267,7 +267,7 @@ Two rules the anonymizer has already been bitten by:
   it was missing 76 of them.
 - **The `*Cap.xml` documents are the device's own specification.** Each
   declares the type, range, step and access mode of every field its `Dyn`
-  partner carries — `typeof="dd:Int" min="0" max="14" step="1"
+  partner carries 鈥?`typeof="dd:Int" min="0" max="14" step="1"
   access="readOnly"`, with an `elementXPath` back to the value. Reading them
   is the systematic way to find a parse gap; the alternative is inferring
   field names. `ProductUsageCap.xml` alone is 32 kB of declared counters.
@@ -282,7 +282,7 @@ Two rules the anonymizer has already been bitten by:
   contains "enabled", so a generic on/off test describes a printer that
   permits the default community string as having it switched off. Enums read
   from a capability document are mapped explicitly, and an unrecognised
-  value is `None` — defaulting a security field to the safe-looking answer
+  value is `None` 鈥?defaulting a security field to the safe-looking answer
   is the one way it can be quietly wrong.
 - Printer HTTPS commonly uses a self-signed certificate and legacy static-RSA ciphers; use the existing `printer_ssl_context()` path rather than replacing it with default TLS settings.
 - The zeroconf-announced IPP port is not the LEDM web-server port; discovery deliberately uses the printer hostname with the configured HTTP/HTTPS web port.
@@ -304,3 +304,4 @@ Two rules the anonymizer has already been bitten by:
 - HACS reads **published** releases. A draft or a bare tag is invisible to it, and a draft that was never tagged only appears on the repository's Releases page, not at any tag URL.
 - release-drafter was removed: it categorises merged pull requests, and this repository commits directly to `main`, so it produced empty drafts. If the workflow ever moves to PRs, it is worth restoring.
 - Versions before `2026.8.0` used semver (`v0.1.0`). The calendar scheme sorts above them, so the switch needed no special handling.
+

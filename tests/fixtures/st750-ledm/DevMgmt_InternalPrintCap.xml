@@ -1,0 +1,28 @@
+<ns0:InternalPrintCap xmlns:ns0="http://www.hp.com/schemas/imaging/con/ledm/internalprintcap/2008/03/21" xmlns:ns2="http://www.hp.com/schemas/imaging/con/dictionaries/1.0/" xmlns:ns3="http://www.hp.com/schemas/imaging/con/ledm/internalprintdyn/2008/03/21" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hp.com/schemas/imaging/con/ledm/internalprintdyn/2008/03/21 ../schemas/InternalPrintDyn.xsd                               http://www.hp.com/schemas/imaging/con/ledm/internalprintcap/2008/03/21 ../schemas/InternalPrintCap.xsd http://www.hp.com/schemas/imaging/con/dictionaries/1.0/ ../schemas/dd/DataDictionaryMasterLEDM.xsd">
+	<ns2:Version>
+		<ns2:Revision>SVN-IPG-LEDM.412</ns2:Revision>
+		<ns2:Date>2012-03-06</ns2:Date>
+	</ns2:Version>
+	<ns0:JobUrl access="readOnly">/DevMgmt/InternalPrintDyn.xml</ns0:JobUrl>
+	<ns0:JobTypesSupport>
+		<ns3:JobType>cleaningPage</ns3:JobType>
+		<ns3:JobType>cleaningPageLevel2</ns3:JobType>
+		<ns3:JobType>cleaningPageLevel3</ns3:JobType>
+		<ns3:JobType>cleaningVerificationPage</ns3:JobType>
+		<ns3:JobType>configurationPage</ns3:JobType>
+		<ns3:JobType>wifiDirectGuide</ns3:JobType>
+		<ns3:JobType>diagnosticsPage</ns3:JobType>
+		<ns3:JobType>extendedConfigurationPage</ns3:JobType>
+		<ns3:JobType>networkSummary</ns3:JobType>
+		<ns3:JobType>networkDiagnosticPage</ns3:JobType>
+		<ns3:JobType>wirelessNetworkPage</ns3:JobType>
+		<ns3:JobType>wifiDirectPinCodePage</ns3:JobType>
+		<ns3:JobType>pqDiagnosticsPage</ns3:JobType>
+		<ns3:JobType>ribSmearCleaningPage</ns3:JobType>
+		<ns3:JobType>eventLogReport</ns3:JobType>
+		<ns3:JobType>webAccessReport</ns3:JobType>
+		<ns3:JobType>webServicesInfoPage</ns3:JobType>
+		<ns3:JobType>ePrintSetupPage</ns3:JobType>
+		<ns3:JobType>privacyReport</ns3:JobType>
+	</ns0:JobTypesSupport>
+</ns0:InternalPrintCap>
