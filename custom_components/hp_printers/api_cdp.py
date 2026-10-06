@@ -717,7 +717,7 @@ class CDPClient:
         # sleep as lingering tasks. There is also nothing to overlap it with:
         # there is no point starting the extras before knowing the device
         # speaks this protocol at all.
-        document = await self._fetch(CDP_IDENTITY)
+        document = await self._fetch_retrying_required(CDP_IDENTITY)
         security = await self._fetch_retrying(CDP_SECURITY_CONFIG)
         wireless_doc = await self._fetch_retrying(CDP_WIRELESS_CONFIG)
         media_config = await self._fetch_retrying(CDP_MEDIA_CONFIG)
@@ -745,6 +745,31 @@ class CDPClient:
             **_parse_supply_alert_subjects(supply_alerts),
             **_parse_firmware_history(firmware_history),
         )
+
+    async def _fetch_retrying_required(self, endpoint: str) -> dict[str, Any]:
+        """Fetch a required document, once more if the device drops it.
+
+        The CDP models fail the TLS handshake with ``TLSV1_ALERT_INTERNAL_ERROR``
+        when too many connections overlap, and the refresh issues far more than
+        a browser would. A *required* document has no optional fallback, so one
+        dropped handshake took the whole entry down: measured on the Smart Tank
+        580-590, the refresh failed on
+        ``/cdm/deviceUsage/v1/serviceCounters`` and the printer never appeared
+        in Home Assistant at all.
+
+        Retries once and then raises properly. It must still raise: the
+        protocol probe relies on this read failing in order to recognise a
+        machine as LEDM rather than CDP, so returning an empty document here
+        would turn "not this protocol" into an AttributeError three frames
+        later -- which is what a previous version of this did.
+        """
+        for attempt in range(2):
+            document = await self._fetch_optional(endpoint)
+            if document is not None:
+                return document
+            if attempt == 0:
+                await asyncio.sleep(CDP_SLOW_RETRY_DELAY_SECONDS)
+        return await self._fetch(endpoint)
 
     async def _fetch_retrying(self, endpoint: str) -> dict[str, Any] | None:
         """Fetch one static document, once more if the device drops the request.
@@ -822,12 +847,25 @@ class CDPClient:
         # product info comes from async_get_product_info on the slow cadence,
         # and re-reading it on every poll would put a second request for the
         # same document on the wire for no gain.
-        statistics, usage_doc, service_doc, supplies_doc = await asyncio.gather(
-            self._fetch_optional(CDP_SYSTEM_STATISTICS),
-            self._fetch(CDP_DEVICE_USAGE),
-            self._fetch(CDP_DEVICE_SERVICE_COUNTERS),
-            self._fetch(CDP_SUPPLIES),
-        )
+        # The required documents are fetched one at a time, on purpose.
+        #
+        # These three have no optional fallback, and they used to be gathered
+        # with everything else -- a burst of twenty-six simultaneous
+        # handshakes. This printer answers that by failing the handshake
+        # outright (``BAD_SIGNATURE`` when probing it as LEDM,
+        # ``TLSV1_ALERT_INTERNAL_ERROR`` when reading it as CDP), so one
+        # dropped connection took the whole entry down: measured, the 580-590
+        # never appeared in Home Assistant at all, while the 750 on the other
+        # protocol set up every time.
+        #
+        # Three sequential requests cost about a second and buy the difference
+        # between a printer that is there and one that is not. The optional
+        # documents can afford to be concurrent, because a dropped one costs
+        # an entity rather than the entry.
+        usage_doc = await self._fetch_retrying_required(CDP_DEVICE_USAGE)
+        service_doc = await self._fetch_retrying_required(CDP_DEVICE_SERVICE_COUNTERS)
+        supplies_doc = await self._fetch_retrying_required(CDP_SUPPLIES)
+        statistics = await self._fetch_optional(CDP_SYSTEM_STATISTICS)
         (
             status_doc,
             scan_doc,
@@ -835,7 +873,7 @@ class CDPClient:
             print_config,
             calibration,
         ) = await asyncio.gather(
-            self._fetch(CDP_PRINT_STATUS),
+            self._fetch_retrying_required(CDP_PRINT_STATUS),
             self._fetch_optional(CDP_SCAN_STATUS),
             self._fetch_optional(CDP_SUPPLY_CONFIG),
             self._fetch_optional(CDP_PRINT_CONFIG),

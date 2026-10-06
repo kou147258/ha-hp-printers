@@ -60,6 +60,13 @@ _LOGGER = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT = ClientTimeout(total=20)
 
+# How long to wait before repeating a request the device dropped. Both models
+# fail the TLS handshake under concurrent connections, so a dropped read is
+# usually a busy device rather than a broken one. One pause, one retry: a
+# device that is genuinely gone fails the second time too, and a third attempt
+# would be guessing at a failure this cannot see.
+SLOW_RETRY_DELAY_SECONDS = 2.0
+
 
 class HPPrinterError(Exception):
     """Base error for this integration."""
@@ -293,9 +300,33 @@ class LEDMClient:
             _LOGGER.debug("Optional endpoint %s unavailable: %s", endpoint, error)
             return None
 
+    async def _fetch_required(self, endpoint: str) -> Element:
+        """Fetch a document the caller cannot do without, once more if dropped.
+
+        These printers fail the TLS handshake when connections overlap -- the
+        CDP model with ``TLSV1_ALERT_INTERNAL_ERROR``, the LEDM one with
+        ``BAD_SIGNATURE`` -- and a refresh opens far more at once than a
+        browser does. A required document has no optional fallback, so one
+        dropped handshake used to take the whole entry down and the printer
+        never appeared in Home Assistant at all.
+
+        Retried once, and it still raises: the protocol probe depends on this
+        read failing for a machine that does not speak LEDM, so swallowing it
+        would turn "not this protocol" into a later crash instead.
+        """
+        for attempt in range(2):
+            try:
+                return await self._fetch(endpoint)
+            except HPPrinterError:
+                if attempt:
+                    raise
+                _LOGGER.debug("%s dropped the connection; retrying once", endpoint)
+                await asyncio.sleep(SLOW_RETRY_DELAY_SECONDS)
+        raise AssertionError("unreachable")  # pragma: no cover
+
     async def async_get_product_info(self) -> ProductInfo:
         """Read static device information."""
-        root = await self._fetch(ENDPOINT_PRODUCT_CONFIG)
+        root = await self._fetch_required(ENDPOINT_PRODUCT_CONFIG)
         return self._parse_product_info(root)
 
     @staticmethod
