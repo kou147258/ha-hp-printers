@@ -204,6 +204,10 @@
       "calibration_result": {
         "name": "上次打印头校准结果"
       },
+      "calibration_state": {
+        "name": "打印头校准进行中",
+        "description": "校准当前进行到哪一步，用打印机自己的说法。校准需要你参与：打印机先打印一张校准图，然后等它放到扫描台上，所以出现 ScanRequested 就是它在等你。"
+      },
       "cartridge_brand": {
         "name": "品牌"
       },

@@ -28,6 +28,7 @@ from .const import (
     COLOR_NAMES,
     ENDPOINT_CALIBRATION_CAP,
     ENDPOINT_CALIBRATION_SESSION,
+    ENDPOINT_CALIBRATION_STATE,
     ENDPOINT_CONSUMABLE_CONFIG,
     ENDPOINT_INTERNAL_PRINT_CAP,
     ENDPOINT_INTERNAL_PRINT_DYN,
@@ -365,11 +366,13 @@ class LEDMClient:
             media_dyn,
             net_apps,
             shop_for_supplies,
+            calibration_state,
         ) = await asyncio.gather(
             self._fetch_optional(ENDPOINT_PRINT_CONFIG),
             self._fetch_optional(ENDPOINT_MEDIA_DYN),
             self._fetch_optional(ENDPOINT_NET_APPS),
             self._fetch_optional(ENDPOINT_SHOP_FOR_SUPPLIES),
+            self._fetch_optional(ENDPOINT_CALIBRATION_STATE),
         )
 
         # An LEDM printer also answers a handful of /cdm/ documents, and two
@@ -405,6 +408,7 @@ class LEDMClient:
             **_parse_ledm_trays(media_doc),
             **_parse_ledm_exposure(net_apps),
             **_parse_ledm_jobs(usage_doc),
+            calibration_state=_parse_ledm_calibration_state(calibration_state),
             **_parse_instant_ink(shop_for_supplies, instant_ink),
             # An LEDM printer reports its own live alerts, so they land on the
             # same field the CDP side fills. Without this the LEDM side would
@@ -1103,15 +1107,53 @@ def _parse_ledm_alerts(status_doc: Element | None) -> list[ActiveAlert]:
         category = _text(entry, "ProductStatusAlertID")
         if severity is None and category is None:
             continue
+        # The detail block is read through the same _text walk as everything
+        # else, and it would be found that way whether it were nested or not.
+        # It was not being read because nothing here asked for it: the alert
+        # constructor listed five fields and the ones that say *what the
+        # problem is about* were not among them. `genuineHP` is the alert these
+        # printers raise most often, and on its own it is a complaint with no
+        # subject -- no colour, no part, nothing to act on.
         alerts.append(
             ActiveAlert(
                 category=category,
                 severity=severity.strip().lower() if severity else None,
                 priority=_int(entry, "AlertPriority"),
                 sequence=_int(entry, "SequenceNumber"),
+                marker_color=_text(entry, "AlertDetails", "AlertDetailsMarkerColor"),
+                marker_location=_text(
+                    entry, "AlertDetails", "AlertDetailsMarkerLocation"
+                ),
+                consumable_type=_text(
+                    entry, "AlertDetails", "AlertDetailsConsumableTypeEnum"
+                ),
+                user_action=_text(entry, "AlertDetails", "AlertDetailsUserAction"),
+                string_id=_int(entry, "StringId"),
+                resource_uri=_text(entry, "ResourceURI"),
             )
         )
     return alerts
+
+
+def _parse_ledm_calibration_state(calibration_doc: Element | None) -> str | None:
+    """Return where an alignment currently is, from ``/Calibration/State``.
+
+    The document is a single element whose text is the state, in the
+    calibration namespace and with no parent to hang details off::
+
+        <CalibrationState xmlns=".../markingagentcalibration/2009/04/08"
+        >ScanRequested</CalibrationState>
+
+    Returned as the device's own token. The state machine runs
+    ``Printing`` -> ``ScanRequested`` -> ... and only the first two are known
+    from the printer's own code, so translating the rest would be guessing at
+    a vocabulary that is not published.
+    """
+    if calibration_doc is None:
+        return None
+    if _localname(calibration_doc.tag) != "CalibrationState":
+        return None
+    return (calibration_doc.text or "").strip() or None
 
 
 def _parse_ledm_jobs(usage_doc: Element | None) -> dict[str, Any]:

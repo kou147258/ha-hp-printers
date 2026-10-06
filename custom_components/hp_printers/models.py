@@ -295,6 +295,27 @@ class ActiveAlert:
     priority: int | None = None
     sequence: int | None = None
 
+    # The detail block, which the device nests one level down rather than
+    # putting beside Severity. It is where the actionable part of a supply
+    # alert lives: an alert saying "genuineHP" is a complaint with no subject,
+    # and ``marker_color`` is the subject. Without these, the most common alert
+    # this integration sees arrives without saying which colour it is about.
+    #
+    # Each is optional because the block only carries the details that apply to
+    # the alert's category -- a jam alert has no marker colour, and a colour
+    # alert has no jam location.
+    marker_color: str | None = None
+    marker_location: str | None = None
+    consumable_type: str | None = None
+    # What the device says the user should do about it. Verbatim rather than
+    # mapped onto advice: it is a device vocabulary, and inventing friendly
+    # wording for a token nobody has read would be a claim the printer never
+    # made.
+    user_action: str | None = None
+    string_id: int | None = None
+    # The document the detail lives in, so "go look" is one request away.
+    resource_uri: str | None = None
+
 
 @dataclass(frozen=True, slots=True)
 class AdapterStats:
@@ -416,6 +437,20 @@ class PrinterData:
     calibration_last_result: str | None = None
     calibration_failure_reason: str | None = None
     calibration_status: str | None = None
+
+    # Where an alignment currently is, as the device's own state machine
+    # reports it (``ScanRequested``, ``Printing``, ...).
+    #
+    # This is the other half of the maintenance button. An alignment is a
+    # two-party job: the printer prints a pattern and then waits for the user
+    # to put it on the scanner glass. The button can only say the request was
+    # accepted, and without this the wait is invisible -- the printer sits on
+    # "ScanRequested" looking idle while the user is told it is working.
+    #
+    # Kept as the raw token on purpose. The vocabulary is the device's, the
+    # set is not published, and mapping known words onto friendlier ones would
+    # hide a state this integration has not been taught rather than report it.
+    calibration_state: str | None = None
 
     # ------------------------------------------------------------------
     # Setup progress.

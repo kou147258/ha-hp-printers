@@ -368,6 +368,24 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
             "failure_reason": data.calibration_failure_reason,
         },
     ),
+    # Where an alignment is *now*, which ``calibration_result`` cannot say: that
+    # one is about the last completed run, this one is about a run in
+    # progress. They answer different questions and neither substitutes for the
+    # other -- a printer sitting on "ScanRequested" has a result of "unknown"
+    # and is simultaneously waiting for the user to put a printed pattern on
+    # the scanner glass.
+    #
+    # No ``options`` list on purpose. The vocabulary is the device's own and
+    # is not published, and an ENUM that silently drops an unlisted state
+    # would report "no problem" for a printer that is stuck mid-alignment.
+    # The raw token is also the only honest thing to show: HP's own web page
+    # renders it as-is.
+    HPPrinterSensorDescription(
+        key="calibration_state",
+        translation_key="calibration_state",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data, _info: data.calibration_state,
+    ),
     # --- diagnostics: firmware and the device event log ---
     HPPrinterSensorDescription(
         key="firmware_date",
@@ -479,11 +497,29 @@ PRINTER_SENSORS: tuple[HPPrinterSensorDescription, ...] = (
                     "category": alert.category,
                     "severity": alert.severity,
                     "priority": alert.priority,
+                    # The detail block. Every key is present but may be None:
+                    # the device nests it one level down and only fills in the
+                    # parts that apply to this alert's category, so a jam
+                    # alert has no marker colour and a colour alert has no jam
+                    # location. Omitting the key instead would make "not
+                    # applicable" indistinguishable from "we did not read it".
+                    "marker_color": alert.marker_color,
+                    "marker_location": alert.marker_location,
+                    "consumable_type": alert.consumable_type,
+                    "user_action": alert.user_action,
+                    "resource_uri": alert.resource_uri,
                 }
                 for alert in data.active_alerts
             ],
             "categories": sorted(
                 {a.category for a in data.active_alerts if a.category}
+            ),
+            # "Which colour is it complaining about", answered directly. The
+            # detail exists on every alert; a template that has to reach into
+            # the alert list to find the first non-null colour is the kind of
+            # template that silently shows nothing when the list is long.
+            "marker_colors": sorted(
+                {a.marker_color for a in data.active_alerts if a.marker_color}
             ),
         },
     ),

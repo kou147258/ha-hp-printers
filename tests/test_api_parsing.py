@@ -35,10 +35,15 @@ from custom_components.hp_printers.const import (
 )
 
 # The optional second wave of an LEDM update: the print configuration, the
-# current media, the network services and the supplies programme. Stands in
-# for "this model serves none of them", which is the case every LEDM printer
-# except one measured serves.
-_NO_OPTIONAL_DOCUMENTS: tuple[Any, ...] = (None, None, None, None)
+# current media, the network services, the supplies programme and the
+# calibration state. Stands in for "this model serves none of them", which is
+# the case for every LEDM printer except the one measured -- the calibration
+# state in particular, because the interface is absent on older firmware.
+#
+# One entry per document in the gather, and it has to stay that way: the stub
+# is positional, so a document added to the second wave without a slot here
+# makes every test that uses it fail on a count rather than on a behaviour.
+_NO_OPTIONAL_DOCUMENTS: tuple[Any, ...] = (None, None, None, None, None)
 
 
 def _xml(value: str) -> Any:

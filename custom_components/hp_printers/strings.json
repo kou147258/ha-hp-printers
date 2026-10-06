@@ -204,6 +204,10 @@
       "calibration_result": {
         "name": "Last printhead alignment"
       },
+      "calibration_state": {
+        "name": "Printhead alignment in progress",
+        "description": "Where an alignment currently is, in the printer's own words. An alignment is a two-party job: the printer prints a pattern and then waits for it on the scanner glass, so a value like ScanRequested means it is waiting for you."
+      },
       "cartridge_brand": {
         "name": "Brand"
       },
