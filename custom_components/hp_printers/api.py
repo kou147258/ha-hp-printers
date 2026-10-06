@@ -449,6 +449,14 @@ class LEDMClient:
         job's state resource. It is returned so a caller can follow progress;
         this integration does not, because the print is what the user asked for
         and the job finishes on its own schedule.
+
+        **Confirmed against hardware.** A POST carrying this body returns
+        ``201 Created`` on the Smart Tank 750 and the job runs -- a clean
+        cycle moved that printer's ``TotalImpressions`` by one and returned it
+        to ``ready`` in about thirty seconds. An empty body and the literal
+        string ``placeholder`` both return 400 with an empty body, which is
+        why the two earlier attempts to reconstruct this request from the
+        discovery document had nothing to work with.
         """
         if not job_type:
             raise HPPrinterWriteError("No job type given")

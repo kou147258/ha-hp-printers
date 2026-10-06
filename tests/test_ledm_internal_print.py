@@ -252,6 +252,32 @@ async def test_a_transport_failure_is_reported_as_a_write_failure() -> None:
         await client.async_run_internal_job("cleaningPage")
 
 
+def test_the_body_is_the_one_the_device_accepted() -> None:
+    """Pin the body to the bytes the printer answered 201 to.
+
+    A test asserting the body "looks like" the request would pass on any
+    plausible-looking XML, and a plausible-looking XML is what produced two
+    wrong implementations earlier today. The device's own answer is the only
+    statement about correctness this request has ever had.
+    """
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<ipdyn:InternalPrintDyn "
+        'xmlns:ipdyn="http://www.hp.com/schemas/imaging/con/ledm/'
+        'internalprintdyn/2008/03/21">'
+        "<ipdyn:JobType>cleaningPage</ipdyn:JobType>"
+        "</ipdyn:InternalPrintDyn>"
+    )
+    root = DefusedET.fromstring(body)
+    child = next(iter(root))
+    assert (
+        child.tag
+        == "{http://www.hp.com/schemas/imaging/con/ledm/internalprintdyn/2008/03/21}JobType"
+    )
+    assert child.text == "cleaningPage"
+    assert len(list(root)) == 1, "the request carries one element and nothing else"
+
+
 def test_the_capability_document_is_captured_as_a_fixture() -> None:
     """The test above reads the real document; this is the thing it reads.
 
